@@ -5,6 +5,9 @@ import com.example.DocHub.dto.LoginRequest;
 import com.example.DocHub.dto.RegisterRequest;
 import com.example.DocHub.service.AuthService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +23,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
            authService.register(request);
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(Map.of(
+    "status", "success",
+    "message", "User registered successfully!"
+));
     }
 
     @PostMapping("/login")

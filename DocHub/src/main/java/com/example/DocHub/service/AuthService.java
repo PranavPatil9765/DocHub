@@ -49,4 +49,17 @@ public class AuthService {
 
         return new AuthResponse(token);
     }
+    public void oauthUserLogin(String name, String email) {
+
+    if (!repo.existsByEmail(email)) {
+         User user = User.builder()
+                .email(email)
+                .password("OATH_PASS")
+                .fullName(name)
+                .build();
+
+        repo.save(user);
+    }
+}
+
 }
