@@ -1,0 +1,21 @@
+<div class="flex justify-between items-center px-6 py-3 bg-white shadow">
+
+  <!-- Mobile menu button -->
+  @if (isMobile) {
+    <button (click)="menuClick.emit()" class="text-2xl">
+      ☰
+    </button>
+  }
+
+  <!-- Logo -->
+  <div class="flex items-center gap-3">
+    <img src="assets/doc-icon.svg" class="w-8 h-8">
+    <h2 class="text-2xl font-semibold text-gray-900">DocHub</h2>
+  </div>
+
+  <!-- Logout -->
+  <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+    Logout
+  </button>
+
+</div>

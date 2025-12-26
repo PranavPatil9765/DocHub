@@ -1,0 +1,47 @@
+<div class="w-full max-w-sm rounded-xl border bg-white shadow-sm hover:shadow-md transition">
+
+  <!-- Preview -->
+  <div class="h-44 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl">
+
+    <!-- Image -->
+    @if (isImage) {
+      <img
+        [src]="fileUrl"
+        alt="file preview"
+        class="object-cover w-full h-full"
+      />
+    }
+
+    <!-- PDF -->
+    <!-- PDF preview -->
+@if (isPdf) {
+  <iframe
+    [src]="safeUrl"
+    class="w-full h-full"
+    frameborder="0">
+  </iframe>
+}
+
+
+    <!-- Fallback -->
+    @else {
+      <div class="flex flex-col items-center text-gray-500">
+        📄
+        <span class="text-sm mt-1">No preview</span>
+      </div>
+    }
+  </div>
+
+  <!-- Info -->
+  <div class="p-4 space-y-1">
+    <p class="font-medium truncate" title="{{ fileName }}">
+      {{ fileName }}
+    </p>
+
+    <div class="text-sm text-gray-500 flex justify-between">
+      <span>{{ fileType }}</span>
+      <span>{{ fileSize }}</span>
+    </div>
+  </div>
+
+</div>

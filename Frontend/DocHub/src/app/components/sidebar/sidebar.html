@@ -1,0 +1,42 @@
+<!-- Overlay (mobile only) -->
+@if (isMobile) {
+  <div
+    class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300"
+    [class.opacity-100]="isOpen"
+    [class.opacity-0]="!isOpen"
+    [class.pointer-events-none]="!isOpen"
+    (click)="close.emit()">
+  </div>
+}
+
+<!-- Sidebar (shared content) -->
+<div
+  class="h-screen border shadow z-50 shadow-blue-100 pt-1 bg-white
+         transform transition-transform duration-300 ease-in-out"
+  [class.fixed]="isMobile"
+  [class.left-0]="isMobile"
+  [class.top-0]="isMobile"
+  [class.w-3/4]="isMobile"
+  [class.w-64]="!isMobile"
+  [class.-translate-x-full]="isMobile && !isOpen"
+  [class.translate-x-0]="!isMobile || isOpen"
+>
+  <!-- Close button (mobile only) -->
+  @if (isMobile) {
+    <button (click)="close.emit()" class="mb-4">
+      close ✕
+    </button>
+  }
+
+  <!--  SHARED CONTENT -->
+    <ul class="mb-4">
+      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md"
+      [class.bg-blue-300]="currentUrl==='/dashboard'"
+      routerLink="/dashboard">Dashboard</li>
+      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md" routerLink="/dochub"
+      [class.bg-blue-300]="currentUrl==='/dochub'"
+
+       >Dochub</li>
+      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-200 p-3 drop-shadow-md">Analytics</li>
+    </ul>
+</div>

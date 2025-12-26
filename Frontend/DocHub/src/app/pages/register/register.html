@@ -1,0 +1,73 @@
+<div class="min-h-screen register-body flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
+
+  <div
+    class="backdrop-blur-md bg-white/30 shadow-xl border border-white/40 rounded-2xl p-10 w-full max-w-lg text-center"
+  >
+    <h2 class="text-3xl font-semibold text-gray-800 mb-6">Create Account</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4 text-sm">
+
+      <input
+        formControlName="fullName"
+        placeholder="Full Name"
+        class="w-full px-4 py-3 rounded-lg bg-white/60 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+
+      <input
+        formControlName="email"
+        placeholder="Email"
+        class="w-full px-4 py-3 rounded-lg bg-white/60 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+
+      <input
+        type="password"
+        formControlName="password"
+        placeholder="Password"
+        class="w-full px-4 py-3 rounded-lg bg-white/60 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+      />
+
+      <button
+        type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+      >
+        Register
+      </button>
+
+    </form>
+
+    <!-- Divider -->
+    <div class="flex items-center my-6">
+      <div class="flex-grow h-px bg-white/50"></div>
+      <span class="px-3 text-gray-700 font-medium">or</span>
+      <div class="flex-grow h-px bg-white/50"></div>
+    </div>
+
+    <!-- Google Login -->
+     <div class="flex justify-evenly items-center text-sm">
+    <button
+      class=" px-2 flex items-center justify-center gap-3 bg-white/70 hover:bg-white/90 text-gray-800 font-semibold py-3 rounded-lg  shadow transition"
+      (click)="loginWithGoogle()"
+      >
+      <img src="assets/google.svg" class="w-5 h-5" />
+      Continue with Google
+    </button>
+
+    <!-- GitHub Login -->
+    <button
+      class="px-2 flex items-center justify-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-lg shadow  transition"
+
+    >
+      <img src="assets/github.svg" class="w-5 h-5 invert" />
+      Continue with GitHub
+    </button>
+</div>
+    <a
+      routerLink="/login"
+      class="block mt-6 text-blue-800 font-medium hover:text-blue-900 transition"
+    >
+      Already have an account? Login
+    </a>
+
+  </div>
+
+</div>

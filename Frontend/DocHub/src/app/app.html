@@ -1,0 +1,22 @@
+<app-navbar
+  [isMobile]="isMobile"
+  (menuClick)="toggleSidebar()">
+</app-navbar>
+
+<div class="flex">
+  <!-- Sidebar -->
+  <app-sidebar
+    [isMobile]="isMobile"
+    [isOpen]="isSidebarOpen"
+    (close)="toggleSidebar()"
+    >
+  </app-sidebar>
+
+  <!-- Main Content -->
+  <main
+    class="flex-1 min-h-screen transition-all duration-300"
+    [class.ml-64]="!isMobile"
+  >
+    <router-outlet />
+  </main>
+</div>
