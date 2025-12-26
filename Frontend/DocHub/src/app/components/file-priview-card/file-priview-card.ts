@@ -3,7 +3,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-file-priview-card',
-  templateUrl: './file-priview-card.html'
+  templateUrl: './file-priview-card.html',
 })
 export class FilePriviewCard {
   @Input() fileUrl!: string;

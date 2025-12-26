@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
-  templateUrl: './navbar.html'
+  templateUrl: './navbar.html',
 })
 export class Navbar {
   @Input() isMobile = false;

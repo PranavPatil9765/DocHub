@@ -1,22 +1,36 @@
-import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login';
-import { RegisterComponent } from './pages/register/register';
-import { DashboardComponent } from './pages/dashboard/dashboard';
 import { authGuard } from './auth/guards/auth-guard';
-import { Dochub } from './pages/dochub/dochub';
+import { Routes } from '@angular/router';
+import { AuthLayout } from './layouts/auth-layout/auth-layout';
+import { MainLayout } from './layouts/main-layout/main-layout';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
+  // { path: '**', redirectTo: 'login' },
   {
-  path: 'social-login',
-  loadComponent: () =>
-    import('./auth/social-login/social-login')
-      .then(m => m.SocialLoginComponent)
+    path: '',
+    component: AuthLayout,
+    children: [
+      {
+        path: 'login',
+        loadComponent: () => import('./pages/login/login').then((m) => m.LoginComponent),
+      },
+      {
+        path: 'register',
+        loadComponent: () => import('./pages/register/register').then((m) => m.RegisterComponent),
+      },
+      {
+        path: 'social-login',
+        loadComponent: () => import('./auth/social-login/social-login').then((m) => m.SocialLoginComponent),
+      },
+    ],
+  },
+  {
+    path: '',
+    component: MainLayout,
+    // canActivate:[authGuard],
+    children: [
+      { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent) },
+      { path: 'dochub', loadComponent: () => import('./pages/dochub/dochub').then(m => m.Dochub) },
+    ]
   },
 
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-  { path: 'dochub', component: Dochub, canActivate: [authGuard] }
 ];
