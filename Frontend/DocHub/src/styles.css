@@ -9,3 +9,11 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+.blue-datepicker {
+  --mat-datepicker-calendar-date-selected-state-background-color: #2563eb;
+  --mat-datepicker-calendar-date-selected-state-text-color: white;
+
+  --mat-datepicker-calendar-date-today-outline-color: #2563eb;
+
+  --mat-datepicker-calendar-range-fill-color: rgba(37, 99, 235, 0.15);
+}

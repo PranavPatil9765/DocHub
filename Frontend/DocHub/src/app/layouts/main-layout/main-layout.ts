@@ -10,7 +10,7 @@ import { RouterModule } from '@angular/router';
   imports:[Navbar,Sidebar,RouterModule]
 })
 export class MainLayout {
-isSidebarOpen = false;
+  isSidebarOpen = false;
   isMobile = false;
 
   constructor() {

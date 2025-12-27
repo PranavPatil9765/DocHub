@@ -1,1 +1,57 @@
-<p>dropdown works!</p>
+<div class="relative dropdown-wrapper w-full h-full">
+  <!-- Button -->
+  <button
+    type="button"
+    (click)="toggle()"
+    [disabled]="disabled"
+    class="w-full h-full flex justify-between items-center gap-2 px-4 py-2 border rounded-lg
+            text-sm transition
+           hover:border-blue-500
+           disabled:bg-gray-100 disabled:text-gray-400
+           shadow-blue-200 shadow shadow-lg bg-white border"
+    [class.bg-blue-50]="!!selected"
+           >
+
+    <!-- Selected text -->
+    <span class="truncate">
+      {{ selected ? selected[displayKey] : label }}
+    </span>
+
+    <div class="flex items-center gap-2">
+      <!-- Clear button -->
+      @if (selected) {
+        <span
+          class="text-gray-400 hover:text-red-500 cursor-pointer"
+          (click)="clear($event)">
+          ✕
+        </span>
+      }
+
+      <!-- Arrow -->
+      <svg
+        class="w-4 h-4 transition-transform"
+        [class.rotate-180]="isOpen"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 9l-7 7-7-7"/>
+      </svg>
+    </div>
+  </button>
+
+  <!-- Dropdown -->
+  @if (isOpen) {
+    <ul
+      class="absolute z-50 mt-1 w-full bg-white border rounded-lg shadow-lg
+             max-h-48 overflow-auto">
+      @for (option of options; track option) {
+        <li
+          class="px-4 py-2 text-sm cursor-pointer hover:bg-blue-50"
+          (click)="select(option)">
+          {{ option[displayKey] }}
+        </li>
+      }
+    </ul>
+  }
+</div>

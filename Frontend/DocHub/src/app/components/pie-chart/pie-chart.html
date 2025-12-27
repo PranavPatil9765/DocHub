@@ -1,0 +1,37 @@
+<div
+  class="chart-wrapper flex flex-col md:flex-row items-center gap-6 justify-evenly p-6 bg-white rounded-xl shadow-lg">
+
+  <!-- Chart (Centered) -->
+  <div class="flex justify-center items-center w-full md:w-auto">
+    <div class="relative chart-box ">
+      <canvas #pieCanvas></canvas>
+
+      <div class="center-label">
+        <p class="text-xs text-gray-500">Total Size</p>
+        <p class="text-xl font-semibold text-blue-700">
+          {{ totalSize }} MB
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legends -->
+  <div class="legend flex flex-wrap md:flex-col gap-4 justify-center md:justify-start max-w-1/2">
+    <div
+      *ngFor="let item of data; let i = index"
+      class="legend-item flex items-center gap-2"
+      (mouseenter)="highlight(i)"
+      (mouseleave)="clearHighlight()">
+
+      <span
+        class="w-3 h-3 rounded-full"
+        [style.background]="colors[i]">
+      </span>
+
+      <span class="text-sm text-gray-700">
+        {{ item.type }} — {{ item.size }} MB
+      </span>
+    </div>
+  </div>
+
+</div>

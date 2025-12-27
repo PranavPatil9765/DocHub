@@ -4,7 +4,6 @@ import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { MainLayout } from './layouts/main-layout/main-layout';
 
 export const routes: Routes = [
-  // { path: '**', redirectTo: 'login' },
   {
     path: '',
     component: AuthLayout,
@@ -30,7 +29,10 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent) },
       { path: 'dochub', loadComponent: () => import('./pages/dochub/dochub').then(m => m.Dochub) },
+      { path: 'analytics', loadComponent: () => import('./pages/analytics/analytics').then(m => m.Analytics) },
     ]
   },
+  { path: '**', redirectTo: 'login' },
+
 
 ];

@@ -11,7 +11,7 @@
 
 <!-- Sidebar (shared content) -->
 <div
-  class="h-screen border shadow z-50 shadow-blue-100 pt-1 bg-white
+  class="min-h-full border shadow z-50 shadow-blue-100 pt-1 bg-white
          transform transition-transform duration-300 ease-in-out"
   [class.fixed]="isMobile"
   [class.left-0]="isMobile"
@@ -35,8 +35,9 @@
       routerLink="/dashboard">Dashboard</li>
       <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md" routerLink="/dochub"
       [class.bg-blue-300]="currentUrl==='/dochub'"
-
        >Dochub</li>
-      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-200 p-3 drop-shadow-md">Analytics</li>
+      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md" routerLink="/analytics"
+      [class.bg-blue-300]="currentUrl==='/analytics'"
+       >Analytics</li>
     </ul>
 </div>

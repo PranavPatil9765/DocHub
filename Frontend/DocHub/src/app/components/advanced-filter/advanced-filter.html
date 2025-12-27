@@ -1,0 +1,88 @@
+<div class="relative filter-wrapper h-full">
+  <!-- Filter Icon -->
+  <button
+    type="button"
+    (click)="toggle()"
+    class="p-2 rounded-md border hover:bg-gray-100 h-full shadow-blue-200 shadow shadow-lg border"
+    [class.bg-blue-100]="hasActiveFilters"
+    >
+    <svg
+      class="w-5 h-5 text-gray-600"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M3 4h18l-7 8v6l-4 2v-8L3 4z"/>
+    </svg>
+  </button>
+
+  <!-- Popover -->
+  @if (isOpen) {
+    <form
+      [formGroup]="filterForm"
+      class="absolute right-0 mt-2 w-80 bg-white border rounded-lg shadow-xl z-50 p-4 space-y-4">
+
+      <!-- Date Range Picker -->
+      <div formGroupName="dateRange">
+        <label class="text-xs font-medium text-gray-600">
+          Date range
+        </label>
+
+        <mat-form-field appearance="outline" class="w-full h-12 mt-1">
+          <mat-date-range-input [rangePicker]="picker" class="h-10">
+            <input matStartDate formControlName="start" placeholder="Start date">
+            <input matEndDate formControlName="end" placeholder="End date">
+          </mat-date-range-input>
+
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker">
+          </mat-datepicker-toggle>
+
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+      </div>
+
+      <!-- Size -->
+      <div>
+        <label class="text-xs font-medium text-gray-600">File size</label>
+        <app-dropdown
+          formControlName="size"
+          label="Select size"
+          [options]="sizeOptions"
+          displayKey="label"
+          valueKey="id">
+        </app-dropdown>
+      </div>
+
+      <!-- Type -->
+      <div>
+        <label class="text-xs font-medium text-gray-600">File type</label>
+        <app-dropdown
+          formControlName="type"
+          label="Select type"
+          [options]="typeOptions"
+          displayKey="label"
+          valueKey="id">
+        </app-dropdown>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button
+          type="button"
+          (click)="clear()"
+          class="px-3 py-1 text-sm rounded-md border hover:bg-gray-100">
+          Clear
+        </button>
+
+        <button
+          type="button"
+          (click)="apply()"
+          class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">
+          Apply
+        </button>
+      </div>
+    </form>
+  }
+</div>

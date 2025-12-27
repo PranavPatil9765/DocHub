@@ -1,7 +1,24 @@
-<app-elatic-search-bar></app-elatic-search-bar>
-<app-file-priview-card
-  fileUrl="assets\Resume.pdf"
-  fileName="Project Proposal.pdf"
-  fileType="application/pdf"
-  [fileSize]="204800">
-</app-file-priview-card>
+<div class=" md:px-10 px-2 ">
+  <br>
+  <div class="search-filter-container grid md:grid-cols-3 gap-3">
+    <div class="md:col-span-2">
+      <app-elatic-search-bar></app-elatic-search-bar>
+    </div>
+    <div class="md:col-span-1">
+      <div class="flex gap-3 h-full justify-between ">
+        <div class="w-3/4 h-full">
+          <app-dropdown
+          formControlName="category"
+          label="Select Category"
+          [options]="categories"
+          displayKey="name"
+          valueKey="id">
+        </app-dropdown>
+      </div>
+      <app-advanced-filter></app-advanced-filter>
+    </div>
+    </div>
+  </div>
+</div>
+
+
