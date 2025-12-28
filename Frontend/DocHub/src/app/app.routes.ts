@@ -30,6 +30,7 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent) },
       { path: 'dochub', loadComponent: () => import('./pages/dochub/dochub').then(m => m.Dochub) },
       { path: 'analytics', loadComponent: () => import('./pages/analytics/analytics').then(m => m.Analytics) },
+      { path: 'about', loadComponent: () => import('./pages/about/about').then(m => m.About) },
     ]
   },
   { path: '**', redirectTo: 'login' },

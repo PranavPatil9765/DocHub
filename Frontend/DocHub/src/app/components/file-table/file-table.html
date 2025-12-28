@@ -1,0 +1,214 @@
+<div
+  class="max-h-[540px] overflow-y-auto rounded-2xl border border-blue-100 bg-white max-w-full shadow-lg"
+  (scroll)="onScroll($event)">
+
+  <table
+    class="w-full text-sm border-separate border-spacing-y-2 px-2">
+
+    <!-- HEADER -->
+    <thead class="sticky top-0 z-10 bg-blue-50/90 backdrop-blur">
+      <tr class="text-blue-700">
+
+        @if (selectable) {
+          <th class="px-5 py-4 w-10">
+            <input
+              type="checkbox"
+              class="accent-blue-600 scale-110"
+              [checked]="isAllSelected()"
+              (change)="toggleAll($event.target.checked)" />
+          </th>
+        }
+
+        <th class="px-5 py-4 text-left font-semibold">Name</th>
+        <th class="px-5 py-4 text-left font-semibold">Size</th>
+        <th class="px-5 py-4 text-left font-semibold">Uploaded</th>
+        <th class="px-5 py-4 text-center font-semibold">Actions</th>
+      </tr>
+    </thead>
+
+    <!-- BODY -->
+    <tbody>
+      @for (file of files; track file.id) {
+        <tr
+          class="
+            group bg-white rounded-xl shadow-sm border border-blue-50
+            hover:shadow-md hover:-translate-y-[1px]
+            transition-all duration-200
+          "
+          [class.bg-blue-50]="selected.has(file.id)"
+          [class.border-blue-300]="selected.has(file.id)">
+
+          @if (selectable) {
+            <td class="px-5 py-4">
+              <input
+                type="checkbox"
+                class="accent-blue-600 scale-110"
+                [checked]="selected.has(file.id)"
+                (change)="toggleOne(file.id)" />
+            </td>
+          }
+
+          <!-- NAME -->
+          <td class="px-5 py-4 flex items-center gap-4">
+            <div
+              class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+              <img [src]="icon(file.type)" class="h-6 w-6" />
+            </div>
+
+            <span
+              class="font-semibold text-gray-800 truncate max-w-xs"
+              [title]="file.name">
+              {{ file.name }}
+            </span>
+          </td>
+
+          <!-- SIZE -->
+          <td class="px-5 py-4 text-gray-600 font-medium">
+            {{ readableSize(file.size) }}
+          </td>
+
+          <!-- DATE -->
+          <td class="px-5 py-4 text-gray-600">
+            {{ file.uploadedAt | date: 'mediumDate' }}
+          </td>
+
+          <!-- ACTIONS -->
+   <td class="px-5 py-4 align-middle">
+  <div class="flex justify-center gap-6 text-lg">
+
+    <!-- OPEN -->
+    <button
+      class="text-blue-600 hover:text-blue-800 transition"
+      title="Open"
+      (click)="open.emit(file)">
+      <i class="fa-regular fa-eye"></i>
+    </button>
+
+    <!-- DOWNLOAD -->
+    <button
+      class="text-green-600 hover:text-green-800 transition"
+      title="Download"
+      (click)="download.emit(file)">
+      <i class="fa-solid fa-download"></i>
+    </button>
+
+    <!-- EDIT -->
+    <button
+      class="text-yellow-600 hover:text-yellow-800 transition"
+      title="Edit"
+      (click)="edit.emit(file)">
+      <i class="fa-regular fa-pen-to-square"></i>
+    </button>
+
+    <!-- DELETE -->
+    <button
+      class="text-red-600 hover:text-red-800 transition"
+      title="Delete"
+      (click)="delete.emit(file)">
+      <i class="fa-regular fa-trash-can"></i>
+    </button>
+
+  </div>
+</td>
+
+
+
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <!-- LOADING -->
+  @if (loading) {
+    <div class="p-4 text-center text-blue-600 font-medium">
+      Loading more files…
+    </div>
+  }
+
+  <!-- END -->
+  @if (!hasMore && !loading) {
+    <div class="p-4 text-center text-gray-400 text-sm">
+      No more files
+    </div>
+  }
+
+
+</div>
+<!-- BOTTOM ACTION BAR -->
+<div
+  class="
+    sticky bottom-0
+    bg-white border-t border-blue-100
+    px-6 py-3
+    flex items-center justify-between
+    shadow-inner
+  "
+  *ngIf="selectedCount > 0"
+>
+
+  <!-- Selection Info -->
+  <div class="text-sm text-gray-600 font-medium">
+    {{ selectedCount }} file{{ selectedCount > 1 ? 's' : '' }} selected
+  </div>
+
+  <!-- Actions -->
+  <div class="flex gap-4">
+
+    <!-- Clear Selection -->
+    <button
+      class="
+        px-4 py-2 rounded-lg
+        border border-gray-300
+        text-gray-600
+        hover:bg-gray-100
+        transition
+      "
+      (click)="clearAllSelection()">
+      Clear selection
+    </button>
+
+    <!-- Delete Selected -->
+    <button
+      class="
+        px-4 py-2 rounded-lg
+        bg-red-600 text-white
+        hover:bg-red-700
+        transition
+        disabled:opacity-50 disabled:cursor-not-allowed
+      "
+      [disabled]="selectedCount === 0"
+      (click)="showDeleteConfirm  = true">
+      Delete selected
+    </button>
+    <button
+      class="
+        px-4 py-2 rounded-lg
+        bg-green-600 text-white
+        hover:bg-green-700
+        transition
+        disabled:opacity-50 disabled:cursor-not-allowed
+      "
+      [disabled]="selectedCount === 0"
+      (click)="downloadAllSelected()">
+      Download selected
+    </button>
+
+  </div>
+</div>
+<!-- <app-confirm-dialog
+  [isOpen]="showDeleteConfirm"
+  title="Delete file"
+  message="This action cannot be undone. Do you want to continue?"
+  confirmText="Delete"
+  confirmType="danger"
+  (confirm)="deleteFile()"
+  (cancel)="showDeleteConfirm = false">
+</app-confirm-dialog> -->
+<app-confirm-dialog
+  [isOpen]="showDeleteConfirm"
+  title="Delete file"
+  message="This action cannot be undone. Do you want to continue?"
+  confirmText="Delete"
+  confirmType="danger"
+  (cancel)="showDeleteConfirm = false">
+</app-confirm-dialog>

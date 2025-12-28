@@ -1,7 +1,7 @@
-<div class="w-full max-w-sm rounded-xl border bg-white shadow-sm hover:shadow-md transition min-w-[300px]">
+<div class="w-full max-w-sm rounded-2xl border bg-white shadow-md shadow hover:shadow-xl transition min-w-[250px]">
 
   <!-- Preview -->
-  <div class="h-44 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl">
+  <div class="h-30 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl">
 
     <!-- Image -->
     @if (isImage) {
@@ -15,11 +15,11 @@
     <!-- PDF -->
     <!-- PDF preview -->
 @if (isPdf) {
-  <iframe
-    [src]="safeUrl"
-    class="w-full h-full"
-    frameborder="0">
-  </iframe>
+ <iframe
+  [src]="safeUrl"
+  class="w-full h-full scale-[1.15] pointer-events-none overflow-hidden"
+></iframe>
+
 }
 
 

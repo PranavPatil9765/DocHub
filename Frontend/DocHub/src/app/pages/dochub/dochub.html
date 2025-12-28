@@ -22,11 +22,27 @@
   </div>
 
   <br >
-  <app-card-section
-  [title]="'Recent Searches'"
-  >
+  <!-- <app-file-table
+  [files]="files"
+  [loading]="loading"
+  [hasMore]="hasMore"
+  (loadMore)="fetchNextPage()"
+  (selectionChange)="onSelection($event)"
+  (open)="openFile($event)"
+  (download)="downloadFile($event)"
+  (edit)="editFile($event)"
+  (delete)="deleteFile($event)">
+</app-file-table> -->
 
-  </app-card-section>
+  <app-file-table
+  [files]="files"
+  [loading]="loading"
+  [hasMore]="hasMore"
+  (loadMore)="fetchNextPage()"
+
+  >
+</app-file-table>
+
 </div>
 
 
