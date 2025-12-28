@@ -3,12 +3,13 @@ import { FilePriviewCard } from '../../components/file-priview-card/file-priview
 import { ElaticSearchBar } from '../../components/elatic-search-bar/elatic-search-bar';
 import { DropdownComponent } from '../../components/dropdown/dropdown';
 import { AdvancedFilterComponent } from "../../components/advanced-filter/advanced-filter";
+import { CardSection } from "../../components/card-section/card-section";
 
 @Component({
   selector: 'app-dochub',
   templateUrl: './dochub.html',
   styleUrl: './dochub.css',
-  imports: [FilePriviewCard, ElaticSearchBar, DropdownComponent, AdvancedFilterComponent]
+  imports: [ElaticSearchBar, DropdownComponent, AdvancedFilterComponent, CardSection]
 })
 export class Dochub {
   categories = [

@@ -1,8 +1,32 @@
 
 <div class="main-container h-full w-full p-2">
   <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
+    <br>
+    <div class="status-cards grid grid-cols-3 gap-2 w-full">
+      <div class="total-files shadow-blue-100 drop-shadow-md bg-blue-100 p-4 text-gray-700">
+        <h3 class="text-2xl">Total Files</h3>
+        <h4 class="text-4xl">222</h4>
+      </div>
+      <div class="total-files shadow shadow-gray-100 drop-shadow-md p-4 bg-gray-50 text-gray-700">
+        <h3 class="text-2xl">Total Downloads</h3>
+        <h4 class="text-4xl">222</h4>
+      </div>
+      <div class="total-files shadow shadow-green-100 drop-shadow-md p-4 bg-green-50 text-gray-700">
+        <h3 class="text-2xl">Total Storage</h3>
+        <h4 class="text-4xl">222</h4>
+      </div>
+    </div>
+    <br>
   <div class="lg:w-3/4 w-full m-auto">
     <app-pie-chart></app-pie-chart>
   </div>
+  <br>
+  <div class="lg:w-3/4 w-full m-auto">
+    <app-tag-cloud
+  [tags]="topTags">
+  </app-tag-cloud>
+
+  </div>
+
 </div>
 </div>

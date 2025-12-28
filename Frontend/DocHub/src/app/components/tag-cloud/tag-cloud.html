@@ -1,0 +1,30 @@
+<div class="tag-cloud-wrapper shadow shadow-blue-200">
+  <!-- Title -->
+  <h3 class="cloud-title  px-4 py-2 text-gray-500">
+    Top Tags
+  </h3>
+  <hr class="m-0 p-0">
+
+  <!-- Cloud Area (Physics Only) -->
+  <div
+  #container
+  class="cloud-container"
+  (mousemove)="onMouseMove($event)"
+  (mouseleave)="onMouseLeave()">
+
+  <div
+    *ngFor="let b of bubbles"
+    class="bubble"
+    [style.width.px]="b.radius * 2"
+    [style.height.px]="b.radius * 2"
+    [style.left.px]="b.x - b.radius"
+    [style.top.px]="b.y - b.radius">
+
+    <span class="label">
+      {{ b.label }}
+    </span>
+
+  </div>
+</div>
+
+</div>
