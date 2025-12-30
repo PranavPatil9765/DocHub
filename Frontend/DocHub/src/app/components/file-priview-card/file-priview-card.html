@@ -1,9 +1,71 @@
-<div class="w-full max-w-sm rounded-2xl border bg-white shadow-md shadow hover:shadow-xl transition min-w-[250px]">
+<div
+  class="relative w-full max-w-sm min-w-[200px] md:min-w-[250px]
+         rounded-2xl border bg-white
+         hover:shadow-xl transition shadow-md
+         group card-wrapper cursor-pointer"
+  [ngClass]="{ 'ring-2 ring-blue-400': selected }"
+  (touchstart)="onTouchStart()"
+  (touchend)="onTouchEnd()"
+  (touchmove)="onTouchMove()"
+>
+
+@if(multiselect){
+
+  <!-- Checkbox (Top-Left) -->
+  <label
+    class="absolute top-2 left-2 z-20
+           w-6 h-6 rounded-md
+           bg-white/80 backdrop-blur
+           flex items-center justify-center
+           shadow cursor-pointer
+            group-hover:opacity-100
+           transition"
+    [ngClass]="{'opacity-0':!selected,'opacity-100':selected}"
+  >
+    <input
+      type="checkbox"
+      class="accent-blue-600 scale-110"
+      [checked]="selected"
+      (click)="$event.stopPropagation()"
+      (change)="onSelectChange($event)"
+    />
+  </label>
+}
+
+  <!-- Options (3 dots) -->
+  <button
+    class="absolute top-2 right-2 z-20
+           w-8 h-8 rounded-full
+           bg-white/80 backdrop-blur
+           flex items-center justify-center
+           opacity-0 group-hover:opacity-100
+           transition hover:bg-white shadow"
+    (click)="toggleMenu($event)"
+  >
+    ⋮
+  </button>
+
+  <!-- Options Menu -->
+  @if (menuOpen) {
+    <div
+      class="absolute top-12 right-2 z-30
+             w-36 bg-white rounded-lg shadow-lg border
+             text-sm overflow-hidden"
+    >
+      <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
+              (click)="onPreview()">Preview</button>
+
+      <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
+              (click)="onDownload()">Download</button>
+
+      <button class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
+              (click)="onDelete()">Delete</button>
+    </div>
+  }
 
   <!-- Preview -->
   <div class="h-30 bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl">
 
-    <!-- Image -->
     @if (isImage) {
       <img
         [src]="fileUrl"
@@ -12,18 +74,13 @@
       />
     }
 
-    <!-- PDF -->
-    <!-- PDF preview -->
-@if (isPdf) {
- <iframe
-  [src]="safeUrl"
-  class="w-full h-full scale-[1.15] pointer-events-none overflow-hidden"
-></iframe>
+    @if (isPdf) {
+      <iframe
+        [src]="safeUrl"
+        class="w-full h-full scale-[1.15] pointer-events-none overflow-hidden"
+      ></iframe>
+    }
 
-}
-
-
-    <!-- Fallback -->
     @else {
       <div class="flex flex-col items-center text-gray-500">
         📄

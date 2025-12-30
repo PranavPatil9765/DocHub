@@ -34,14 +34,23 @@
   (delete)="deleteFile($event)">
 </app-file-table> -->
 
-  <app-file-table
+  <!-- <app-file-table
   [files]="files"
   [loading]="loading"
   [hasMore]="hasMore"
   (loadMore)="fetchNextPage()"
 
   >
-</app-file-table>
+</app-file-table> -->
+
+  <app-file-gallery
+    [files]="files"
+    [loading]="loading"
+    [hasMore]="hasMore"
+    (loadMore)="fetchNextPage()"
+  >
+  </app-file-gallery>
+
 
 </div>
 

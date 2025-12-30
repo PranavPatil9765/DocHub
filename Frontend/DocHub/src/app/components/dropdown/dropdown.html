@@ -1,25 +1,31 @@
 <div class="relative dropdown-wrapper w-full h-full">
+
   <!-- Button -->
   <button
     type="button"
     (click)="toggle()"
     [disabled]="disabled"
     class="w-full h-full flex justify-between items-center gap-2 px-4 py-2 border rounded-lg
-            text-sm transition
-           hover:border-blue-500
+           text-sm transition hover:border-blue-500
            disabled:bg-gray-100 disabled:text-gray-400
-           shadow-blue-200 shadow shadow-lg bg-white border"
-    [class.bg-blue-50]="!!selected"
-           >
+           shadow-blue-200 shadow shadow-lg bg-white"
+  >
 
     <!-- Selected text -->
     <span class="truncate">
-      {{ selected ? selected[displayKey] : label }}
+      @if (checkbox) {
+        {{ selectedValues.length
+            ? selectedValues.length + ' selected'
+            : label }}
+      } @else {
+        {{ selected ? selected[displayKey] : label }}
+      }
     </span>
 
     <div class="flex items-center gap-2">
-      <!-- Clear button -->
-      @if (selected) {
+
+      <!-- Clear -->
+      @if ((checkbox && selectedValues.length) || (!checkbox && selected)) {
         <span
           class="text-gray-400 hover:text-red-500 cursor-pointer"
           (click)="clear($event)">
@@ -45,13 +51,37 @@
     <ul
       class="absolute z-50 mt-1 w-full bg-white border rounded-lg shadow-lg
              max-h-48 overflow-auto">
-      @for (option of options; track option) {
-        <li
-          class="px-4 py-2 text-sm cursor-pointer hover:bg-blue-50"
-          (click)="select(option)">
-          {{ option[displayKey] }}
-        </li>
+
+      @for (option of options; track option[valueKey]) {
+
+        <!-- MULTI SELECT -->
+        @if (checkbox) {
+          <li
+            class="flex items-center gap-2 px-4 py-2 text-sm cursor-pointer
+                   hover:bg-blue-50"
+            [class.bg-blue-50]="isChecked(option)"
+            (click)="$event.stopPropagation()"
+          >
+            <input
+              type="checkbox"
+              class="accent-blue-600"
+              [checked]="isChecked(option)"
+              (change)="toggleCheckbox(option, $event)"
+            />
+            <span>{{ option[displayKey] }}</span>
+          </li>
+        }
+
+        <!-- SINGLE SELECT -->
+        @else {
+          <li
+            class="px-4 py-2 text-sm cursor-pointer hover:bg-blue-50"
+            (click)="select(option)">
+            {{ option[displayKey] }}
+          </li>
+        }
       }
     </ul>
   }
+
 </div>

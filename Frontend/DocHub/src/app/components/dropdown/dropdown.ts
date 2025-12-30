@@ -29,13 +29,19 @@ export class DropdownComponent implements ControlValueAccessor {
   @Input() options: any[] = [];
   @Input() displayKey = 'label';
   @Input() valueKey = 'value';
+  @Input() checkbox = false; // ✅ NEW
 
   @Output() valueChange = new EventEmitter<any>();
   @Output() cleared = new EventEmitter<void>();
 
   isOpen = false;
-  selected: any = null;
   disabled = false;
+
+  // 🔹 Single select
+  selected: any = null;
+
+  // 🔹 Multi select
+  selectedValues: any[] = [];
 
   private onChange = (_: any) => {};
   private onTouched = () => {};
@@ -45,8 +51,9 @@ export class DropdownComponent implements ControlValueAccessor {
     this.isOpen = !this.isOpen;
   }
 
+  /** SINGLE SELECT */
   select(option: any) {
-    if (this.disabled) return;
+    if (this.disabled || this.checkbox) return;
 
     this.selected = option;
     this.isOpen = false;
@@ -57,21 +64,48 @@ export class DropdownComponent implements ControlValueAccessor {
     this.valueChange.emit(value);
   }
 
+  /** MULTI SELECT */
+  toggleCheckbox(option: any, event: Event) {
+    event.stopPropagation();
+
+    const value = option[this.valueKey];
+    const index = this.selectedValues.indexOf(value);
+
+    if (index === -1) {
+      this.selectedValues.push(value);
+    } else {
+      this.selectedValues.splice(index, 1);
+    }
+
+    this.onChange([...this.selectedValues]);
+    this.onTouched();
+    this.valueChange.emit([...this.selectedValues]);
+  }
+
+  isChecked(option: any): boolean {
+    return this.selectedValues.includes(option[this.valueKey]);
+  }
+
   clear(event: MouseEvent) {
-    event.stopPropagation(); // prevent dropdown toggle
+    event.stopPropagation();
 
     this.selected = null;
+    this.selectedValues = [];
     this.isOpen = false;
 
-    this.onChange(null);
+    this.onChange(this.checkbox ? [] : null);
     this.onTouched();
     this.cleared.emit();
   }
 
-  /** CVA methods */
+  /** CVA */
   writeValue(value: any): void {
-    this.selected =
-      this.options.find(opt => opt[this.valueKey] === value) || null;
+    if (this.checkbox) {
+      this.selectedValues = Array.isArray(value) ? value : [];
+    } else {
+      this.selected =
+        this.options.find(opt => opt[this.valueKey] === value) || null;
+    }
   }
 
   registerOnChange(fn: any): void {

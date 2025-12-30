@@ -6,12 +6,13 @@ import { AdvancedFilterComponent } from "../../components/advanced-filter/advanc
 import { CardSection } from "../../components/card-section/card-section";
 import { FileRow } from '../../models/file-row';
 import { FileTableComponent } from '../../components/file-table/file-table';
+import { FileGalleryComponent } from '../../components/file-gallery/file-gallery';
 
 @Component({
   selector: 'app-dochub',
   templateUrl: './dochub.html',
   styleUrl: './dochub.css',
-  imports: [ElaticSearchBar, DropdownComponent, AdvancedFilterComponent, FileTableComponent]
+  imports: [ElaticSearchBar, DropdownComponent, AdvancedFilterComponent, FileGalleryComponent]
 })
 export class Dochub {
   categories = [
@@ -89,6 +90,7 @@ export class Dochub {
         id: `file-${page}-${i}`,
         name: `Project_File_${page}_${i}.${type}`,
         type,
+        url:"assets/Resume.pdf",
         size: 1024 * (i + 2),
         uploadedAt: new Date(
           Date.now() - (page * 12 + i) * 86400000
@@ -96,5 +98,33 @@ export class Dochub {
       };
     });
   }
+
+
+
+//   files: any[] = [];
+// page = 1;
+// pageSize = 9;
+// loading = false;
+// hasMore = true;
+
+// loadFiles() {
+//   if (this.loading || !this.hasMore) return;
+
+//   this.loading = true;
+
+//   // 🔹 Example API call
+//   this.fileService.getFiles(this.page, this.pageSize).subscribe({
+//     next: (res) => {
+//       this.files.push(...res.data);
+//       this.hasMore = res.data.length === this.pageSize;
+//       this.page++;
+//       this.loading = false;
+//     },
+//     error: () => {
+//       this.loading = false;
+//     },
+//   });
+// }
+
 
 }

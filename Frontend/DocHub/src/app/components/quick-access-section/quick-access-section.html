@@ -1,0 +1,45 @@
+<div class="w-full shadow">
+  <!-- Header -->
+  <div class="section-title w-full flex items-center justify-between px-4 py-2">
+    <h3 class="text-gray-500 font-medium text-lg">
+      {{ title }}
+    </h3>
+
+    <button class="text-blue-600 text-sm font-medium hover:underline" (click)="onViewAll()">
+      View All
+    </button>
+  </div>
+
+  <hr />
+
+  <!-- Files Grid -->
+  <div class="grid grid-cols-2 gap-4 p-4">
+    @for (file of files; track file.id) {
+    <div
+      class="p-3 rounded-lg border shadow-sm flex gap-3 items-start hover:shadow-blue-200 hover:shadow-lg"
+      [ngClass]="[getFileStyle(file.type).bg, getFileStyle(file.type).border]"
+    >
+      <!-- Icon -->
+      <i
+        class="fa-solid text-xl"
+        [ngClass]="[getFileStyle(file.type).icon, getFileStyle(file.type).text]"
+      ></i>
+
+      <!-- File Info -->
+      <div class="flex-1 min-w-0">
+        <p
+          class="font-semibold text-sm overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
+          title="{{ file.name }}"
+        >
+          {{ file.name }}
+        </p>
+
+        <p class="text-sm font-medium" [ngClass]="getFileStyle(file.type).text">
+          {{ file.type | uppercase }}
+        </p>
+      </div>
+    </div>
+
+    }
+  </div>
+</div>

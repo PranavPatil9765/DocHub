@@ -1,12 +1,18 @@
 <div class="main-container h-full w-full p-2">
   <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
     <br />
-    <app-elatic-search-bar></app-elatic-search-bar>
+    <div class="stats-section grid grid-cols-2 md:grid-cols-4 gap-3">
+      <app-stats-card [title]="'Images'" [count]="4" [bg]="'bg-red-100'"></app-stats-card>
+      <app-stats-card [title]="'pdf'" [count]="4" [bg]="'bg-blue-100'"></app-stats-card>
+      <app-stats-card [title]="'doc'" [count]="4" [bg]="'bg-green-100'"></app-stats-card>
+      <app-stats-card [title]="'others'" [count]="4" [bg]="'bg-white'"></app-stats-card>
+    </div>
     <br />
-    <app-card-section [title]="'Favorites'"></app-card-section>
+    <app-quick-access-section [title]="'Recently searched'"></app-quick-access-section>
+    <br />
+    <app-card-section [title]="'Favorites'" [multiselect]="false"></app-card-section>
     <br />
     <app-card-section [title]="'Recently Uploaded'"></app-card-section>
-    <br />
-    <app-card-section [title]="'Recent Searches'"> </app-card-section>
+
   </div>
 </div>
