@@ -18,7 +18,7 @@ public class DocHubApplication {
                     System.out.println("✅ Connected to PostgreSQL successfully!");
                 }
             } catch (Exception e) {
-                System.err.println("❌ Failed to connect to PostgreSQL: " + e.getMessage());
+                System.err.println(" Failed to connect to PostgreSQL: " + e.getMessage());
             }
         };
     }
