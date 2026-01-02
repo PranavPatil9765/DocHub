@@ -55,4 +55,29 @@ public class PasswordResetService {
     }
 }
 
+public void verifyOtp(String email, String otp) {
+
+    PasswordResetOtp resetOtp = otpRepository
+            .findByEmailAndOtp(email, otp)
+            .orElseThrow(() ->
+                    new RuntimeException("Invalid OTP"));
+
+    // ⏱ Expiry check
+    if (resetOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+        otpRepository.delete(resetOtp);
+        throw new RuntimeException("OTP expired");
+    }
+
+    // ❌ Already used check (optional but good)
+    if (resetOtp.isUsed()) {
+        throw new RuntimeException("OTP already used");
+    }
+
+    // ✅ OTP valid → delete from DB
+    otpRepository.delete(resetOtp);
+
+    System.out.println(">>> OTP verified and deleted successfully");
+}
+
+
 }

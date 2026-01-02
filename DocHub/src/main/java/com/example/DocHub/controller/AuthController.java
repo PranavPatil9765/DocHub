@@ -50,4 +50,20 @@ public class AuthController {
                 Map.of("message", "OTP sent if email exists")
         );
     }
+
+
+    @PostMapping("/verify-otp")
+public ResponseEntity<?> verifyOtp(
+        @RequestBody com.example.DocHub.dto.VerifyOtpRequest request) {
+
+    passwordResetService.verifyOtp(
+            request.getEmail(),
+            request.getOtp()
+    );
+
+    return ResponseEntity.ok(
+            Map.of("message", "OTP verified successfully")
+    );
+}
+
 }
