@@ -1,3 +1,4 @@
+import { Collections } from './pages/collections/collections';
 import { authGuard } from './auth/guards/auth-guard';
 import { Routes } from '@angular/router';
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
@@ -31,9 +32,25 @@ export const routes: Routes = [
       { path: 'dochub', loadComponent: () => import('./pages/dochub/dochub').then(m => m.Dochub) },
       { path: 'analytics', loadComponent: () => import('./pages/analytics/analytics').then(m => m.Analytics) },
       { path: 'about', loadComponent: () => import('./pages/about/about').then(m => m.About) },
+      { path: 'collections', children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/collections/collections')
+            .then(m => m.Collections),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/collection-details/collection-details')
+            .then(m => m.CollectionDetailsComponent),
+      },
+    ], },
+      { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
+
     ]
   },
-  { path: '**', redirectTo: 'login' },
+  // { path: '', redirectTo: 'login' },
 
 
 ];

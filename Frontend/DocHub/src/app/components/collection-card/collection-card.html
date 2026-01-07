@@ -1,0 +1,124 @@
+<div
+  class="relative w-full max-w-sm min-w-[100px] md:min-w-[250px]
+         rounded-2xl border bg-white
+         shadow-md hover:shadow-xl
+         transition group cursor-pointer"
+  [ngClass]="{ 'ring-2 ring-blue-400': selected }"
+  (touchstart)="onTouchStart()"
+  (touchend)="onTouchEnd()"
+  (touchmove)="onTouchMove()"
+  (click)="onCardClick($event)"
+>
+
+  <!-- 🔹 CHECKBOX (ONLY FOR NORMAL STATE) -->
+  @if (collection.state === 'normal' && multiselect) {
+    <label
+      class="absolute top-2 left-2 z-20
+             w-6 h-6 rounded-md
+             bg-white/80 backdrop-blur
+             flex items-center justify-center
+             shadow cursor-pointer
+             transition
+             group-hover:opacity-100"
+      [ngClass]="{ 'opacity-0': !selected, 'opacity-100': selected }"
+    >
+      <input
+        type="checkbox"
+        class="accent-blue-600 scale-110"
+        [checked]="selected"
+        (click)="$event.stopPropagation()"
+        (change)="onSelectChange($event)"
+      />
+    </label>
+  }
+
+  <!-- 🔹 MENU (ONLY FOR NORMAL STATE) -->
+  @if (collection.state === 'normal') {
+    <button
+      class="absolute top-2 right-2 z-20
+             w-8 h-8 rounded-full
+             bg-white/80 backdrop-blur
+             flex items-center justify-center
+             md:opacity-0 group-hover:opacity-100
+             transition hover:bg-white shadow"
+      (click)="toggleMenu($event)"
+    >
+      ⋮
+    </button>
+  }
+
+  <!-- 🔹 MENU DROPDOWN -->
+  @if (collection.state === 'normal' && menuOpen) {
+    <div
+      class="absolute top-12 right-2 z-30
+             w-36 bg-white rounded-lg shadow-lg border
+             text-sm overflow-hidden"
+    >
+      <button
+        class="w-full px-4 py-2 text-left hover:bg-gray-100"
+        (click)="open.emit()"
+      >
+        Open
+      </button>
+
+      <button
+        class="w-full px-4 py-2 text-left hover:bg-gray-100"
+        (click)="handleEdit($event)"
+      >
+        Edit
+      </button>
+
+      <button
+        class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
+        (click)="delete.emit()"
+      >
+        Delete
+      </button>
+    </div>
+  }
+
+  <!-- 🔹 DEFAULT STATE -->
+  @if (collection.state === 'default') {
+    <div class="flex flex-col">
+      <div class="md:h-32 h-20 bg-blue-100 rounded-t-2xl overflow-hidden">
+        <img
+          [src]="imageUrl"
+          alt="collection image"
+          class="w-full h-full object-contain
+                 transition-transform duration-300
+                 group-hover:scale-105"
+        />
+      </div>
+
+      <div class="p-4">
+        <p class="font-semibold text-blue-900 truncate text-center">
+          {{ collection.name }}
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- 🔹 NORMAL STATE -->
+  @else {
+
+    <div class="flex items-center gap-4 p-5"
+    >
+      <div
+        class="w-12 h-12 rounded-xl
+               bg-blue-600 text-white
+               flex items-center justify-center
+               text-xl
+               shadow-lg shadow-blue-400/40
+               transition-transform duration-300
+               group-hover:scale-110"
+      >
+        {{ collection.icon }}
+      </div>
+
+      <p class="font-semibold text-blue-900 truncate">
+        {{ collection.name }}
+      </p>
+    </div>
+  }
+
+</div>

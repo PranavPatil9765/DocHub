@@ -7,47 +7,16 @@
 
   <div class="flex space-x-4 p-4  overflow-x-auto">
 
-  <app-file-priview-card
-    fileUrl="assets/Resume.pdf"
-    fileName="Project Proposal.pdf"
-    fileType="application/pdf"
-    [fileSize]="204800"
-    [multiselect]="multiselect"
-    >
-  </app-file-priview-card>
-  <app-file-priview-card
-    fileUrl="assets/Resume.pdf"
-    fileName="Project Proposal.pdf"
-    fileType="application/pdf"
-    [fileSize]="204800"
-    [multiselect]="multiselect"
-    >
-  </app-file-priview-card>
-  <app-file-priview-card
-    fileUrl="assets/Resume.pdf"
-    fileName="Project Proposal.pdf"
-    fileType="application/pdf"
-    [fileSize]="204800"
-    [multiselect]="multiselect"
-    >
-  </app-file-priview-card>
-  <app-file-priview-card
-    fileUrl="assets/Resume.pdf"
-    fileName="Project Proposal.pdf"
-    fileType="application/pdf"
-    [fileSize]="204800"
-    [multiselect]="multiselect"
-    >
-  </app-file-priview-card>
-  <app-file-priview-card
-    fileUrl="assets/Resume.pdf"
-    fileName="Project Proposal.pdf"
-    fileType="application/pdf"
-    [fileSize]="204800"
-    [multiselect]="multiselect"
-    >
-  </app-file-priview-card>
+    @for(file of files;track file.id){
 
-  </div>
+      <app-file-priview-card
+      [file]="file"
+      [multiselect]="multiselect"
+      >
+    </app-file-priview-card>
+
+  }
 
 </div>
+</div>
+

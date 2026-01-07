@@ -1,0 +1,45 @@
+<div class="absolute bottom-0 left-0 right-0 h-[80px]">
+  <div
+    class="h-full bg-white border-t
+           flex items-center justify-between px-6
+           transition-transform transition-opacity duration-300 ease-out"
+    [ngClass]="selectedCount > 0
+      ? 'translate-y-0 opacity-100'
+      : 'translate-y-full opacity-0 pointer-events-none'"
+  >
+    <!-- Count -->
+    <span class="text-sm font-medium text-gray-600">
+      {{ selectedCount }} selected
+    </span>
+
+    <!-- Actions -->
+    <div class="flex gap-3">
+      <button
+        class="px-4 py-2 text-sm rounded-lg
+               text-gray-600 hover:bg-gray-100
+               active:scale-95 transition"
+        (click)="clear.emit()"
+      >
+        Clear
+      </button>
+
+      <button
+        class="px-4 py-2 text-sm rounded-lg
+               bg-blue-600 text-white hover:bg-blue-700
+               active:scale-95 transition"
+        (click)="download.emit()"
+      >
+        Download
+      </button>
+
+      <button
+        class="px-4 py-2 text-sm rounded-lg
+               bg-red-600 text-white hover:bg-red-700
+               active:scale-95 transition"
+        (click)="delete.emit()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

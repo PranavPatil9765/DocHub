@@ -5,7 +5,8 @@ import { Router, RouterLink } from "@angular/router";
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.html',
-  imports:[RouterLink]
+  imports:[RouterLink],
+  styleUrls:["./sidebar.scss"]
 })
 export class Sidebar {
   @Input() isMobile = false;

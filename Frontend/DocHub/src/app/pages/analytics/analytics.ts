@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { PieChartComponent } from '../../components/pie-chart/pie-chart';
 import { TagCloudComponent } from "../../components/tag-cloud/tag-cloud";
+import { StorageUsageComponent } from "../../components/storage-usage/storage-usage";
 
 @Component({
   selector: 'app-analytics',
-  imports: [PieChartComponent, TagCloudComponent],
+  imports: [PieChartComponent, TagCloudComponent, StorageUsageComponent],
   templateUrl: './analytics.html',
   styleUrl: './analytics.scss',
 })

@@ -29,7 +29,7 @@ export class DropdownComponent implements ControlValueAccessor {
   @Input() options: any[] = [];
   @Input() displayKey = 'label';
   @Input() valueKey = 'value';
-  @Input() checkbox = false; // ✅ NEW
+  @Input() checkbox = false;
 
   @Output() valueChange = new EventEmitter<any>();
   @Output() cleared = new EventEmitter<void>();

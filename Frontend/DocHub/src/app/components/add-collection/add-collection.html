@@ -1,0 +1,136 @@
+<!-- Overlay -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+
+  <!-- Modal -->
+  <div
+    class="max-w-[95%] bg-white rounded-3xl shadow-2xl
+           border border-blue-100 overflow-hidden
+           transition-all duration-300"
+    [ngClass]="mode === 'both' ? 'w-[900px]' : 'w-[480px]'"
+  >
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b">
+      <h2 class="text-xl font-semibold text-blue-700">
+        {{ mode === 'edit' ? 'Edit Collection' : 'Add to Collection' }}
+      </h2>
+
+      <button
+        class="text-gray-400 hover:text-red-500"
+        (click)="close.emit()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div
+      class="grid gap-6 p-6"
+      [ngClass]="{
+        'grid-cols-1 max-w-[420px] mx-auto': mode !== 'both',
+        'grid-cols-1 md:grid-cols-2': mode === 'both'
+      }"
+    >
+
+      <!-- ================= CREATE / EDIT ================= -->
+      @if (mode !== 'select') {
+        <div class="space-y-4">
+
+          <h3 class="text-lg font-medium text-blue-600">
+            {{ mode === 'edit' ? 'Edit Collection' : 'Create New Collection' }}
+          </h3>
+
+          <!-- Name -->
+          <div>
+            <label class="text-sm text-gray-600">
+              Collection Name *
+            </label>
+            <input
+              [(ngModel)]="name"
+              class="w-full mt-1 px-4 py-2 rounded-xl border
+                     focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+
+          <!-- Icon Picker -->
+          <div>
+            <label class="text-sm text-gray-600">Choose Icon</label>
+            <div class="flex flex-wrap gap-2 mt-2">
+              @for (icon of icons; track icon) {
+                <button
+                  type="button"
+                  class="w-10 h-10 text-xl rounded-xl border
+                         hover:bg-blue-50 transition"
+                  [ngClass]="
+                    selectedIcon === icon
+                      ? 'border-blue-500 bg-blue-100'
+                      : 'border-gray-200'
+                  "
+                  (click)="selectIcon(icon)"
+                >
+                  {{ icon }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="text-sm text-gray-600">Description</label>
+            <textarea
+              [(ngModel)]="description"
+              rows="3"
+              class="w-full mt-1 px-4 py-2 rounded-xl border
+                     focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+            ></textarea>
+          </div>
+
+          @if (error) {
+            <p class="text-sm text-red-500">{{ error }}</p>
+          }
+
+          <button
+            class="w-full py-2.5 rounded-xl bg-blue-600 text-white
+                   hover:bg-blue-700 active:scale-95 transition"
+            (click)="save()"
+          >
+            {{ mode === 'edit' ? 'Update Collection' : 'Create Collection' }}
+          </button>
+        </div>
+      }
+
+      <!-- ================= SELECT ================= -->
+      @if (mode !== 'create' && mode !== 'edit') {
+        <div class="space-y-4">
+
+          <h3 class="text-lg font-medium text-blue-600">
+            Existing Collections
+          </h3>
+
+          <app-elatic-search-bar></app-elatic-search-bar>
+
+          <div class="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+            @for (col of collections; track col.id) {
+              <div
+                class="p-4 rounded-xl border cursor-pointer
+                       hover:bg-blue-50 transition"
+                (click)="select(col)"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="text-xl">{{ col.icon || '📁' }}</span>
+                  <span class="font-medium">{{ col.name }}</span>
+                </div>
+                @if (col.description) {
+                  <div class="text-sm text-gray-500 ml-8 mt-1">
+                    {{ col.description }}
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,81 @@
+<div class="main-container h-full w-full max-w-full p-2">
+  <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
+
+    <!-- ================= DEFAULT COLLECTIONS ================= -->
+    <div class="w-full m-auto shadow-lg shadow-blue-200 border border-gray-200 rounded-lg">
+      <div class="section-title w-full">
+        <h3 class="text-gray-500 font-medium text-lg px-4 py-2">
+          Default Collections
+        </h3>
+        <hr />
+      </div>
+
+      <div class="px-4 py-2 grid grid-cols-3 gap-3">
+   @for (col of DefaultCollections; track col.id) {
+  <app-collection-card
+    [collection]="col"
+    [imageUrl]="col.imageUrl">
+  </app-collection-card>
+}
+
+      </div>
+    </div>
+
+    <br />
+
+    <!-- ================= SEARCH + ADD ================= -->
+    <div class="grid grid-cols-4 gap-6">
+      <div class="col-span-3">
+        <app-elatic-search-bar></app-elatic-search-bar>
+      </div>
+
+      <div class="col-span-1 flex justify-end">
+        <button
+          (click)="openCreateCollection()"
+          class="bg-blue-600 h-full w-full md:w-1/2
+                 hover:bg-blue-700 text-white font-medium
+                 py-2 px-4 rounded-md shadow text-sm"
+        >
+          + Add
+        </button>
+      </div>
+    </div>
+
+    <br />
+
+    <!-- ================= USER COLLECTIONS ================= -->
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 py-2">
+      @for (col of collections; track col.id) {
+        <app-collection-card
+          [multiselect]="true"
+          [collection]="col"
+          [multiselectActive]="!!selectedFileIds.size"
+          [clearSelection]="clearSelectedFields"
+          (edit)="handleCollectionEdit($event)"
+          (selectionChange)="onFileSelectionChange($event)">
+        </app-collection-card>
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= BOTTOM BAR ================= -->
+<app-bottom-bar
+  [selectedCount]="selectedFileIds.size"
+  (clear)="clearSelection()"
+  (download)="downloadAllSelected()"
+  (delete)="deleteAllSelected()">
+</app-bottom-bar>
+
+<!-- ================= OVERLAY ================= -->
+@if (showOverlay) {
+  <app-add-collection
+    [collections]="collections"
+    [mode]="mode"
+    [editingCollection]="editingCollection"
+    (createCollection)="onCreate($event)"
+    (selectCollection)="onSelect($event)"
+    (close)="closeOverlay()">
+  </app-add-collection>
+}

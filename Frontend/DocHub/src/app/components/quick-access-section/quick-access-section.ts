@@ -1,9 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { getFileClasses } from '../../../utilities/file-type.styles';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-quick-access-section',
-  imports: [CommonModule],
+  imports: [CommonModule,RouterModule],
   templateUrl: './quick-access-section.html',
   styleUrl: './quick-access-section.scss',
 })
