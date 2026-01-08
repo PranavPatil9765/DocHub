@@ -1,0 +1,73 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 body">
+
+  <div
+    class="backdrop-blur-xl bg-white/30 border border-white/40 rounded-3xl p-10 w-full max-w-lg shadow-2xl text-center"
+  >
+
+    <!-- Icon -->
+    <div class="flex justify-center mb-4">
+      <div class="w-14 h-14 rounded-full bg-blue-600/90 flex items-center justify-center shadow-lg">
+        <svg
+          class="w-7 h-7 text-white"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16v-1a5 5 0 00-10 0v1"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <h2 class="text-3xl font-bold text-gray-800 mb-2">
+      Verify OTP
+    </h2>
+    <p class="text-gray-700 text-sm mb-6">
+      Enter the 6-digit code sent to your email
+    </p>
+
+    <!-- OTP Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+
+      <!-- OTP Boxes -->
+      <div class="flex justify-center gap-3">
+        <input
+          *ngFor="let box of [0,1,2,3,4,5]; let i = index"
+          maxlength="1"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          class="w-12 h-14 text-center text-xl font-semibold
+                 rounded-xl bg-white/70 border border-gray-300
+                 focus:ring-2 focus:ring-blue-500 focus:outline-none
+                 transition"
+          (input)="onOtpInput($event, i)"
+          (keydown.backspace)="onBackspace($event, i)"
+        />
+      </div>
+
+      <!-- Hidden actual control -->
+      <input type="hidden" formControlName="otp" />
+
+      <!-- Button -->
+      <button
+        type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98]
+               text-white font-semibold py-3 rounded-xl
+               shadow-lg shadow-blue-500/40 transition-all"
+      >
+        Verify OTP
+      </button>
+
+    </form>
+
+    <!-- Error -->
+    <p
+      *ngIf="error"
+      class="mt-4 text-red-600 font-medium bg-red-100/60 rounded-lg py-2 px-3"
+    >
+      {{ error }}
+    </p>
+
+  </div>
+</div>

@@ -34,4 +34,12 @@ export class AuthService {
     localStorage.removeItem('token');
     this.router.navigate(['/login']);
   }
+
+  loginWithGoogle() {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+  }
+
+  loginWithGithub() {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/github';
+  }
 }
