@@ -1,28 +1,29 @@
-<div class=" md:px-10 px-2 ">
-  <br>
-  <div class="search-filter-container grid md:grid-cols-2 gap-3">
-    <div class="md:col-span-1">
-      <app-elatic-search-bar></app-elatic-search-bar>
-    </div>
-    <div class="md:col-span-1">
-      <div class="flex gap-3 h-full justify-evenly ">
-        <div class="w-3/4 h-full">
-          <app-dropdown
-          formControlName="category"
-          label="Select Category"
-          [options]="categories"
-          displayKey="name"
-          valueKey="id">
-        </app-dropdown>
+<div class="main-container h-full w-full p-2">
+  <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
+    <br>
+      <div class="search-filter-container grid md:grid-cols-3 gap-3">
+        <div class="md:col-span-2">
+          <app-elatic-search-bar></app-elatic-search-bar>
+        </div>
+        <div class="md:col-span-1">
+          <div class="flex gap-3 h-full justify-evenly">
+            <div class="w-3/4 h-full">
+              <app-dropdown
+                formControlName="sortby"
+                label="sortby"
+                [options]="sortby"
+                displayKey="name"
+                valueKey="id"
+              >
+              </app-dropdown>
+            </div>
+            <app-advanced-filter></app-advanced-filter>
+          </div>
+        </div>
       </div>
-      <app-advanced-filter></app-advanced-filter>
-      <button class="bg-blue-600 min-w-12 rounded-full text-2xl text-white">+</button>
-    </div>
-    </div>
-  </div>
 
-  <br >
-  <!-- <app-file-table
+      <br />
+      <!-- <app-file-table
   [files]="files"
   [loading]="loading"
   [hasMore]="hasMore"
@@ -34,7 +35,7 @@
   (delete)="deleteFile($event)">
 </app-file-table> -->
 
-  <!-- <app-file-table
+      <!-- <app-file-table
   [files]="files"
   [loading]="loading"
   [hasMore]="hasMore"
@@ -43,15 +44,12 @@
   >
 </app-file-table> -->
 
-  <app-file-gallery
-    [files]="files"
-    [loading]="loading"
-    [hasMore]="hasMore"
-    (loadMore)="fetchNextPage()"
-  >
-  </app-file-gallery>
-
-
-</div>
-
-
+      <app-file-gallery
+        [files]="files"
+        [loading]="loading"
+        [hasMore]="hasMore"
+        (loadMore)="fetchNextPage()"
+      >
+      </app-file-gallery>
+    </div>
+  </div>

@@ -7,6 +7,7 @@ import { CardSection } from "../../components/card-section/card-section";
 import { FileRow } from '../../models/file-row';
 import { FileTableComponent } from '../../components/file-table/file-table';
 import { FileGalleryComponent } from '../../components/file-gallery/file-gallery';
+import { FileUploadComponent } from "../../components/file-upload/file-upload";
 
 @Component({
   selector: 'app-dochub',
@@ -15,10 +16,10 @@ import { FileGalleryComponent } from '../../components/file-gallery/file-gallery
   imports: [ElaticSearchBar, DropdownComponent, AdvancedFilterComponent, FileGalleryComponent]
 })
 export class Dochub {
-  categories = [
-  { id: 1, name: 'Documents' },
-  { id: 2, name: 'Images' },
-  { id: 3, name: 'Videos' }
+  sortby = [
+  { id: 1, name: 'Size' },
+  { id: 2, name: 'Upload Date' },
+  { id: 3, name: 'Name' }
 ];
 // form = new FormGroup({
 //   category: new FormControl(null)
@@ -90,8 +91,55 @@ export class Dochub {
         id: `file-${page}-${i}`,
         name: `Project_File_${page}_${i}.${type}`,
         type,
+        description:"ewe",
         url:"assets/Resume.pdf",
+tags: [
+  "invoice",
+  "receipt",
+  "bill",
+  "payment",
+  "finance",
+  "tax",
+  "gst",
+  "bank-statement",
+  "salary-slip",
+  "budget",
+
+  "resume",
+  "cv",
+  "offer-letter",
+  "appointment-letter",
+  "experience-letter",
+  "certificate",
+  "marksheet",
+  "transcript",
+  "id-proof",
+  "passport",
+
+  "project",
+  "proposal",
+  "report",
+  "presentation",
+  "ppt",
+  "research",
+  "analysis",
+  "documentation",
+  "requirements",
+  "design",
+
+  "contract",
+  "agreement",
+  "nda",
+  "legal",
+  "policy",
+  "compliance",
+  "terms",
+  "license",
+  "authorization",
+  "approval"
+],
         size: 1024 * (i + 2),
+        isFavourite :false,
         uploadedAt: new Date(
           Date.now() - (page * 12 + i) * 86400000
         )

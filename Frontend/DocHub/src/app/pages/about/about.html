@@ -1,1 +1,149 @@
-<p>about works!</p>
+<!-- ===== SCROLL RANGE BAR ===== -->
+<div class="sticky top-0 z-30 bg-white border-b border-blue-200">
+  <div class="max-w-6xl mx-auto px-6 py-3">
+
+    <!-- Labels -->
+    <div class="flex justify-between text-xs font-semibold text-blue-700 mb-2">
+      <span *ngFor="let step of steps; let i = index"
+        [class.text-blue-600]="activeStep >= i"
+        [class.text-gray-400]="activeStep < i">
+        {{ step }}
+      </span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
+      <div
+        class="h-full bg-blue-600 transition-all duration-200"
+        [style.width.%]="scrollProgress">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="py-24 bg-gradient-to-b from-blue-100 to-white text-center">
+  <h1 class="text-4xl font-bold text-blue-800 mb-6">
+    DocHub Makes Documents Feel Smart 💙
+  </h1>
+  <p class="max-w-3xl mx-auto text-lg text-blue-700">
+    Imagine your documents are toys.
+    DocHub knows which toy is where,
+    what it does, and finds it for you instantly.
+  </p>
+</section>
+
+<!-- ===== UPLOAD ===== -->
+<section class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 px-6 items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-blue-800 mb-4">📄 Upload</h2>
+      <p class="text-blue-700 text-lg">
+        Give DocHub your files — PDFs, Docs, Images.
+        Like putting books on a magical shelf 📚
+      </p>
+    </div>
+    <div class="h-56 bg-blue-100 rounded-xl flex items-center justify-center font-bold text-blue-600">
+      <img src="assets/upload.png" alt="">
+    </div>
+  </div>
+</section>
+
+<!-- ===== PARSE ===== -->
+<section class="py-20 bg-blue-50">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 px-6 items-center">
+    <div class="h-56 bg-blue-200 rounded-xl flex items-center justify-center font-bold text-blue-700">
+            <img src="assets/parse.png" alt="">
+    </div>
+    <div>
+      <h2 class="text-3xl font-bold text-blue-800 mb-4">🧠 Parse</h2>
+      <p class="text-blue-700 text-lg">
+        DocHub reads every word inside your document
+        like a robot librarian 🤖
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TAG ===== -->
+<section class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 px-6 items-center">
+    <div>
+      <h2 class="text-3xl font-bold text-blue-800 mb-4">🏷 Smart Tags</h2>
+      <p class="text-blue-700 text-lg">
+        We add stickers like:
+        <br>📌 Resume • 📌 Invoice • 📌 Project
+      </p>
+    </div>
+    <div class="h-56 bg-blue-100 rounded-xl flex items-center justify-center font-bold text-blue-600">
+            <img src="assets/tagging.png" alt="">
+    </div>
+  </div>
+</section>
+
+<!-- ===== SEARCH ===== -->
+<section class="py-20 bg-blue-50">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 px-6 items-center">
+    <div class="h-56 bg-blue-200 rounded-xl flex items-center justify-center font-bold text-blue-700">
+            <img src="assets/search.png" alt="">
+    </div>
+    <div>
+      <h2 class="text-3xl font-bold text-blue-800 mb-4">🔍 Search</h2>
+      <p class="text-blue-700 text-lg">
+        Type what you remember.
+        DocHub finds it lightning fast ⚡
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DISCOVER ===== -->
+<section class="py-20 bg-white text-center">
+  <h2 class="text-3xl font-bold text-blue-800 mb-4">✨ Discover</h2>
+  <p class="text-blue-700 text-lg">
+    No folders. No confusion.
+    Just answers.
+  </p>
+</section>
+
+<!-- ===== COLLECTIONS (NEW FEATURE) ===== -->
+<section class="py-24 bg-gradient-to-t from-blue-100 to-white">
+  <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+
+    <div>
+      <h2 class="text-3xl font-bold text-blue-800 mb-4">
+        🗂 Document Collections
+      </h2>
+
+      <p class="text-blue-700 text-lg mb-4">
+        Collections are like playlists 🎵 for documents.
+      </p>
+
+      <ul class="list-disc list-inside text-blue-600 space-y-2">
+        <li>Group documents by topic</li>
+        <li>Acts as reference only</li>
+        <li>No duplicate storage</li>
+        <li>Zero extra space used</li>
+      </ul>
+
+      <p class="mt-6 text-blue-700">
+        Same document can live in many collections —
+        without being copied 📎
+      </p>
+    </div>
+
+    <div class="h-64 bg-blue-200 rounded-xl flex items-center justify-center font-bold text-blue-700">
+            <img src="assets/collection.png" alt="">
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== FOOTER MESSAGE ===== -->
+<section class="py-16 bg-white text-center">
+  <p class="text-xl font-semibold text-blue-800">
+    DocHub doesn’t store files.
+    It stores understanding 💙
+  </p>
+</section>

@@ -39,7 +39,7 @@
     </div>
 
     <!-- Google Login -->
-     <div class="flex justify-evenly items-center text-sm">
+     <div class="flex justify-evenly items-center gap-2 text-sm">
     <button
       class=" px-2 flex items-center justify-center gap-3 bg-white/70 hover:bg-white/90 text-gray-800 font-semibold py-3 rounded-lg  shadow transition"
       (click)="loginWithGoogle()"
@@ -63,6 +63,13 @@
     >
       New user? Register
     </a>
+       <a
+      routerLink="/forgot-password"
+      class="block mt-6 text-blue-800 font-medium hover:text-blue-900 transition"
+    >
+      Forgot Password
+    </a>
+
 
   </div>
 

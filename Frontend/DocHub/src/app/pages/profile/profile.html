@@ -1,0 +1,98 @@
+<div class="max-w-4xl mx-auto p-6 space-y-8">
+
+  <!-- ===== Personal Details ===== -->
+  <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-6">
+    <h2 class="text-lg font-semibold text-blue-800 mb-4">
+      Personal Details
+    </h2>
+
+    <div class="grid sm:grid-cols-2 gap-4 text-sm">
+      <div>
+        <label class="text-blue-600 font-medium">Username</label>
+        <div class="mt-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-800">
+          {{ username }}
+        </div>
+      </div>
+
+      <div>
+        <label class="text-blue-600 font-medium">Email</label>
+        <div class="mt-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-800">
+          {{ email }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Reset Password ===== -->
+  <div class="bg-white rounded-xl border border-blue-100 shadow-sm p-6 relative">
+
+    <!-- Section Header + Button -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-blue-800">
+        Reset Password
+      </h2>
+
+      <button
+        (click)="updatePassword()"
+        [disabled]="passwordForm.invalid"
+        class="px-4 py-2 text-sm font-semibold rounded-lg
+               bg-blue-600 text-white
+               disabled:bg-blue-300 disabled:cursor-not-allowed
+               hover:bg-blue-700 transition">
+        Update Password
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="passwordForm" class="grid sm:grid-cols-2 gap-4">
+
+      <!-- Old Password -->
+      <div>
+        <label class="text-blue-600 font-medium">Old Password</label>
+        <input
+          type="password"
+          formControlName="oldPassword"
+          class="mt-1 w-full px-3 py-2 rounded-lg
+                 border border-blue-200
+                 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+      </div>
+
+      <!-- New Password -->
+      <div>
+        <label class="text-blue-600 font-medium">New Password</label>
+        <input
+          type="password"
+          formControlName="newPassword"
+          class="mt-1 w-full px-3 py-2 rounded-lg
+                 border border-blue-200
+                 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <p class="text-xs text-blue-500 mt-1">
+          Minimum 6 characters
+        </p>
+      </div>
+
+      <!-- Confirm Password -->
+      <div>
+        <label class="text-blue-600 font-medium">Confirm Password</label>
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          class="mt-1 w-full px-3 py-2 rounded-lg
+                 border border-blue-200
+                 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+
+        <!-- Error -->
+        <p
+          *ngIf="passwordForm.errors?.['mismatch']"
+          class="text-xs text-red-600 mt-1">
+          Passwords do not match
+        </p>
+      </div>
+
+    </form>
+  </div>
+
+</div>

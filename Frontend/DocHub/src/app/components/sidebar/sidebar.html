@@ -1,7 +1,8 @@
 <!-- Overlay (mobile only) -->
 @if (isMobile) {
   <div
-    class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300"
+    class="fixed inset-0 bg-black/40 z-40
+           transition-opacity duration-300"
     [class.opacity-100]="isOpen"
     [class.opacity-0]="!isOpen"
     [class.pointer-events-none]="!isOpen"
@@ -9,10 +10,13 @@
   </div>
 }
 
-<!-- Sidebar (shared content) -->
+<!-- Sidebar -->
 <div
-  class="min-h-full border shadow z-50 shadow-blue-100 pt-1 bg-white
-         transform transition-transform duration-300 ease-in-out"
+  class="min-h-full z-50 bg-white
+         border-r border-blue-100
+         shadow-lg shadow-blue-100/50
+         transform transition-transform duration-300 ease-in-out
+         flex flex-col"
   [class.fixed]="isMobile"
   [class.left-0]="isMobile"
   [class.top-0]="isMobile"
@@ -21,26 +25,136 @@
   [class.-translate-x-full]="isMobile && !isOpen"
   [class.translate-x-0]="!isMobile || isOpen"
 >
+
   <!-- Close button (mobile only) -->
   @if (isMobile) {
-    <button (click)="close.emit()" class="mb-4">
-      close ✕
-    </button>
+   <!-- Header -->
+  <div class="flex items-center justify-between px-4 py-4 border-b border-blue-100">
+    <span class="text-lg font-bold text-blue-700">
+      DocHub
+    </span>
+
+    @if (isMobile) {
+      <button
+        (click)="close.emit()"
+        class="text-gray-400 hover:text-red-500 transition">
+        ✕
+      </button>
+    }
+  </div>
   }
 
-  <!--  SHARED CONTENT -->
-    <ul class="mb-4">
-      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md"
-      [class.bg-blue-300]="currentUrl==='/dashboard'"
-      routerLink="/dashboard">Dashboard</li>
-      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md" routerLink="/dochub"
-      [class.bg-blue-300]="currentUrl==='/dochub'"
-       >Dochub</li>
-      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md" routerLink="/analytics"
-      [class.bg-blue-300]="currentUrl==='/analytics'"
-       >Analytics</li>
-      <li class="w-full h-12 flex items-center bg-blue-100 mb-1 hover:bg-blue-400 p-3 drop-shadow-md" routerLink="/about"
-      [class.bg-blue-300]="currentUrl==='/about'"
-       >About</li>
-    </ul>
+  <!-- Navigation -->
+  <ul class="flex-1 px-3 py-4 space-y-1">
+
+    <!-- Dashboard -->
+    <li
+      routerLink="/dashboard"
+      class="flex items-center gap-3
+             px-3 py-2 rounded-lg
+             text-sm font-medium
+             text-blue-700
+             cursor-pointer
+             transition
+             hover:bg-blue-50"
+      [class.bg-blue-100]="currentUrl === '/dashboard'"
+      [class.text-blue-900]="currentUrl === '/dashboard'"
+      [class.font-semibold]="currentUrl === '/dashboard'">
+      <i class="fa-solid fa-house w-4"></i>
+      Dashboard
+    </li>
+
+    <!-- DocHub -->
+    <li
+      routerLink="/dochub"
+      class="flex items-center gap-3
+             px-3 py-2 rounded-lg
+             text-sm font-medium
+             text-blue-700
+             cursor-pointer
+             transition
+             hover:bg-blue-50"
+      [class.bg-blue-100]="currentUrl === '/dochub'"
+      [class.text-blue-900]="currentUrl === '/dochub'"
+      [class.font-semibold]="currentUrl === '/dochub'">
+      <i class="fa-solid fa-file-lines w-4"></i>
+      DocHub
+    </li>
+
+    <!-- Collections -->
+  <li
+  routerLink="/collections"
+  class="flex items-center gap-3
+         px-3 py-2 rounded-lg
+         text-sm font-medium
+         text-blue-700
+         cursor-pointer
+         transition
+         hover:bg-blue-50"
+  [class.bg-blue-100]="currentUrl.startsWith('/collections')"
+  [class.text-blue-900]="currentUrl.startsWith('/collections')"
+  [class.font-semibold]="currentUrl.startsWith('/collections')">
+  <i class="fa-solid fa-layer-group w-4"></i>
+  Collections
+</li>
+
+
+    <!-- Analytics -->
+    <li
+      routerLink="/analytics"
+      class="flex items-center gap-3
+             px-3 py-2 rounded-lg
+             text-sm font-medium
+             text-blue-700
+             cursor-pointer
+             transition
+             hover:bg-blue-50"
+      [class.bg-blue-100]="currentUrl === '/analytics'"
+      [class.text-blue-900]="currentUrl === '/analytics'"
+      [class.font-semibold]="currentUrl === '/analytics'">
+      <i class="fa-solid fa-chart-line w-4"></i>
+      Analytics
+    </li>
+
+    <!-- About -->
+    <li
+      routerLink="/about"
+      class="flex items-center gap-3
+             px-3 py-2 rounded-lg
+             text-sm font-medium
+             text-blue-700
+             cursor-pointer
+             transition
+             hover:bg-blue-50"
+      [class.bg-blue-100]="currentUrl === '/about'"
+      [class.text-blue-900]="currentUrl === '/about'"
+      [class.font-semibold]="currentUrl === '/about'">
+      <i class="fa-solid fa-circle-info w-4"></i>
+      About
+    </li>
+
+    <!-- Profile -->
+    <li
+      routerLink="/profile"
+      class="flex items-center gap-3
+             px-3 py-2 rounded-lg
+             text-sm font-medium
+             text-blue-700
+             cursor-pointer
+             transition
+             hover:bg-blue-50"
+      [class.bg-blue-100]="currentUrl === '/profile'"
+      [class.text-blue-900]="currentUrl === '/profile'"
+      [class.font-semibold]="currentUrl === '/profile'">
+      <i class="fa-solid fa-user w-4"></i>
+      Profile
+    </li>
+
+  </ul>
+
+  <!-- Footer -->
+  <div class="px-4 py-3 border-t border-blue-100 text-xs text-blue-500">
+    © 2026 DocHub
+  </div>
+
 </div>

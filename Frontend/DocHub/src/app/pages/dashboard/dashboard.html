@@ -8,11 +8,16 @@
       <app-stats-card [title]="'others'" [count]="4" [bg]="'bg-white'"></app-stats-card>
     </div>
     <br />
-    <app-quick-access-section [title]="'Recently searched'"></app-quick-access-section>
+    <app-storage-usage [totalStorageGB]="totalStorageGB" [usedStorage]="storageData">
+    </app-storage-usage>
     <br />
-    <app-card-section [title]="'Favorites'" [multiselect]="false"></app-card-section>
+    <app-quick-access-section [title]="'Recently Uploaded'"></app-quick-access-section>
     <br />
-    <app-card-section [title]="'Recently Uploaded'"></app-card-section>
-
+    <app-card-section
+      [title]="'Favorites'"
+      [multiselect]="false"
+      [files]="files"
+    ></app-card-section>
+    <br />
   </div>
 </div>

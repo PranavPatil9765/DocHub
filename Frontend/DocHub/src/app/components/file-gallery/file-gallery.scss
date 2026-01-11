@@ -12,3 +12,10 @@
 .animate-slide-up {
   animation: slideUp 0.25s ease-out;
 }
+.scrollbar-none {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,198 @@
+<!-- Floating + Button -->
+<!-- Drag Overlay -->
+@if (isDragging && mode !== 'edit') {
+<div
+  class="fixed inset-0 z-[60] bg-blue-600/30 backdrop-blur-sm flex items-center justify-center pointer-events-none"
+>
+  <div
+    class="bg-white rounded-2xl border-2 border-dashed border-blue-500 px-10 py-8 text-center shadow-2xl"
+  >
+    <div class="text-5xl mb-3">📂</div>
+
+    <h3 class="text-lg font-semibold text-blue-700">Drop file to upload</h3>
+
+    <p class="text-sm text-blue-500 mt-1">Release your mouse to continue</p>
+  </div>
+</div>
+} @if (mode !== 'edit') {
+<button
+  (click)="open()"
+  class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700 active:scale-95 transition"
+>
+  <span class="text-lg leading-none">+</span>
+  Add
+</button>
+}
+
+<!-- Overlay -->
+@if (isOpen) {
+<div class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+  <!-- Popover -->
+  <div
+    class="w-[420px] max-w-full bg-white rounded-2xl shadow-2xl border border-blue-100 p-6 space-y-4"
+  >
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <h3 class="text-lg font-semibold text-blue-700">
+        {{ mode === 'edit' ? 'Edit File' : 'Upload File' }}
+      </h3>
+
+      <button class="text-gray-400 hover:text-red-500" (click)="close()">✕</button>
+    </div>
+
+    <!-- ================= STEP 1 ================= -->
+    @if (step === 1 && mode !== 'edit') {
+    <div class="animate-step-in">
+      <label
+        class="flex flex-col items-center justify-center border-2 border-dashed border-blue-300 rounded-xl p-8 cursor-pointer hover:bg-blue-50 transition"
+      >
+        <span class="text-blue-600 text-4xl mb-2">⬆️</span>
+        <span class="text-sm text-gray-600"> Click to upload file </span>
+
+        <input type="file" class="hidden" (change)="onFileSelected($event)" />
+      </label>
+    </div>
+    }
+
+    <!-- ================= STEP 2 ================= -->
+    @if (step === 2) {
+    <div class="animate-step-in space-y-4">
+      <!-- Preview -->
+      <div
+        class="w-full h-40 rounded-xl border flex items-center justify-center bg-blue-50 text-blue-700"
+      >
+        @if (fileType === 'image') {
+        <img [src]="previewUrl" class="w-full h-full object-contain rounded-xl" />
+        } @else if (fileType === 'pdf') {
+        <iframe [src]="previewUrl" class="w-full h-full rounded-xl"></iframe>
+        } @else if (fileType === 'doc') {
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">📄</span>
+          <span class="mt-2 font-medium">Word Document</span>
+        </div>
+        } @else if (fileType === 'ppt') {
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">📊</span>
+          <span class="mt-2 font-medium">PowerPoint</span>
+        </div>
+        } @else if (fileType === 'xls') {
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">📈</span>
+          <span class="mt-2 font-medium">Excel Sheet</span>
+        </div>
+        } @else {
+        <div class="flex flex-col items-center">
+          <span class="text-5xl">📁</span>
+          <span class="mt-2 font-medium">File</span>
+        </div>
+        }
+      </div>
+
+      <!-- Title -->
+      <input
+        type="text"
+        placeholder="Title"
+        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+        [(ngModel)]="title"
+      />
+
+      <!-- Description -->
+      <textarea
+        rows="2"
+        placeholder="Description (optional)"
+        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+        [(ngModel)]="description"
+      ></textarea>
+
+      <!-- Tags -->
+      <div class="border-2 border-blue-200 rounded-xl p-4 bg-blue-50 space-y-3">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-semibold text-blue-800">
+            Tags <span class="text-blue-500">(required)</span>
+          </h4>
+
+          <span class="text-xs text-blue-500"> Helps smart search & organization </span>
+        </div>
+
+        <!-- Loader -->
+        @if (isTagsLoading) {
+        <div class="space-y-2">
+          <div class="h-6 w-24 bg-blue-200 rounded-full animate-pulse"></div>
+          <div class="h-6 w-32 bg-blue-200 rounded-full animate-pulse"></div>
+          <div class="h-6 w-20 bg-blue-200 rounded-full animate-pulse"></div>
+        </div>
+        }
+
+        <!-- Tags Display -->
+        @else {
+       <!-- Tags Display (Scrollable) -->
+<div
+  class="flex gap-2 flex-wrap
+         min-h-[40px]
+         max-h-[120px]
+         overflow-y-auto
+         pr-1
+         scrollbar-thin
+         scrollbar-thumb-blue-300
+         scrollbar-track-transparent"
+>
+  @if (tags.length === 0) {
+    <span class="text-sm text-blue-500 italic">
+      No tags added yet
+    </span>
+  }
+
+  @for (tag of tags; track tag) {
+    <span
+      class="flex items-center gap-2
+             bg-blue-600 text-white
+             px-3 py-1.5
+             rounded-full text-sm
+             shadow-sm"
+    >
+      {{ tag }}
+
+      <button
+        class="text-white/80 hover:text-red-300 transition"
+        (click)="removeTag(tag)">
+        ✕
+      </button>
+    </span>
+  }
+</div>
+
+        }
+
+        <!-- Input -->
+        <div class="flex gap-2">
+          <input
+            type="text"
+            placeholder="Add tag (e.g. invoice, resume, project)"
+            class="flex-1 border-2 border-blue-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+            [(ngModel)]="tagInput"
+            (keyup.enter)="addTag()"
+          />
+
+          <button
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            (click)="addTag()"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button
+        class="w-full py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 transition"
+        [disabled]="!canUpload()"
+        (click)="submit()"
+      >
+        {{ mode === 'edit' ? 'Update' : 'Upload' }}
+      </button>
+    </div>
+    }
+  </div>
+</div>
+}

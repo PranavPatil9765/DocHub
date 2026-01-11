@@ -1,0 +1,77 @@
+<div class="bg-white rounded-xl shadow-sm border border-blue-100 p-6">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-blue-800">
+      Storage Usage
+    </h3>
+    <span class="text-sm text-blue-600 font-medium">
+      {{ usedGB }} GB / {{ totalStorageGB }} GB Used
+    </span>
+  </div>
+
+  <!-- Storage Bar Wrapper (NO overflow hidden) -->
+<div class="bg-white rounded-xl shadow-sm border border-blue-100 p-6 relative">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-blue-800">
+      Storage Usage
+    </h3>
+    <span class="text-sm text-blue-600 font-medium">
+      {{ usedGB }} GB / {{ totalStorageGB }} GB Used
+    </span>
+  </div>
+
+  <!-- Storage Bar -->
+  <div
+    class="w-full h-6 rounded-full bg-blue-100 flex overflow-hidden"
+    (mousemove)="onMouseMove($event)"
+  >
+
+    <!-- Used Segments -->
+    <ng-container *ngFor="let slice of usedStorage">
+      <div
+        class="h-full cursor-pointer transition hover:brightness-110"
+        [ngClass]="slice.color"
+        [style.width.%]="getPercentage(slice.sizeGB)"
+        (mouseenter)="onMouseEnter(slice)"
+        (mouseleave)="onMouseLeave()">
+      </div>
+    </ng-container>
+
+    <!-- Remaining -->
+    <div
+      class="h-full bg-gray-200 cursor-pointer"
+      [style.width.%]="getPercentage(remainingGB)"
+      (mouseenter)="onMouseEnter({ type: 'Free Space', sizeGB: remainingGB })"
+      (mouseleave)="onMouseLeave()">
+    </div>
+
+  </div>
+
+  <!-- FLOATING TOOLTIP -->
+  <div
+    *ngIf="hoveredSlice"
+    class="fixed z-50 pointer-events-none
+           bg-blue-700 text-white
+           text-xs font-medium
+           px-3 py-2
+           rounded-lg shadow-lg
+           transition-opacity duration-100"
+    [style.left.px]="tooltipX"
+    [style.top.px]="tooltipY"
+  >
+    📄 {{ hoveredSlice.type }} — {{ hoveredSlice.sizeGB }} GB
+  </div>
+
+</div>
+
+
+
+  <!-- Footer Hint -->
+  <p class="mt-4 text-sm text-blue-600">
+    Hover over the bar to see storage details
+  </p>
+
+</div>

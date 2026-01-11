@@ -1,91 +1,62 @@
 <div
-  class="h-[520px] overflow-y-auto max-w-full px-2 py-4"
+  class="h-[520px] overflow-y-auto max-w-full scrollbar-none py-4 pb-[96px]"
   (scroll)="onScroll($event)"
 >
 
   <!-- Grid -->
-  <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 pb-24">
-
+  <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
     @for (file of files; track file.id) {
       <app-file-priview-card
-        [fileId]="file.id"
-        [fileUrl]="file.url"
-        [fileName]="file.name"
-        [fileType]="file.type"
-        [fileSize]="file.size"
-        (selectionChange)="onFileSelectionChange($event)"
+        [multiselectActive]="!!selectedFileIds.size"
+        [file]="file"
         [clearSelection]="clearSelectedFields"
+        (selectionChange)="onFileSelectionChange($event)"
+        (addToCollection)="onAddToCollection($event)"
+        (edit)="onFileEdit($event)"
       >
       </app-file-priview-card>
     }
-
   </div>
 
-  <!-- Loading -->
+  <!-- Loading / Empty -->
   @if (loading) {
-    <div class="text-center py-4 text-gray-500">
+    <div class="text-center py-2 text-gray-500">
       Loading more files…
     </div>
   }
 
   @if (!loading && !hasMore && files.length > 0) {
-    <div class="text-center py-4 text-gray-400">
+    <div class="text-center py-2 text-gray-400">
       No more files
     </div>
   }
 
   @if (!loading && files.length === 0) {
-    <div class="text-center py-10 text-gray-400">
+    <div class="text-center py-2 text-gray-400">
       No files found
     </div>
   }
 </div>
 
-<!-- Bottom bar -->
-@if (selectedFileIds.size > 0) {
-<div class="absolute bottom-0 left-0 right-0 h-[80px]">
-  <div
-    class="h-full bg-white border-t
-           flex items-center justify-between px-6
-           transition-transform transition-opacity duration-300 ease-out"
-    [ngClass]="selectedFileIds.size > 0
-      ? 'translate-y-0 opacity-100'
-      : 'translate-y-full opacity-0 pointer-events-none'"
-  >
-    <span class="text-sm font-medium text-gray-600">
-      {{ selectedFileIds.size }} selected
-    </span>
-
-    <div class="flex gap-3">
-      <button
-        class="px-4 py-2 text-sm rounded-lg
-               text-gray-600 hover:bg-gray-100
-               active:scale-95 transition"
-        (click)="clearSelection()"
-      >
-        Clear
-      </button>
-
-      <button
-        class="px-4 py-2 text-sm rounded-lg
-               bg-blue-600 text-white hover:bg-blue-700
-               active:scale-95 transition"
-        (click)="downloadAllSelected()"
-      >
-        Download
-      </button>
-
-      <button
-        class="px-4 py-2 text-sm rounded-lg
-               bg-red-600 text-white hover:bg-red-700
-               active:scale-95 transition"
-        (click)="deleteAllSelected()"
-      >
-        Delete
-      </button>
-    </div>
-  </div>
-</div>
-
+<app-bottom-bar
+  [selectedCount]="selectedFileIds.size"
+  (clear)="clearSelection()"
+  (download)="downloadAllSelected()"
+  (delete)="deleteAllSelected()"
+>
+</app-bottom-bar>
+@if(showOverlay){
+  <app-add-collection
+  [collections]="collections"
+  mode="both"
+  (createCollection)="onCreate($event)"
+  (selectCollection)="onSelect($event)"
+  (close)="closeOverlay()">
+</app-add-collection>
 }
-
+<app-file-upload
+[mode]="'edit'"
+[editData]="editFile"
+[isOpen]="editFileOverlayOpen"
+(closeEdit)="closeEdit()"
+></app-file-upload>

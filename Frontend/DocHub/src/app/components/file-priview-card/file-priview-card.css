@@ -17,3 +17,13 @@
 .no-scrollbar {
   -ms-overflow-style: none;
 }
+iframe {
+  overflow: hidden !important;
+}
+iframe::-webkit-scrollbar {
+  display: none !important;
+}
+
+iframe {
+  scrollbar-width: none !important;
+}
