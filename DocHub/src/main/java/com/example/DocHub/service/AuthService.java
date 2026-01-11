@@ -2,6 +2,8 @@ package com.example.DocHub.service;
 
 import com.example.DocHub.dto.*;
 import com.example.DocHub.entity.User;
+import com.example.DocHub.exception.AppException;
+import com.example.DocHub.exception.AppException.BadRequestException;
 import com.example.DocHub.repository.UserRepository;
 import com.example.DocHub.security.JwtService;
 
@@ -20,10 +22,10 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JwtService jwtService;
 
-    public void register(RegisterRequest req){
+    public void register(RegisterRequest req) {
 
         if (repo.existsByEmail(req.email())) {
-            throw new IllegalArgumentException("Email already exists");
+            throw new BadRequestException("Email already exists");
         }
 
         User user = User.builder()
@@ -39,27 +41,31 @@ public class AuthService {
 
         System.out.println("🧪 Login attempt for: " + req.email());
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.email(), req.password())
-        );
+        User user = repo.findByEmail(req.email())
+                .orElseThrow(() -> new AppException.UnauthorizedException("Invalid email or password"));
 
-        String token = jwtService.generateToken(req.email());
+        if (!encoder.matches(req.password(), user.getPassword())) {
+            throw new AppException.UnauthorizedException("Invalid email or password");
+        }
 
-        System.out.println("✔ Login successful. Token: " + token);
+        String token = jwtService.generateToken(user.getEmail());
+
+        System.out.println("✔ Login successful");
 
         return new AuthResponse(token);
     }
+
     public void oauthUserLogin(String name, String email) {
 
-    if (!repo.existsByEmail(email)) {
-         User user = User.builder()
-                .email(email)
-                .password("OATH_PASS")
-                .fullName(name)
-                .build();
+        if (!repo.existsByEmail(email)) {
+            User user = User.builder()
+                    .email(email)
+                    .password("OATH_PASS")
+                    .fullName(name)
+                    .build();
 
-        repo.save(user);
+            repo.save(user);
+        }
     }
-}
 
 }

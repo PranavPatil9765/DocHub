@@ -5,55 +5,61 @@ import com.example.DocHub.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
 @Component
 @RequiredArgsConstructor
-public class JwtAuthFilter implements Filter {
+public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/auth")
+            || path.startsWith("/oauth2")
+            || path.startsWith("/login");
+    }
 
-        HttpServletRequest req = (HttpServletRequest) request;
-
-        // ⛔ IMPORTANT: Skip token check for login/register
-        if (req.getRequestURI().startsWith("/auth")) {
-            chain.doFilter(request, response);
-            return;
-        }
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest req,
+            HttpServletResponse res,
+            FilterChain chain
+    ) throws ServletException, IOException {
 
         String authHeader = req.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            chain.doFilter(request, response);
+            chain.doFilter(req, res);
             return;
         }
 
         String token = authHeader.substring(7);
         String email = jwtService.extractUsername(token);
-
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        System.out.println(SecurityContextHolder.getContext().getAuthentication());
+        if (email != null &&
+            SecurityContextHolder.getContext().getAuthentication() == null) {
 
             var userDetails = userDetailsService.loadUserByUsername(email);
 
             if (jwtService.isTokenValid(token, userDetails)) {
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        chain.doFilter(request, response);
+        chain.doFilter(req, res);
     }
 }

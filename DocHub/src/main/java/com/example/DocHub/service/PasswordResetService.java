@@ -4,9 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.example.DocHub.config.PasswordResetTokenUtil;
 import com.example.DocHub.entity.PasswordResetOtp;
+import com.example.DocHub.exception.AppException.*;
 import com.example.DocHub.repository.PasswordResetOtpRepository;
 import com.example.DocHub.repository.UserRepository;
 
@@ -31,7 +35,7 @@ public class PasswordResetService {
 
     if (!exists) {
         System.out.println(">>> STEP 3: Email not found, returning");
-        return;
+        throw new ResourceNotFoundException("Email not registered");
     }
 
     System.out.println(">>> STEP 4: Email found, generating OTP");
@@ -51,11 +55,11 @@ public class PasswordResetService {
         System.out.println(">>> STEP 6: Email sent successfully");
     } catch (Exception e) {
         System.out.println(">>> STEP 6 ERROR: Email sending failed");
-        e.printStackTrace();
+        throw new InternalServerError("Email service failed");
     }
 }
 
-public void verifyOtp(String email, String otp) {
+public String verifyOtp(String email, String otp) {
 
     PasswordResetOtp resetOtp = otpRepository
             .findByEmailAndOtp(email, otp)
@@ -77,6 +81,10 @@ public void verifyOtp(String email, String otp) {
     otpRepository.delete(resetOtp);
 
     System.out.println(">>> OTP verified and deleted successfully");
+
+    String resetToken = PasswordResetTokenUtil.generateResetToken(email);
+
+    return resetToken;
 }
 
 

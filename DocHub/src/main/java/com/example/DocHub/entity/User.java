@@ -1,5 +1,7 @@
 package com.example.DocHub.entity;
 
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,8 +14,9 @@ import lombok.*;
 @Table(name = "users")
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(unique = true)
     private String email;
@@ -21,4 +24,7 @@ public class User {
     private String password;
 
     private String fullName;
+
+    private Long storageUsedBytes = 0L;
+
 }
