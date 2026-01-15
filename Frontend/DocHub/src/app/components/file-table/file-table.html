@@ -52,7 +52,7 @@
           <td class="px-5 py-4 flex items-center gap-4">
             <div
               class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-              <img [src]="icon(file.type)" class="h-6 w-6" />
+              <img [src]="icon(file.file_type)" class="h-6 w-6" />
             </div>
 
             <span
@@ -64,12 +64,12 @@
 
           <!-- SIZE -->
           <td class="px-5 py-4 text-gray-600 font-medium">
-            {{ readableSize(file.size) }}
+            {{ readableSize(file.file_size) }}
           </td>
 
           <!-- DATE -->
           <td class="px-5 py-4 text-gray-600">
-            {{ file.uploadedAt | date: 'mediumDate' }}
+            {{ file.uploaded_at | date: 'mediumDate' }}
           </td>
 
           <!-- ACTIONS -->

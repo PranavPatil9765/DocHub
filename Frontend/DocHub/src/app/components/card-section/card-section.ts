@@ -1,7 +1,7 @@
 import { Component, Input, input } from '@angular/core';
 import { FilePriviewCard } from '../file-priview-card/file-priview-card';
 import { RouterModule } from "@angular/router";
-import { FileRow } from '../../models/file-row';
+import { FileRow } from '../../models/file.model';
 import { dummyFiles } from '../../constants/constants';
 
 @Component({

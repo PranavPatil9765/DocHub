@@ -1,6 +1,7 @@
 package com.example.DocHub.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -29,6 +30,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.sourceforge.tess4j.Tesseract;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.tika.Tika;
 
 @RestController
 @RequestMapping("/api/files/")
@@ -54,7 +58,7 @@ public class TagGenerationController {
             tempFile = Files.createTempFile("upload-", file.getOriginalFilename());
             Files.write(tempFile, file.getBytes());
 
-            String extractedText = extractText(file.getContentType(), tempFile);
+            String extractedText = extractText(tempFile);
 
             if (extractedText.length() < 30) {
                 return ResponseEntity.badRequest()
@@ -66,6 +70,9 @@ public class TagGenerationController {
 
             /* 3️⃣ Parse tags safely */
             List<String> tags = parseTags(rawResponse);
+            if (!tags.isEmpty()) {
+                tags = tags.subList(1, tags.size());
+            }
 
             return ResponseEntity.ok(new ApiResponse<List<String>>(true, "Tags Generated Successfully", tags));
 
@@ -75,31 +82,19 @@ public class TagGenerationController {
                     .body(Map.of("error", "Tag generation failed"));
         } finally {
             try {
-                if (tempFile != null) Files.deleteIfExists(tempFile);
-            } catch (IOException ignored) {}
+                if (tempFile != null)
+                    Files.deleteIfExists(tempFile);
+            } catch (IOException ignored) {
+            }
         }
     }
 
     /* -------------------- TEXT EXTRACTION -------------------- */
 
-    private String extractText(String mimeType, Path file) throws Exception {
-        if (mimeType == null) return "";
-
-        if ("application/pdf".equals(mimeType)) {
-            try (PDDocument doc = PDDocument.load(file.toFile())) {
-                return new PDFTextStripper().getText(doc).trim();
-            }
-        }
-
-        if (mimeType.startsWith("image/")) {
-            Tesseract tesseract = new Tesseract();
-            tesseract.setLanguage("eng");
-            return tesseract.doOCR(file.toFile()).trim();
-        }
-
-        throw new IllegalArgumentException("Unsupported file type");
+    public String extractText(Path file) throws Exception {
+        Tika tika = new Tika();
+        return tika.parseToString(file.toFile()).trim();
     }
-
     /* -------------------- GROQ API -------------------- */
 
     private String callGroq(String text) throws Exception {
@@ -116,16 +111,14 @@ public class TagGenerationController {
                         "role", "user",
                         "content",
                         """
-                        Extract 25–30 short, relevant tags from the text below.
-                        Return ONLY a valid JSON array of strings.
+                                Extract 25–30 short, relevant tags from the text below.
+                                Return ONLY a valid JSON array of strings.
 
-                        Text:
-                        %s
-                        """.formatted(text.substring(0, Math.min(2000, text.length())))
-                )),
+                                Text:
+                                %s
+                                """.formatted(text.substring(0, Math.min(2000, text.length()))))),
                 "max_tokens", 200,
-                "temperature", 0.3
-        );
+                "temperature", 0.3);
 
         String response = client.post()
                 .bodyValue(body)
@@ -143,25 +136,30 @@ public class TagGenerationController {
     /* -------------------- TAG PARSER (ROBUST) -------------------- */
 
     private List<String> parseTags(String raw) {
-        if (raw == null || raw.isBlank()) return List.of();
+        if (raw == null || raw.isBlank())
+            return List.of();
 
         String text = raw.replaceAll("```json|```", "").trim();
 
         /* 1️⃣ Try JSON directly */
         try {
             List<String> parsed = mapper.readValue(
-                    text, new TypeReference<List<String>>() {});
+                    text, new TypeReference<List<String>>() {
+                    });
             return clean(parsed);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         /* 2️⃣ Extract JSON array */
         Matcher m = Pattern.compile("\\[[\\s\\S]*?]").matcher(text);
         if (m.find()) {
             try {
                 List<String> parsed = mapper.readValue(
-                        m.group(), new TypeReference<List<String>>() {});
+                        m.group(), new TypeReference<List<String>>() {
+                        });
                 return clean(parsed);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         /* 3️⃣ Fallback split */
@@ -175,8 +173,8 @@ public class TagGenerationController {
     private List<String> clean(List<String> input) {
         return input.stream()
                 .map(t -> t.replaceAll("^[-*\\d.]+\\s*", "")
-                           .replaceAll("^['\"\\s]+|['\"\\s,]+$", "")
-                           .trim())
+                        .replaceAll("^['\"\\s]+|['\"\\s,]+$", "")
+                        .trim())
                 .filter(t -> t.length() > 2)
                 .distinct()
                 .limit(30)

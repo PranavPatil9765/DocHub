@@ -16,51 +16,40 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Optional;
 import java.util.UUID;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/files")
 public class FilePreviewController {
-    
+
     private final FileDownloadService fileDownloadService;
     private final FileRepository fileRepository;
+
     @GetMapping("/preview/{fileId}")
     public void previewFile(
             @PathVariable("fileId") UUID fileId,
             HttpServletResponse response
     ) {
         try {
-          FileEntity file = fileRepository
-        .findByIdAndUser_Id(fileId, UserUtil.getCurrentUser().getId())
-        .orElseThrow(()-> new AppException.ResourceNotFoundException ("File not found"));
+            FileEntity file = fileRepository.findById(fileId)
+                .orElseThrow(() ->
+                    new AppException.ResourceNotFoundException("File not found")
+                );
 
-             String telegramFileId = file.getTelegramFileId(); // ✅ THIS
-            System.out.println("fileId"+fileId);
-            // 1️⃣ Get Telegram file URL
+            String telegramFileId = file.getTelegramFileId();
             String fileUrl = fileDownloadService.getFileDownloadUrl(telegramFileId);
 
-            // 2️⃣ Extract filename
-            String filename = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+            // 🔥 Decide content-type ourselves (DO NOT trust URLConnection)
+            String contentType = resolveContentType(file.getName());
 
-            // 3️⃣ Detect content type
-            URL url = new URL(fileUrl);
-            URLConnection connection = url.openConnection();
-            String contentType = connection.getContentType();
-
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
-
-            // 4️⃣ Set headers for PREVIEW
             response.setContentType(contentType);
             response.setHeader(
-                    "Content-Disposition",
-                    "inline; filename=\"" + filename + "\""
+                "Content-Disposition",
+                "inline; filename=\"" + file.getName() + "\""
             );
             response.setHeader("Accept-Ranges", "bytes");
 
-            // 5️⃣ Stream file
-            try (InputStream in = connection.getInputStream()) {
+            URL url = new URL(fileUrl);
+            try (InputStream in = url.openStream()) {
                 in.transferTo(response.getOutputStream());
             }
 
@@ -69,5 +58,21 @@ public class FilePreviewController {
         } catch (Exception e) {
             throw new RuntimeException("File preview failed", e);
         }
+    }
+
+    // ✅ THIS IS THE KEY
+    private String resolveContentType(String filename) {
+        String ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+
+        return switch (ext) {
+            case "pdf" -> "application/pdf";
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "webp" -> "image/webp";
+            case "txt" -> "text/plain";
+            case "html" -> "text/html";
+            default -> "application/octet-stream"; // downloads (correct)
+        };
     }
 }

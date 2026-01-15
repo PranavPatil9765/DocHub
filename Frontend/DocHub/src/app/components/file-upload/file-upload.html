@@ -58,33 +58,25 @@
     @if (step === 2) {
     <div class="animate-step-in space-y-4">
       <!-- Preview -->
+      <!-- Preview -->
       <div
-        class="w-full h-40 rounded-xl border flex items-center justify-center bg-blue-50 text-blue-700"
+        class="w-full h-40 rounded-xl border flex flex-col items-center justify-center bg-blue-50 text-blue-700"
       >
-        @if (fileType === 'image') {
-        <img [src]="previewUrl" class="w-full h-full object-contain rounded-xl" />
-        } @else if (fileType === 'pdf') {
-        <iframe [src]="previewUrl" class="w-full h-full rounded-xl"></iframe>
-        } @else if (fileType === 'doc') {
-        <div class="flex flex-col items-center">
-          <span class="text-5xl">📄</span>
-          <span class="mt-2 font-medium">Word Document</span>
-        </div>
-        } @else if (fileType === 'ppt') {
-        <div class="flex flex-col items-center">
-          <span class="text-5xl">📊</span>
-          <span class="mt-2 font-medium">PowerPoint</span>
-        </div>
-        } @else if (fileType === 'xls') {
-        <div class="flex flex-col items-center">
-          <span class="text-5xl">📈</span>
-          <span class="mt-2 font-medium">Excel Sheet</span>
-        </div>
-        } @else {
-        <div class="flex flex-col items-center">
-          <span class="text-5xl">📁</span>
-          <span class="mt-2 font-medium">File</span>
-        </div>
+        <!-- Thumbnail preview -->
+        @if (previewUrl) {
+        <img
+          [src]="previewUrl"
+          class="w-full h-full object-contain rounded-xl"
+          alt="File preview"
+        />
+        }
+        <!-- Icon fallback -->
+        @else {
+        <i [class]="FILE_TYPE_ICON[fileType] + ' ' + FILE_TYPE_COLOR[fileType] + ' text-5xl'"></i>
+
+        <span class="mt-2 text-sm font-medium text-blue-700">
+          {{ fileTypeLabel }}
+        </span>
         }
       </div>
 
@@ -126,41 +118,24 @@
 
         <!-- Tags Display -->
         @else {
-       <!-- Tags Display (Scrollable) -->
-<div
-  class="flex gap-2 flex-wrap
-         min-h-[40px]
-         max-h-[120px]
-         overflow-y-auto
-         pr-1
-         scrollbar-thin
-         scrollbar-thumb-blue-300
-         scrollbar-track-transparent"
->
-  @if (tags.length === 0) {
-    <span class="text-sm text-blue-500 italic">
-      No tags added yet
-    </span>
-  }
+        <!-- Tags Display (Scrollable) -->
+        <div
+          class="flex gap-2 flex-wrap min-h-[40px] max-h-[120px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent"
+        >
+          @if (tags.length === 0) {
+          <span class="text-sm text-blue-500 italic"> No tags added yet </span>
+          } @for (tag of tags; track tag) {
+          <span
+            class="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm shadow-sm"
+          >
+            {{ tag }}
 
-  @for (tag of tags; track tag) {
-    <span
-      class="flex items-center gap-2
-             bg-blue-600 text-white
-             px-3 py-1.5
-             rounded-full text-sm
-             shadow-sm"
-    >
-      {{ tag }}
-
-      <button
-        class="text-white/80 hover:text-red-300 transition"
-        (click)="removeTag(tag)">
-        ✕
-      </button>
-    </span>
-  }
-</div>
+            <button class="text-white/80 hover:text-red-300 transition" (click)="removeTag(tag)">
+              ✕
+            </button>
+          </span>
+          }
+        </div>
 
         }
 

@@ -4,7 +4,9 @@ import {
   AfterViewInit,
   ElementRef,
   ViewChild,
-  OnDestroy
+  OnDestroy,
+    OnChanges,
+  SimpleChanges
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -25,9 +27,10 @@ interface Bubble {
   templateUrl: './tag-cloud.html',
   styleUrls: ['./tag-cloud.scss']
 })
-export class TagCloudComponent implements AfterViewInit, OnDestroy {
+export class TagCloudComponent implements AfterViewInit, OnDestroy, OnChanges {
+  private viewReady = false;
 
-  @Input() tags: { label: string; count: number }[] = [];
+  @Input() tags: { tag: string; count: number }[] = [];
   @ViewChild('container', { static: true }) container!: ElementRef<HTMLDivElement>;
 
   bubbles: Bubble[] = [];
@@ -41,10 +44,23 @@ export class TagCloudComponent implements AfterViewInit, OnDestroy {
   // Visual buffer for borders + shadows
   readonly BUFFER = 6;
 
-  ngAfterViewInit() {
+ ngAfterViewInit() {
+  this.viewReady = true;
+
+  if (this.tags.length > 0) {
     this.initialize();
     this.animate();
   }
+}
+ngOnChanges(changes: SimpleChanges) {
+  if (!changes['tags'] || !this.viewReady) return;
+  if (!this.tags.length) return;
+
+  cancelAnimationFrame(this.animationId);
+
+  this.initialize();
+  this.animate();
+}
 
   initialize() {
     const rect = this.container.nativeElement.getBoundingClientRect();
@@ -57,7 +73,7 @@ export class TagCloudComponent implements AfterViewInit, OnDestroy {
       const radius = 22 + (tag.count / max) * 18;
 
       return {
-        label: tag.label,
+        label: tag.tag,
         count: tag.count,
         radius,
         x: Math.random() * (this.width - radius * 2) + radius,

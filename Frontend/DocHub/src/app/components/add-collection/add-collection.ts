@@ -2,26 +2,34 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ElaticSearchBar } from '../elatic-search-bar/elatic-search-bar';
+import { SpinnerComponent } from "../spinner/spinner";
+import { SearchSuggestion } from '../../models/file.model';
+import { CollectionModel } from '../../models/collection';
 
 @Component({
   selector: 'app-add-collection',
   standalone: true,
-  imports: [CommonModule, FormsModule, ElaticSearchBar],
+  imports: [CommonModule, FormsModule, ElaticSearchBar, SpinnerComponent],
   templateUrl: './add-collection.html',
   styleUrls: ['./add-collection.scss'],
 })
 export class AddCollectionComponent implements OnChanges {
 
   /* ---------------- Inputs ---------------- */
-  @Input() collections: any[] = [];
+  @Input() collections: CollectionModel[] = [];
   @Input() mode: 'create' | 'edit' | 'select' | 'both' = 'both';
   @Input() editingCollection: any | null = null;
+  @Input() loading: boolean = false;
+  @Input() suggestions: SearchSuggestion[] = [];
+  @Input() fileId: string="";
 
   /* ---------------- Outputs ---------------- */
   @Output() close = new EventEmitter<void>();
   @Output() createCollection = new EventEmitter<any>();
   @Output() updateCollection = new EventEmitter<any>();
-  @Output() selectCollection = new EventEmitter<any>();
+  @Output() selectCollection = new EventEmitter<{collection:CollectionModel,fileId:string}>();
+  @Output() search = new EventEmitter<string>();
+  @Output() searchSuggestion = new EventEmitter<string>();
 
   /* ---------------- Form State ---------------- */
   name = '';
@@ -71,6 +79,7 @@ export class AddCollectionComponent implements OnChanges {
       this.updateCollection.emit(payload);
     } else {
       this.createCollection.emit(payload);
+
     }
 
     this.reset();
@@ -78,7 +87,7 @@ export class AddCollectionComponent implements OnChanges {
 
   /* ---------------- Select ---------------- */
   select(col: any) {
-    this.selectCollection.emit(col);
+    this.selectCollection.emit({collection:col,fileId:this.fileId});
   }
 
   selectIcon(icon: string) {

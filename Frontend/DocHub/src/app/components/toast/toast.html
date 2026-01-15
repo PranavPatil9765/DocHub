@@ -1,0 +1,62 @@
+<div
+  *ngIf="toast$ | async as toast"
+  class="fixed top-6 right-6 z-[99999]
+         min-w-[320px] max-w-sm
+         flex items-start gap-3
+         px-5 py-4 rounded-2xl
+         shadow-2xl backdrop-blur-lg
+         text-white
+         transition-all duration-300 ease-out
+         animate-toast-in"
+  [class]="toastClass(toast.type)"
+>
+  <!-- Icon -->
+  <div class="mt-0.5">
+    <ng-container [ngSwitch]="toast.type">
+      <!-- Success -->
+      <svg *ngSwitchCase="'success'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+           viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M5 13l4 4L19 7"/>
+      </svg>
+
+      <!-- Error -->
+      <svg *ngSwitchCase="'error'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+           viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+
+      <!-- Info -->
+      <svg *ngSwitchCase="'info'" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"
+           viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+      </svg>
+    </ng-container>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1">
+    <p class="text-sm leading-relaxed">
+      {{ toast.message }}
+    </p>
+  </div>
+
+  <!-- Close -->
+  <button
+    class="ml-2 text-white/70 hover:text-white transition"
+    (click)="closeToast()"
+  >
+    ✕
+  </button>
+
+  <!-- Progress bar -->
+  <div
+    class="absolute bottom-0 left-0 h-[3px] w-full
+           bg-white/30 overflow-hidden rounded-b-2xl">
+    <div
+      class="h-full bg-white/80 animate-toast-progress">
+    </div>
+  </div>
+</div>

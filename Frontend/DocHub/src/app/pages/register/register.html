@@ -1,12 +1,12 @@
-<div class="min-h-screen register-body flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
-
+<div
+  class="min-h-screen register-body flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300"
+>
   <div
     class="backdrop-blur-md bg-white/30 shadow-xl border border-white/40 rounded-2xl p-10 w-full max-w-lg text-center"
   >
     <h2 class="text-3xl font-semibold text-gray-800 mb-6">Create Account</h2>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4 text-sm">
-
       <input
         formControlName="fullName"
         placeholder="Full Name"
@@ -28,11 +28,11 @@
 
       <button
         type="submit"
-        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white flex justify-center items-center font-semibold py-3 rounded-lg transition"
       >
-        Register
+        <app-spinner *ngIf="loading" size="sm"></app-spinner>
+        <span *ngIf="!loading">Register</span>
       </button>
-
     </form>
 
     <!-- Divider -->
@@ -43,24 +43,23 @@
     </div>
 
     <!-- Google Login -->
-     <div class="flex justify-evenly gap-2 items-center text-sm">
-    <button
-      class=" px-2 flex items-center justify-center gap-3 bg-white/70 hover:bg-white/90 text-gray-800 font-semibold py-3 rounded-lg  shadow transition"
-      (click)="auth.loginWithGoogle()"
+    <div class="flex justify-evenly gap-2 items-center text-sm">
+      <button
+        class="px-2 flex items-center justify-center gap-3 bg-white/70 hover:bg-white/90 text-gray-800 font-semibold py-3 rounded-lg shadow transition"
+        (click)="authService.loginWithGoogle()"
       >
-      <img src="assets/google.svg" class="w-5 h-5" />
-      Continue with Google
-    </button>
+        <img src="assets/google.svg" class="w-5 h-5" />
+        Continue with Google
+      </button>
 
-    <!-- GitHub Login -->
-    <button
-      class="px-2 flex items-center justify-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-lg shadow  transition"
-
-    >
-      <img src="assets/github.svg" class="w-5 h-5 invert" />
-      Continue with GitHub
-    </button>
-</div>
+      <!-- GitHub Login -->
+      <button
+        class="px-2 flex items-center justify-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-lg shadow transition"
+      >
+        <img src="assets/github.svg" class="w-5 h-5 invert" />
+        Continue with GitHub
+      </button>
+    </div>
     <a
       routerLink="/login"
       class="block mt-6 text-blue-800 font-medium hover:text-blue-900 transition"
@@ -73,7 +72,5 @@
     >
       Forgot Password
     </a>
-
   </div>
-
 </div>

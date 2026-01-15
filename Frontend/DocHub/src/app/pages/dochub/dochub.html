@@ -1,29 +1,38 @@
 <div class="main-container h-full w-full p-2">
   <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
-    <br>
-      <div class="search-filter-container grid md:grid-cols-3 gap-3">
-        <div class="md:col-span-2">
-          <app-elatic-search-bar></app-elatic-search-bar>
-        </div>
-        <div class="md:col-span-1">
-          <div class="flex gap-3 h-full justify-evenly">
-            <div class="w-3/4 h-full">
-              <app-dropdown
-                formControlName="sortby"
-                label="sortby"
-                [options]="sortby"
-                displayKey="name"
-                valueKey="id"
-              >
-              </app-dropdown>
-            </div>
-            <app-advanced-filter></app-advanced-filter>
+    <br />
+    <div class="search-filter-container grid md:grid-cols-3 gap-3">
+      <div class="md:col-span-2">
+        <app-elatic-search-bar
+          (searchSuggestion)="fetchFileSuggestions($event)"
+          (search)="onFileSearch($event)"
+          [suggestions]="FileSearchSuggestions"
+        ></app-elatic-search-bar>
+      </div>
+      <div class="md:col-span-1">
+        <div class="flex gap-3 h-full justify-evenly">
+          <div class="w-3/4 h-full">
+            <app-dropdown
+              class="w-56"
+              label="Sort by"
+              [options]="sortOptions"
+              displayKey="label"
+              valueKey="value"
+              (valueChange)="onSortChange($event)"
+            >
+            </app-dropdown>
           </div>
+          <app-advanced-filter
+            (applyFilters)="onApplyFilters($event)"
+            (clearFilters)="onClearFilters()"
+          >
+          </app-advanced-filter>
         </div>
       </div>
+    </div>
 
-      <br />
-      <!-- <app-file-table
+    <br />
+    <!-- <app-file-table
   [files]="files"
   [loading]="loading"
   [hasMore]="hasMore"
@@ -35,7 +44,7 @@
   (delete)="deleteFile($event)">
 </app-file-table> -->
 
-      <!-- <app-file-table
+    <!-- <app-file-table
   [files]="files"
   [loading]="loading"
   [hasMore]="hasMore"
@@ -44,12 +53,28 @@
   >
 </app-file-table> -->
 
-      <app-file-gallery
-        [files]="files"
-        [loading]="loading"
-        [hasMore]="hasMore"
-        (loadMore)="fetchNextPage()"
-      >
-      </app-file-gallery>
-    </div>
+    <app-file-gallery
+      [files]="files"
+      [loading]="loading"
+      [hasMore]="hasMore"
+      (loadMore)="fetchNextPage()"
+      (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
+    >
+    </app-file-gallery>
   </div>
+</div>
+@if(showAddtoCollectionOverlay){
+<app-add-collection
+  [collections]="collectionsToShow"
+  [fileId]="AddtoCollectionFileId"
+  (searchSuggestion)="onCollectionSearchSuggestion($event)"
+  (search)="onCollectionsearch($event)"
+  [suggestions]="CollectionSuggestion"
+  mode="both"
+  (createCollection)="onCreateCollection($event)"
+  (selectCollection)="onAddtoCollection($event)"
+  (close)="closeAddToCollectionOverlay()"
+  [loading]="loadingCollections"
+>
+</app-add-collection>
+}

@@ -12,7 +12,10 @@ import com.example.DocHub.dto.response.FileResponse;
 import com.example.DocHub.dto.response.StorageChart;
 import com.example.DocHub.dto.response.TagCountResponse;
 import com.example.DocHub.dto.response.UploadStatsResponse;
+import com.example.DocHub.dto.response.UserResponse;
+import com.example.DocHub.entity.User;
 import com.example.DocHub.service.AnalyticsService;
+import com.example.DocHub.utils.UserUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +27,16 @@ public class DashboardController {
     private final AnalyticsService service;
 
     /* 1️⃣ Analytics */
+     @GetMapping("/user")
+    public ApiResponse<UserResponse> getUser() {
+                User user = UserUtil.getCurrentUser();
+                UserResponse userresponse = new UserResponse(user.getEmail(),user.getFullName());
+        return new ApiResponse<UserResponse>(
+                true,
+                "User fetched successfully",
+                userresponse
+        );
+    }
     @GetMapping("/analytics")
     public ApiResponse<AnalyticsResponse> analytics() {
         return new ApiResponse<>(

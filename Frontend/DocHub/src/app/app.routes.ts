@@ -5,6 +5,7 @@ import { AuthLayout } from './layouts/auth-layout/auth-layout';
 import { MainLayout } from './layouts/main-layout/main-layout';
 
 export const routes: Routes = [
+   { path: '', redirectTo: 'login', pathMatch: 'full' },
   {
     path: '',
     component: AuthLayout,
@@ -39,7 +40,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayout,
-    // canActivate:[authGuard],
+    canActivate:[authGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent) },
       { path: 'dochub', loadComponent: () => import('./pages/dochub/dochub').then(m => m.Dochub) },
@@ -63,7 +64,7 @@ export const routes: Routes = [
 
     ]
   },
-  // { path: '', redirectTo: 'login' },
+  { path: '**', redirectTo: '/login' }
 
 
 ];

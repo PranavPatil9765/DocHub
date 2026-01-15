@@ -1,0 +1,54 @@
+.icon-wrapper {
+  position: relative;
+}
+
+.icon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  opacity: 0;
+  transform: scale(0.5) rotate(0deg);
+  animation: icon-cycle 3.6s infinite ease-in-out;
+}
+
+/* Stagger animations */
+.upload {
+  animation-delay: 0s;
+}
+
+.tag {
+  animation-delay: 1.2s;
+}
+
+.search {
+  animation-delay: 2.4s;
+}
+
+@keyframes icon-cycle {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(0deg);
+  }
+
+  20% {
+    opacity: 1;
+    transform: scale(1) rotate(360deg);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1) rotate(360deg);
+  }
+
+  60% {
+    opacity: 0;
+    transform: scale(0.5) rotate(720deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(720deg);
+  }
+}

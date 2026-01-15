@@ -45,7 +45,7 @@
 
     <!-- ================= USER COLLECTIONS ================= -->
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 py-2">
-      @for (col of collections; track col.id) {
+      @for (col of collections; track $index) {
         <app-collection-card
           [multiselect]="true"
           [collection]="col"
@@ -76,6 +76,8 @@
     [editingCollection]="editingCollection"
     (createCollection)="onCreate($event)"
     (selectCollection)="onSelect($event)"
+    (updateCollection)="onUpdate($event)"
     (close)="closeOverlay()">
   </app-add-collection>
 }
+<app-dochub-loader [show]="loading"></app-dochub-loader>

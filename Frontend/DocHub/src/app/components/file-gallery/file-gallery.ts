@@ -1,11 +1,15 @@
 import { collections, DefaultFile } from './../../constants/constants';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FilePriviewCard } from '../file-priview-card/file-priview-card';
 import { BottomBar } from '../bottom-bar/bottom-bar';
 import { AddCollectionComponent } from "../add-collection/add-collection";
 import { FileUploadComponent } from "../file-upload/file-upload";
-import { FileRow } from '../../models/file-row';
+import { FileRow } from '../../models/file.model';
+import { CollectionRequest } from '../../models/collectionRequest.model';
+import { CollectionService } from '../../services/collections.service';
+import { ToastService } from '../../services/toastService';
+import { finalize } from 'rxjs';
 @Component({
   selector: 'app-file-gallery',
   templateUrl: './file-gallery.html',
@@ -14,7 +18,6 @@ import { FileRow } from '../../models/file-row';
     CommonModule,
     FilePriviewCard,
     BottomBar,
-    AddCollectionComponent,
     FileUploadComponent
 ]
 })
@@ -25,12 +28,15 @@ export class FileGalleryComponent {
   @Input() hasMore = true;
   editFile:FileRow = DefaultFile
   @Output() loadMore = new EventEmitter<void>();
+  @Output() showAddCollectionOverlay = new EventEmitter<string>();
   editFileOverlayOpen = false;
   selectedFileId = ""
   selectedFileIds = new Set<string>();
   clearSelectedFields = false;
-  collections = collections
-
+  collectionLoading = false;
+  collectionService = inject(CollectionService)
+  cdr = inject(ChangeDetectorRef)
+  toast = inject(ToastService)
   onScroll(event: Event) {
     if (this.loading || !this.hasMore) return;
 
@@ -72,9 +78,9 @@ export class FileGalleryComponent {
     );
     console.log('Downloading:', selectedFiles);
   }
-  onAddToCollection(fileId:string){
+  onShowAddCollectionOverlay(fileId:string){
     this.selectedFileId=fileId
-    this.showOverlay=true;
+    this.showAddCollectionOverlay.emit(this.selectedFileId);
   }
 
   onFileEdit(e:FileRow){
@@ -87,10 +93,10 @@ export class FileGalleryComponent {
     this.editFileOverlayOpen = false;
   }
 
-showOverlay = false;
+
 
 /* ---------------- Create Collection ---------------- */
-onCreate(event: { name: string; description?: string }) {
+onCreate(event: CollectionRequest) {
   console.log('Create collection triggered:', event);
 
   const newCollection = {
@@ -104,7 +110,6 @@ onCreate(event: { name: string; description?: string }) {
 
   console.log('Updated collections list:', this.files);
 
-  this.closeOverlay();
 }
 
 /* ---------------- Select Existing Collection ---------------- */
@@ -114,12 +119,7 @@ onSelect(collection: any) {
   // Dummy action – later replace with API call
   // this.fileService.addToCollection(fileIds, collection.id)
 
-  this.closeOverlay();
 }
 
 /* ---------------- Close Overlay ---------------- */
-closeOverlay() {
-  console.log('Overlay closed');
-  this.showOverlay = false;
-}
 }

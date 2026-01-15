@@ -4,7 +4,10 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
-  OnDestroy
+  OnDestroy,
+  Input,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 
 import {
@@ -21,26 +24,25 @@ Chart.register(DoughnutController, ArcElement, Tooltip);
   standalone: true,
   templateUrl: './pie-chart.html',
   styleUrls: ['./pie-chart.scss'],
-  imports:[CommonModule]
+  imports: [CommonModule]
 })
-export class PieChartComponent implements AfterViewInit, OnDestroy {
+export class PieChartComponent
+  implements AfterViewInit, OnDestroy, OnChanges {
 
   @ViewChild('pieCanvas', { static: true })
   pieCanvas!: ElementRef<HTMLCanvasElement>;
 
+  @Input() chartData: {
+    file_type: string;
+    file_count: number;
+    storage_used: number;
+  }[] = [];
+
   chart!: Chart;
   highlightIndex = 0;
-  intervalId!: number;
+  intervalId?: number;
 
-  data = [
-    { type: 'PDF', size: 420 },
-    { type: 'Images', size: 310 },
-    { type: 'Docs', size: 180 },
-    { type: 'Videos', size: 720 },
-    { type: 'Archives', size: 90 }
-  ];
-
-  colors = [
+  readonly colors = [
     '#2563eb',
     '#3b82f6',
     '#60a5fa',
@@ -48,19 +50,50 @@ export class PieChartComponent implements AfterViewInit, OnDestroy {
     '#93c5fd'
   ];
 
+  /* ======================
+   * LIFECYCLE
+   * ====================== */
+
   ngAfterViewInit() {
+    if (this.chartData.length > 0) {
+      this.createChart();
+      this.startAutoLoop();
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes['chartData'] || !this.chartData.length) return;
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
+
     this.createChart();
     this.startAutoLoop();
   }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+
+    if (this.chart) {
+      this.chart.destroy();
+    }
+  }
+
+  /* ======================
+   * CHART LOGIC
+   * ====================== */
 
   createChart() {
     this.chart = new Chart(this.pieCanvas.nativeElement, {
       type: 'doughnut',
       data: {
-        labels: this.data.map(d => d.type),
+        labels: this.chartData.map(d => d.file_type),
         datasets: [
           {
-            data: this.data.map(d => d.size),
+            data: this.chartData.map(d => d.file_count),
             backgroundColor: this.colors,
             hoverOffset: 22,
             borderWidth: 0
@@ -84,7 +117,7 @@ export class PieChartComponent implements AfterViewInit, OnDestroy {
             titleColor: '#fff',
             bodyColor: '#e5e7eb',
             callbacks: {
-              label: ctx => `${ctx.label}: ${ctx.raw} MB`
+              label: ctx => `${ctx.label}: ${ctx.raw} files`
             }
           }
         }
@@ -93,6 +126,14 @@ export class PieChartComponent implements AfterViewInit, OnDestroy {
   }
 
   startAutoLoop() {
+    if (!this.chartData.length) return;
+
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+
+    this.highlightIndex = 0;
+
     this.intervalId = window.setInterval(() => {
       this.chart.setActiveElements([
         { datasetIndex: 0, index: this.highlightIndex }
@@ -100,11 +141,13 @@ export class PieChartComponent implements AfterViewInit, OnDestroy {
       this.chart.update();
 
       this.highlightIndex =
-        (this.highlightIndex + 1) % this.data.length;
+        (this.highlightIndex + 1) % this.chartData.length;
     }, 1800);
   }
 
   highlight(index: number) {
+    if (!this.chart) return;
+
     this.chart.setActiveElements([
       { datasetIndex: 0, index }
     ]);
@@ -112,16 +155,20 @@ export class PieChartComponent implements AfterViewInit, OnDestroy {
   }
 
   clearHighlight() {
+    if (!this.chart) return;
+
     this.chart.setActiveElements([]);
     this.chart.update();
   }
 
-  ngOnDestroy() {
-    clearInterval(this.intervalId);
-    this.chart.destroy();
-  }
+  /* ======================
+   * DERIVED DATA
+   * ====================== */
 
-  get totalSize(): number {
-    return this.data.reduce((a, b) => a + b.size, 0);
+  get totalFiles(): number {
+    return this.chartData.reduce(
+      (sum, item) => sum + item.file_count,
+      0
+    );
   }
 }

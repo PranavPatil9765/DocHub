@@ -1,62 +1,170 @@
-import { Component } from '@angular/core';
+import { FileSearchService } from './../../services/file-search.service';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FilePriviewCard } from '../../components/file-priview-card/file-priview-card';
 import { ElaticSearchBar } from '../../components/elatic-search-bar/elatic-search-bar';
 import { DropdownComponent } from '../../components/dropdown/dropdown';
-import { AdvancedFilterComponent } from "../../components/advanced-filter/advanced-filter";
-import { CardSection } from "../../components/card-section/card-section";
-import { FileRow } from '../../models/file-row';
+import { AdvancedFilterComponent } from '../../components/advanced-filter/advanced-filter';
+import { CardSection } from '../../components/card-section/card-section';
+import { FileRow, SearchSuggestion } from '../../models/file.model';
 import { FileTableComponent } from '../../components/file-table/file-table';
 import { FileGalleryComponent } from '../../components/file-gallery/file-gallery';
-import { FileUploadComponent } from "../../components/file-upload/file-upload";
+import { FileUploadComponent } from '../../components/file-upload/file-upload';
+import { FileSearchRequest } from '../../services/file-search.service';
+import { AddCollectionComponent } from '../../components/add-collection/add-collection';
+import { CollectionService } from '../../services/collections.service';
+import { finalize } from 'rxjs';
+import { CollectionRequest } from '../../models/collectionRequest.model';
+import { CollectionModel } from '../../models/collection';
+import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-dochub',
   templateUrl: './dochub.html',
   styleUrl: './dochub.css',
-  imports: [ElaticSearchBar, DropdownComponent, AdvancedFilterComponent, FileGalleryComponent]
+  imports: [
+    ElaticSearchBar,
+    DropdownComponent,
+    AdvancedFilterComponent,
+    FileGalleryComponent,
+    AddCollectionComponent,
+  ],
 })
 export class Dochub {
-  sortby = [
-  { id: 1, name: 'Size' },
-  { id: 2, name: 'Upload Date' },
-  { id: 3, name: 'Name' }
-];
-// form = new FormGroup({
-//   category: new FormControl(null)
-// });
+  sortOptions = [
+    { label: 'Name (A → Z)', value: { sortBy: 'NAME', sortDir: 'ASC' } },
+    { label: 'Name (Z → A)', value: { sortBy: 'NAME', sortDir: 'DESC' } },
 
+    { label: 'Size (Small → Large)', value: { sortBy: 'SIZE', sortDir: 'ASC' } },
+    { label: 'Size (Large → Small)', value: { sortBy: 'SIZE', sortDir: 'DESC' } },
 
-
-
+    { label: 'Upload Date (Newest)', value: { sortBy: 'UPLOADED_AT', sortDir: 'DESC' } },
+    { label: 'Upload Date (Oldest)', value: { sortBy: 'UPLOADED_AT', sortDir: 'ASC' } },
+  ];
+  // form = new FormGroup({
+  //   category: new FormControl(null)
+  // });
   files: FileRow[] = [];
   loading = false;
   hasMore = true;
+  showAddtoCollectionOverlay = false;
+  loadingCollections = false;
+  cursorTime: string | null = null;
+  cursorId: string | null = null;
+  collections: CollectionModel[] = [];
+  collectionsToShow:CollectionModel[]=[];
+  filters: FileSearchRequest = {};
+  FileSearchSuggestions: SearchSuggestion[] = [];
+  CollectionSuggestion: SearchSuggestion[]=[];
+  AddtoCollectionFileId!:string
+  constructor(
+    private FileSearchService: FileSearchService,
+    private cdr: ChangeDetectorRef,
+    private collectionService: CollectionService,
+    private toast: ToastService
+
+  ) {}
+
+  ngOnInit() {
+    this.fetchNextPage(true);
+    this.fetchCollections();
+  }
 
   private page = 0;
 
-  /* ---------- INITIAL LOAD ---------- */
-  ngOnInit() {
-    this.fetchNextPage();
-  }
-
   /* ---------- INFINITE SCROLL ---------- */
-  fetchNextPage() {
-    if (this.loading) return;
+  fetchNextPage(reset = false) {
+    if (this.loading || (!this.hasMore && !reset)) return;
+
+    if (reset) {
+      this.files = [];
+      this.cursorTime = null;
+      this.cursorId = null;
+      this.hasMore = true;
+    }
 
     this.loading = true;
 
-    setTimeout(() => {
-      const newFiles: FileRow[] = this.generateDummyFiles(this.page);
-      this.files = [...this.files, ...newFiles];
-
-      this.page++;
+    this.FileSearchService.searchFiles(
+      {
+        ...this.filters,
+        sortBy: this.sortBy,
+        sortDir: this.sortDir,
+      },
+      this.cursorTime,
+      this.cursorId
+    ).subscribe((res) => {
+      this.files = [...this.files, ...res.items];
+      this.hasMore = res.hasMore;
+      this.cursorTime = res.cursorTime;
+      this.cursorId = res.cursorId;
       this.loading = false;
+      this.cdr.detectChanges();
+    });
+  }
 
-      // Stop after 3 pages
-      if (this.page >= 3) {
-        this.hasMore = false;
-      }
-    }, 800); // simulate API delay
+  onApplyFilters(form: any) {
+    this.filters = {
+      minSize: form?.minSize ? form?.minSize : undefined,
+      maxSize: form?.maxSize ? form?.maxSize : undefined,
+      fileType: form?.fileType?.value ?? null,
+    };
+
+    this.fetchNextPage(true);
+  }
+
+  onClearFilters() {
+    this.filters = {};
+    this.fetchNextPage(true);
+  }
+
+  fetchFileSuggestions(query: string) {
+    this.FileSearchService.getSuggestions(query)
+      .pipe(
+        finalize(() => {
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.FileSearchSuggestions = Array.isArray(res) ? res.slice(0, 4) : [];
+        },
+        error: (err) => {
+          console.error('Suggestion fetch failed', err);
+          this.FileSearchSuggestions = [];
+        },
+      });
+  }
+
+  onFileSearch(query: string) {
+    this.filters = {
+      ...this.filters,
+      query,
+    };
+
+    this.fetchNextPage(true);
+  }
+
+  onScrollBottom() {
+    if (this.hasMore && !this.loading) {
+      this.fetchNextPage();
+    }
+  }
+
+  sortBy: 'NAME' | 'SIZE' | 'UPLOADED_AT' = 'UPLOADED_AT';
+  sortDir: 'ASC' | 'DESC' = 'DESC';
+
+  onSortChange(sort: { sortBy: 'NAME' | 'SIZE' | 'UPLOADED_AT'; sortDir: 'ASC' | 'DESC' }) {
+    this.sortBy = sort.sortBy;
+    this.sortDir = sort.sortDir;
+
+    // 🔥 FULL RESET
+    this.files = [];
+    this.cursorTime = null;
+    this.cursorId = null;
+    this.hasMore = true;
+
+    // 🔥 Reload from start
+    this.fetchNextPage(true);
   }
 
   /* ---------- ACTION HANDLERS ---------- */
@@ -80,99 +188,103 @@ export class Dochub {
     console.log('Delete', file);
   }
 
-  /* ---------- DUMMY GENERATOR ---------- */
-  private generateDummyFiles(page: number): FileRow[] {
-    const types = ['pdf', 'doc', 'xls', 'ppt', 'image'] as const;
-
-    return Array.from({ length: 12 }).map((_, i) => {
-      const type = types[(page * 3 + i) % types.length];
-
-      return {
-        id: `file-${page}-${i}`,
-        name: `Project_File_${page}_${i}.${type}`,
-        type,
-        description:"ewe",
-        url:"assets/Resume.pdf",
-tags: [
-  "invoice",
-  "receipt",
-  "bill",
-  "payment",
-  "finance",
-  "tax",
-  "gst",
-  "bank-statement",
-  "salary-slip",
-  "budget",
-
-  "resume",
-  "cv",
-  "offer-letter",
-  "appointment-letter",
-  "experience-letter",
-  "certificate",
-  "marksheet",
-  "transcript",
-  "id-proof",
-  "passport",
-
-  "project",
-  "proposal",
-  "report",
-  "presentation",
-  "ppt",
-  "research",
-  "analysis",
-  "documentation",
-  "requirements",
-  "design",
-
-  "contract",
-  "agreement",
-  "nda",
-  "legal",
-  "policy",
-  "compliance",
-  "terms",
-  "license",
-  "authorization",
-  "approval"
-],
-        size: 1024 * (i + 2),
-        isFavourite :false,
-        uploadedAt: new Date(
-          Date.now() - (page * 12 + i) * 86400000
-        )
-      };
-    });
+  private fetchCollections() {
+    this.loadingCollections = true;
+    this.collectionService
+      .getCollections()
+      .pipe(
+        finalize(() => {
+          this.loadingCollections = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.loadingCollections = false;
+          this.collections = Array.isArray(res?.data) ? res.data : [];
+          this.collectionsToShow = this.collections;
+        },
+        error: (err) => {
+          this.collections = [];
+        },
+      });
   }
 
+  onCreateCollection(event: CollectionRequest) {
+    const newCollection: CollectionRequest = {
+      name: event.name,
+      icon: event.icon || '📁',
+      description: event.description,
+      fileIds: [],
+    };
+    this.collectionService
+      .createCollection(newCollection)
+      .pipe(
+        finalize(() => {
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.fetchCollections();
+        },
+        error: (err) => {},
+      });
+  }
+  onShowAddCollectionOverlay(fileId: string) {
+    this.AddtoCollectionFileId = fileId;
+    this.showAddtoCollectionOverlay = true;
+  }
+  onAddtoCollection(e: {collection:CollectionModel,fileId:string}) {
+     if (e.collection.file_ids.includes(e.fileId)) {
+    // ℹ️ INFO TOAST
+    this.toast.info('File already exists in this collection');
+    return;
+  }
+   const toastId = this.toast.loading('Adding file');
+   const fileIds = e.collection.file_ids;
+   fileIds.push(e.fileId);
+     this.collectionService
+      .AddFilesInCollection(e.collection.id,{fileIds:fileIds})
+      .pipe(
+        finalize(() => {
 
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res) => {
+          this.toast.success("File Added to Collection")
+        },
+        error: (err) => {
+            this.toast.success("File Addition failed")
+        },
+      });
+  }
+  closeAddToCollectionOverlay() {
+    this.showAddtoCollectionOverlay = false;
+  }
 
-//   files: any[] = [];
-// page = 1;
-// pageSize = 9;
-// loading = false;
-// hasMore = true;
+ onCollectionSearchSuggestion(q: string) {
+  const query = q?.trim().toLowerCase();
 
-// loadFiles() {
-//   if (this.loading || !this.hasMore) return;
+  this.CollectionSuggestion = this.collections
+    .filter(col =>
+      col.name?.toLowerCase().includes(query)
+    )
+    .slice(0, 4)
+    .map(col => ({
+      id: col.id,
+      name: col.name,
+      icon:col.icon
+    }) as SearchSuggestion);
+}
+onCollectionsearch(q:string){
+  const query = q?.trim().toLowerCase();
 
-//   this.loading = true;
-
-//   // 🔹 Example API call
-//   this.fileService.getFiles(this.page, this.pageSize).subscribe({
-//     next: (res) => {
-//       this.files.push(...res.data);
-//       this.hasMore = res.data.length === this.pageSize;
-//       this.page++;
-//       this.loading = false;
-//     },
-//     error: () => {
-//       this.loading = false;
-//     },
-//   });
-// }
-
-
+  this.collectionsToShow = this.collections
+    .filter(col =>
+      col.name?.toLowerCase().includes(query)
+    )
+}
 }

@@ -60,8 +60,8 @@ public class FileUploadService {
             System.out.println("Content type:" + multipartFile.getContentType());
             String filename = multipartFile.getOriginalFilename();
 
-            if (filename != null && filename.toLowerCase().endsWith(".pdf")) {
-                thumbnailUrl = pdfThumbnailService.generate(tempFile);
+           if (filename != null) {
+                thumbnailUrl = pdfThumbnailService.generateThumbnail(tempFile, filename);
             }
 
             /* 4️⃣ Save metadata in DB */

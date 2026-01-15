@@ -57,10 +57,10 @@
               (click)="onPreview()">Preview</button>
 
       <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
-              (click)="onAddCollection()">Add to Collection</button>
+              (click)="onShowAddCollectionOverlay($event)">Add to Collection</button>
 
       <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
-              (click)="onEdit()">Edit</button>
+              (click)="onEdit($event)">Edit</button>
 
       <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
               (click)="onDownload()">Download</button>
@@ -71,31 +71,38 @@
   }
 
   <!-- Preview -->
-<div class="h-[100px] md:h-[150px] bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl">
+<!-- Preview -->
+<div
+  class="h-[100px] md:h-[150px]
+         bg-gray-100 flex items-center justify-center
+         overflow-hidden rounded-t-xl"
+>
+  <!-- Thumbnail -->
+  @if (file.thumbnail_link) {
+    <img
+      [src]="previewUrl"
+      alt="file preview"
+      class="object-cover w-full h-full"
+    />
+  }
+  <!-- Icon fallback -->
+  @else {
+    <div class="flex flex-col items-center justify-center">
+      <i
+        [class]="
+          FILE_TYPE_ICON[file.file_type] +
+          ' ' +
+          FILE_TYPE_COLOR[file.file_type] +
+          ' text-4xl'
+        "
+      ></i>
 
-    @if (isImage) {
-      <img
-        [src]="file.url"
-        alt="file preview"
-        class="object-cover w-full h-full"
-      />
-    }
-
-    @if (isPdf) {
-    <iframe
-    [src]="safeUrl"
-    class="w-full h-full scale-[1.3] pointer-events-none overflow-hidden"
-  ></iframe>
-
-    }
-
-    @else {
-      <div class="flex flex-col items-center text-gray-500">
-        📄
-        <span class="text-sm mt-1">No preview</span>
-      </div>
-    }
-  </div>
+      <span class="text-xs mt-1 text-gray-500">
+        {{ file.file_type }}
+      </span>
+    </div>
+  }
+</div>
 
   <!-- Info -->
   <div class="p-4 space-y-1">
@@ -104,8 +111,8 @@
     </p>
 
     <div class="text-sm text-gray-500 flex justify-between">
-      <span>{{ file.type }}</span>
-      <span>{{ file.size }}</span>
+      <span>{{ file.file_type }}</span>
+      <span>{{ file.file_size }}</span>
     </div>
   </div>
 

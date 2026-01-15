@@ -3,7 +3,7 @@
     <div class="w-full">
       <!-- ================= HEADER ================= -->
       <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-b-3xl shadow-lg">
-        <div class="max-w-6xl mx-auto py-10">
+        <div class="px-4 mx-auto py-10">
           <div class="flex items-center gap-6">
             <!-- Icon -->
             <div
@@ -29,20 +29,23 @@
       </div>
 
       <!-- ================= CONTENT ================= -->
-      <div class="max-w-6xl mx-auto py-8">
+      <div class=" mx-auto py-8">
         <div class="flex items-center gap-4">
           <div class="flex-1 max-w-3xl">
-            <app-elatic-search-bar></app-elatic-search-bar>
+<app-elatic-search-bar
+    [showSuggestionsEnabled]="false">
+</app-elatic-search-bar>
           </div>
 
           <div class="w-48">
-            <app-dropdown
-              label="Sort by"
-              [options]="sortby"
-              displayKey="name"
-              valueKey="id"
-            >
-            </app-dropdown>
+         <app-dropdown
+  label="Sort by"
+  [options]="sortby"
+  displayKey="name"
+  valueKey="id"
+  (valueChange)="onSortChange($event)">
+</app-dropdown>
+
           </div>
         </div>
         <br>
@@ -51,3 +54,4 @@
     </div>
   </div>
 </div>
+<app-dochub-loader [show]="isLoading"></app-dochub-loader>

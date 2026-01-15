@@ -1,18 +1,22 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../../services/user.service';
+import { DocHubLoaderComponent } from "../../components/dochub-loader/dochub-loader";
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DocHubLoaderComponent],
   templateUrl: './profile.html'
 })
 export class Profile {
 
-  username = 'Pranav';
-  email = 'pranav@example.com';
-
+  username = '';
+  email = '';
+  loading = false;
+    private userService = inject(UserService);
+    private cdr = inject(ChangeDetectorRef)
   passwordForm!: FormGroup;
 
   constructor(private fb: FormBuilder) {
@@ -24,6 +28,32 @@ export class Profile {
       },
       { validators: this.passwordMatchValidator }
     );
+  }
+
+    ngOnInit() {
+    this.loadUser();
+  }
+
+  private loadUser() {
+    this.loading = true;
+    this.userService.getUser().subscribe({
+      next: (user) => {
+        console.log(user);
+
+        this.username = user.data.user_name; // or user.name / user.fullName
+        this.email = user.data.email; // or user.name / user.fullName
+        this.loading=false;
+        this.cdr.detectChanges()
+      },
+      error: () => {
+        console.log("error");
+
+        this.username = '';
+
+        this.loading = false;
+        this.cdr.detectChanges()
+      }
+    });
   }
 
   passwordMatchValidator(form: FormGroup) {

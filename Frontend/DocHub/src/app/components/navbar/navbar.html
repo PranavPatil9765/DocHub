@@ -48,7 +48,11 @@
              text-blue-700 font-semibold"
     >
       <span class="text-lg color-blue-300">👤</span>
-      <span class="hidden sm:block">{{ username }}</span>
+      @if(loading){
+        <app-spinner [size]="'sm'"></app-spinner>
+      }@else{
+        <span class="hidden sm:block">{{ username }}</span>
+      }
       <span class="text-xs">▾</span>
     </button>
 

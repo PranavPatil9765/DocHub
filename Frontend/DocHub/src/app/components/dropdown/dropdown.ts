@@ -28,7 +28,10 @@ export class DropdownComponent implements ControlValueAccessor {
   @Input() label = 'Select';
   @Input() options: any[] = [];
   @Input() displayKey = 'label';
-  @Input() valueKey = 'value';
+
+  // 🔥 valueKey MUST be optional
+  @Input() valueKey?: string;
+
   @Input() checkbox = false;
 
   @Output() valueChange = new EventEmitter<any>();
@@ -51,31 +54,34 @@ export class DropdownComponent implements ControlValueAccessor {
     this.isOpen = !this.isOpen;
   }
 
-  /** SINGLE SELECT */
+  /* =======================
+     SINGLE SELECT
+     ======================= */
   select(option: any) {
     if (this.disabled || this.checkbox) return;
 
     this.selected = option;
     this.isOpen = false;
 
-    const value = option[this.valueKey];
+    const value = this.valueKey ? option[this.valueKey] : option;
+
     this.onChange(value);
     this.onTouched();
     this.valueChange.emit(value);
   }
 
-  /** MULTI SELECT */
+  /* =======================
+     MULTI SELECT
+     ======================= */
   toggleCheckbox(option: any, event: Event) {
     event.stopPropagation();
 
-    const value = option[this.valueKey];
+    const value = this.valueKey ? option[this.valueKey] : option;
     const index = this.selectedValues.indexOf(value);
 
-    if (index === -1) {
-      this.selectedValues.push(value);
-    } else {
-      this.selectedValues.splice(index, 1);
-    }
+    index === -1
+      ? this.selectedValues.push(value)
+      : this.selectedValues.splice(index, 1);
 
     this.onChange([...this.selectedValues]);
     this.onTouched();
@@ -83,7 +89,8 @@ export class DropdownComponent implements ControlValueAccessor {
   }
 
   isChecked(option: any): boolean {
-    return this.selectedValues.includes(option[this.valueKey]);
+    const value = this.valueKey ? option[this.valueKey] : option;
+    return this.selectedValues.includes(value);
   }
 
   clear(event: MouseEvent) {
@@ -98,13 +105,16 @@ export class DropdownComponent implements ControlValueAccessor {
     this.cleared.emit();
   }
 
-  /** CVA */
+  /* =======================
+     CVA IMPLEMENTATION
+     ======================= */
   writeValue(value: any): void {
     if (this.checkbox) {
       this.selectedValues = Array.isArray(value) ? value : [];
     } else {
-      this.selected =
-        this.options.find(opt => opt[this.valueKey] === value) || null;
+      this.selected = this.valueKey
+        ? this.options.find(opt => opt[this.valueKey!] === value) || null
+        : value; // 🔥 value-first support
     }
   }
 
@@ -120,7 +130,9 @@ export class DropdownComponent implements ControlValueAccessor {
     this.disabled = isDisabled;
   }
 
-  /** Click outside */
+  /* =======================
+     CLICK OUTSIDE
+     ======================= */
   @HostListener('document:click', ['$event'])
   close(event: Event) {
     const target = event.target as HTMLElement;

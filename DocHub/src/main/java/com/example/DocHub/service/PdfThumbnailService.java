@@ -16,48 +16,101 @@ import java.util.UUID;
 @Service
 public class PdfThumbnailService {
 
-    private static final int DPI = 130; // balance: quality + speed
+    private static final int DPI = 130;
 
-    public String generate(File pdfFile) throws Exception {
+    private static final String THUMBNAIL_DIR =
+            System.getProperty("user.dir") + "/thumbnails";
 
-        // Ensure folder
-        File dir = new File("thumbnails");
-        if (!dir.exists()) dir.mkdirs();
+    public String generateThumbnail(File file, String originalName) throws Exception {
 
-        File output = new File(dir, UUID.randomUUID() + ".jpg");
+        String lower = originalName.toLowerCase();
+
+        if (lower.endsWith(".pdf")) {
+            return generatePdfThumbnail(file);
+        }
+
+        if (lower.endsWith(".png")
+                || lower.endsWith(".jpg")
+                || lower.endsWith(".jpeg")
+                || lower.endsWith(".webp")) {
+            return generateImageThumbnail(file);
+        }
+
+        return null; // other file types
+    }
+
+    /* ---------------- PDF ---------------- */
+
+    private String generatePdfThumbnail(File pdfFile) throws Exception {
+
+        File output = prepareOutput();
 
         try (PDDocument document = PDDocument.load(pdfFile)) {
 
             PDFRenderer renderer = new PDFRenderer(document);
 
-            // 1️⃣ Render first page
             BufferedImage image = renderer.renderImageWithDPI(
-                    0,
-                    DPI,
-                    ImageType.RGB
+                    0, DPI, ImageType.RGB
             );
 
-            // 2️⃣ Crop margins (remove viewer UI whitespace)
             BufferedImage cropped = cropMargins(image);
-            BufferedImage Topcropped = cropTopOnly(cropped);
-            // 3️⃣ Compress & save
-            writeCompressedJpeg(Topcropped, output, 0.65f);
+            BufferedImage topCropped = cropTopOnly(cropped);
+
+            writeCompressedJpeg(topCropped, output, 0.65f);
         }
 
         return "/thumbnails/" + output.getName();
     }
 
-    /**
-     * Removes top/bottom/side white margins
-     */
-    private BufferedImage cropMargins(BufferedImage src) {
+    /* ---------------- IMAGE ---------------- */
+
+    private String generateImageThumbnail(File imageFile) throws Exception {
+
+        File output = prepareOutput();
+
+        BufferedImage image = ImageIO.read(imageFile);
+        if (image == null) return null;
+
+        BufferedImage resized = resize(image, 400);
+
+        writeCompressedJpeg(resized, output, 0.7f);
+
+        return "/thumbnails/" + output.getName();
+    }
+
+    /* ---------------- HELPERS ---------------- */
+
+    private File prepareOutput() {
+        File dir = new File(THUMBNAIL_DIR);
+        if (!dir.exists()) dir.mkdirs();
+        return new File(dir, UUID.randomUUID() + ".jpg");
+    }
+
+    private BufferedImage resize(BufferedImage src, int targetWidth) {
 
         int width = src.getWidth();
         int height = src.getHeight();
 
-        int cropTop = (int) (height * 0.05);   // 5% top
+        int targetHeight = (targetWidth * height) / width;
+
+        BufferedImage resized =
+                new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+
+        resized.getGraphics().drawImage(
+                src.getScaledInstance(targetWidth, targetHeight, java.awt.Image.SCALE_SMOOTH),
+                0, 0, null
+        );
+
+        return resized;
+    }
+
+    private BufferedImage cropMargins(BufferedImage src) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+
+        int cropTop = (int) (height * 0.05);
         int cropBottom = (int) (height * 0.05);
-        int cropSides = (int) (width * 0.04);  // 4% left/right
+        int cropSides = (int) (width * 0.04);
 
         return src.getSubimage(
                 cropSides,
@@ -66,35 +119,24 @@ public class PdfThumbnailService {
                 height - (cropTop + cropBottom)
         );
     }
+
     private BufferedImage cropTopOnly(BufferedImage src) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+        int topHeight = (int) (height * 0.45);
 
-    int width = src.getWidth();
-    int height = src.getHeight();
+        return src.getSubimage(0, 0, width, topHeight);
+    }
 
-    int topHeight = (int) (height * 0.45); // top 30% of page
-
-    return src.getSubimage(
-            0,              // x
-            0,              // y (top)
-            width,          // full width
-            topHeight       // only top part
-    );
-}
-
-
-    /**
-     * High-compression JPEG (same idea as Sharp in Node)
-     */
     private void writeCompressedJpeg(
             BufferedImage image,
             File output,
             float quality
     ) throws Exception {
 
-        Iterator<ImageWriter> writers =
-                ImageIO.getImageWritersByFormatName("jpg");
-
-        ImageWriter writer = writers.next();
+        ImageWriter writer = ImageIO
+                .getImageWritersByFormatName("jpg")
+                .next();
 
         ImageWriteParam param = writer.getDefaultWriteParam();
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);

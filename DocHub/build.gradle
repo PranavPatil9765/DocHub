@@ -68,6 +68,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0"
 implementation 'org.apache.pdfbox:pdfbox:2.0.30'
+  // Word DOC (97–2003)
+  /* 📄 PDF text extraction */
+
+/* 🧠 Apache Tika – universal text extraction */
+implementation 'org.apache.tika:tika-core:2.9.2'
+implementation 'org.apache.tika:tika-parsers-standard-package:2.9.2'
+
+/* 🖼 OCR (Tesseract) */
+
 
 }
 

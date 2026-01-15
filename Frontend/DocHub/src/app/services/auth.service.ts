@@ -2,6 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
+import { loginReq, registerReq } from '../models/request';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,7 @@ export class AuthService {
   http = inject(HttpClient);
   router = inject(Router);
 
-  private api = 'http://localhost:8080/auth'; // change to actual API
+  private api = `${environment.apiBaseUrl}/auth`;
 
   get token() {
     return localStorage.getItem('token');
@@ -20,13 +22,13 @@ export class AuthService {
     return !!this.token;
   }
 
-  login(data: any) {
+  login(data: loginReq) {
     return this.http.post(`${this.api}/login`, data).pipe(
       tap((res: any) => localStorage.setItem('token', res.token))
     );
   }
 
-  register(data: any) {
+  register(data: registerReq) {
     return this.http.post(`${this.api}/register`, data);
   }
 

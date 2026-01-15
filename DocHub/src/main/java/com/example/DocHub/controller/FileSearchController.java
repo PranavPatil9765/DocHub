@@ -50,7 +50,7 @@ public class FileSearchController {
 
         @GetMapping("/search/suggestions")
         public ResponseEntity<?> searchSuggestions(
-                        @RequestParam String q) {
+                        @RequestParam("q") String q) {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
                 CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();

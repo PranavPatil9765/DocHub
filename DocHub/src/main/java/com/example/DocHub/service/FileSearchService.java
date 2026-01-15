@@ -34,10 +34,12 @@ public ScrollResponse<FileResponse> search(
         int limit
 ) {
 
+    Sort sort = buildSort(req);
+
     Pageable pageable = PageRequest.of(
             0,
             limit + 1,
-            Sort.unsorted()
+            sort
     );
 
     List<FileEntity> data = repository.searchFiles(
@@ -75,16 +77,17 @@ public ScrollResponse<FileResponse> search(
 
 private Sort buildSort(FileSearchRequest req) {
 
-        Sort.Direction dir = req.getSortDir() == SortDirection.ASC
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-    
-        return switch (req.getSortBy()) {
-            case SIZE -> Sort.by(dir, "fileSize");
-            case NAME -> Sort.by(dir, "name");
-            case UPLOADED_AT -> Sort.by(dir, "uploadedAt");
-        };
-    }
+    Sort.Direction dir = req.getSortDir() == SortDirection.ASC
+            ? Sort.Direction.ASC
+            : Sort.Direction.DESC;
+
+    return switch (req.getSortBy()) {
+        case SIZE -> Sort.by(dir, "file_size");
+        case NAME -> Sort.by(dir, "name");
+        case UPLOADED_AT -> Sort.by(dir, "uploaded_at");
+    };
+}
+
     public List<FileSuggestions> getSuggestions(UUID userId, String query) {
 
         if (query == null || query.trim().length() < 2) {
@@ -93,6 +96,7 @@ private Sort buildSort(FileSearchRequest req) {
     
         return repository.searchSuggestions(userId, query)
                 .stream()
+                .limit(4)
                 .map(f -> new FileSuggestions(
                         f.getId(),
                         f.getName(),

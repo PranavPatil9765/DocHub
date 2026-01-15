@@ -1,0 +1,59 @@
+<div
+  *ngIf="show"
+  class="fixed top-0 bottom-0 right-0
+         z-[25]
+         flex items-center justify-center
+         bg-black/40 backdrop-blur-sm
+         transition-all duration-300"
+  [class.left-0]="isMobile"
+  [class.left-[256px]]="!isMobile"
+>
+
+  <!-- Loader Card -->
+  <div
+    class="relative bg-white/10 backdrop-blur-xl
+           rounded-2xl px-10 py-8
+           flex flex-col items-center gap-6
+           shadow-2xl
+           border border-blue-400/30
+           overflow-hidden"
+  >
+
+    <!-- Soft blue glow -->
+    <div
+      class="absolute inset-0
+             bg-gradient-to-br
+             from-blue-500/15 via-transparent to-blue-600/15
+             pointer-events-none"
+    ></div>
+
+    <!-- Animated Icons -->
+    <div class="relative w-16 h-16 icon-wrapper z-10">
+
+      <!-- Upload -->
+      <svg class="icon upload text-blue-400" viewBox="0 0 24 24">
+        <path d="M5 20h14v-2H5v2zm7-18l-5.5 6h4v6h3v-6h4L12 2z"/>
+      </svg>
+
+      <!-- Tag -->
+      <svg class="icon tag text-blue-500" viewBox="0 0 24 24">
+        <path d="M20.59 13.41L11 3.83V3h-2v1.83l9.59 9.58-6.59 6.59L2 11.41V4h7.41l9.59 9.59-1.41 1.41z"/>
+      </svg>
+
+      <!-- Search -->
+      <svg class="icon search text-blue-300" viewBox="0 0 24 24">
+        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5
+                 6.5 6.5 0 109.5 16c1.61 0 3.09-.59
+                 4.23-1.57l.27.28v.79l5 4.99
+                 L20.49 19l-4.99-5z"/>
+      </svg>
+
+    </div>
+
+    <!-- Text -->
+    <p class="text-blue-100/90 text-sm tracking-wide z-10">
+      Processing your documents…
+    </p>
+
+  </div>
+</div>

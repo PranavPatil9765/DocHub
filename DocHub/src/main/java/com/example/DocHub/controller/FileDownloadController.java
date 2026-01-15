@@ -5,12 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.DocHub.dto.request.DownloadRequest;
+import com.example.DocHub.entity.FileEntity;
+import com.example.DocHub.exception.AppException;
+import com.example.DocHub.repository.FileRepository;
 import com.example.DocHub.service.FileDownloadService;
 import com.example.DocHub.service.TelegramService;
+import com.example.DocHub.utils.UserUtil;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -20,7 +26,7 @@ import java.util.zip.ZipOutputStream;
 public class FileDownloadController {
 
     private final FileDownloadService fileDownloadService;
-
+    private final FileRepository fileRepository;
     @PostMapping("/download")
     public void downloadMultipleFiles(
             @RequestBody DownloadRequest request,
@@ -61,12 +67,15 @@ public class FileDownloadController {
 
      @GetMapping("/download/{fileId}")
     public void downloadSingleFile(
-            @PathVariable String fileId,
+            @PathVariable("fileId") UUID fileId,
             HttpServletResponse response
     ) {
         try {
             // 1️⃣ Get Telegram download URL
-            String fileUrl = fileDownloadService.getFileDownloadUrl(fileId);
+              FileEntity file = fileRepository
+            .findById(fileId)
+            .orElseThrow(()-> new AppException.ResourceNotFoundException ("File not found"));
+            String fileUrl = fileDownloadService.getFileDownloadUrl(file.getTelegramFileId());
 
             // 2️⃣ Extract filename from URL
             String filename = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);

@@ -2,22 +2,30 @@
   <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
     <br />
     <div class="stats-section grid grid-cols-2 md:grid-cols-4 gap-3">
-      <app-stats-card [title]="'Images'" [count]="4" [bg]="'bg-red-100'"></app-stats-card>
-      <app-stats-card [title]="'pdf'" [count]="4" [bg]="'bg-blue-100'"></app-stats-card>
-      <app-stats-card [title]="'doc'" [count]="4" [bg]="'bg-green-100'"></app-stats-card>
-      <app-stats-card [title]="'others'" [count]="4" [bg]="'bg-white'"></app-stats-card>
+       @for (card of statCards; track card.title) {
+    <app-stats-card
+      [title]="card.title"
+      [count]="card.count"
+      [bg]="card.bg">
+    </app-stats-card>
+  }
     </div>
     <br />
     <app-storage-usage [totalStorageGB]="totalStorageGB" [usedStorage]="storageData">
     </app-storage-usage>
     <br />
-    <app-quick-access-section [title]="'Recently Uploaded'"></app-quick-access-section>
+    <app-quick-access-section [title]="'Recently Uploaded'" [files]="recentFiles"></app-quick-access-section>
     <br />
+    <app-storage-line-chart
+  [data]="storagechart">
+</app-storage-line-chart>
+<br>
     <app-card-section
       [title]="'Favorites'"
       [multiselect]="false"
-      [files]="files"
+      [files]="favouritesFiles"
     ></app-card-section>
     <br />
   </div>
+  <app-dochub-loader [show]="loading"></app-dochub-loader>
 </div>

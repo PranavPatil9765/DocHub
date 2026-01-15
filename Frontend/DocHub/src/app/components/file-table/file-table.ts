@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FileRow } from '../../models/file-row';
+import { FileRow } from '../../models/file.model';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
 
 @Component({

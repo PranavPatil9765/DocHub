@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, Ou
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { FileRow } from '../../models/file-row';
+import { FILE_TYPE_COLOR, FILE_TYPE_ICON, FileRow, FileType } from '../../models/file.model';
 import { DefaultFile } from '../../constants/constants';
 
 @Component({
@@ -34,6 +34,16 @@ export class FileUploadComponent implements OnChanges {
   step: 1 | 2 = 1;
   isDragging = false;
 
+
+FILE_TYPE_ICON = FILE_TYPE_ICON;
+FILE_TYPE_COLOR = FILE_TYPE_COLOR;
+
+fileType!: FileType;
+
+get fileTypeLabel(): string {
+  return this.fileType.charAt(0) + this.fileType.slice(1).toLowerCase();
+}
+
   ngOnChanges(changes: SimpleChanges) {
 
   /* ---------------- OPEN OVERLAY ---------------- */
@@ -48,13 +58,12 @@ export class FileUploadComponent implements OnChanges {
 }
 
   selectedFile: File | null = null;
-  previewUrl: SafeResourceUrl | null = null;
-  fileType: any = null;
 
   title = '';
   description = '';
   tags: string[] = [];
   tagInput = '';
+previewUrl: string | null = null;
 
   /* =====================
    * LIFECYCLE
@@ -69,24 +78,22 @@ export class FileUploadComponent implements OnChanges {
     }
   }
 
-  openEdit() {
-    if (!this.editData) return;
+ openEdit() {
+  if (!this.editData) return;
 
-    this.isOpen = true;
-    this.step = 2;
+  this.isOpen = true;
+  this.step = 2;
 
-    this.fileType = this.editData.type;
-    this.title = this.editData.name;
-    this.description = this.editData.description;
-    this.tags = [...this.editData.tags];
+  // 🔥 TRUST BACKEND DATA
+  this.fileType = this.editData.file_type;
+  this.title = this.editData.name;
+  this.description = this.editData.description;
+  this.tags = [...this.editData.tags];
 
-    if (this.editData.url) {
-      this.previewUrl =
-        this.fileType === 'pdf' || this.fileType === 'image'
-          ? this.sanitizer.bypassSecurityTrustResourceUrl(this.editData.url)
-          : null;
-    }
-  }
+  // 🔥 DIRECTLY USE THUMBNAIL URL
+  this.previewUrl = this.editData.thumbnail_link ?? null;
+}
+
 
   close() {
     this.isOpen = false;
@@ -98,7 +105,6 @@ export class FileUploadComponent implements OnChanges {
     this.step = 1;
     this.selectedFile = null;
     this.previewUrl = null;
-    this.fileType = null;
     this.title = '';
     this.description = '';
     this.tags = [];
@@ -109,69 +115,69 @@ export class FileUploadComponent implements OnChanges {
    * FILE HANDLING
    * ===================== */
 
-  onFileSelected(event: Event) {
-    if (this.mode === 'edit') return;
+ onFileSelected(event: Event) {
+  if (this.mode === 'edit') return;
 
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (!file) return;
+  const file = (event.target as HTMLInputElement).files?.[0];
+  if (!file) return;
 
-    this.selectedFile = file;
-    this.title = file.name.replace(/\.[^/.]+$/, '');
-
-    const ext = file.name.split('.').pop()?.toLowerCase();
-
-    if (file.type.startsWith('image/')) {
-      this.fileType = 'image';
-      this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-        URL.createObjectURL(file)
-      );
-    } else if (ext === 'pdf') {
-      this.fileType = 'pdf';
-      this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-        URL.createObjectURL(file)
-      );
-    } else if (['doc', 'docx'].includes(ext!)) {
-      this.fileType = 'doc';
-    } else if (['ppt', 'pptx'].includes(ext!)) {
-      this.fileType = 'ppt';
-    } else if (['xls', 'xlsx'].includes(ext!)) {
-      this.fileType = 'xls';
-    } else {
-      this.fileType = 'other';
-    }
-
-    this.step = 2;
-  }
-
-  handleDroppedFile(file: File) {
   this.selectedFile = file;
   this.title = file.name.replace(/\.[^/.]+$/, '');
 
-  const ext = file.name.split('.').pop()?.toLowerCase();
+  // ✅ Detect enum (same as backend)
+  this.fileType = this.detectFileType(file.name);
 
-  if (file.type.startsWith('image/')) {
-    this.fileType = 'image';
-    this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-      URL.createObjectURL(file)
-    );
-  } else if (ext === 'pdf') {
-    this.fileType = 'pdf';
-    this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-      URL.createObjectURL(file)
-    );
-  } else if (['doc', 'docx'].includes(ext!)) {
-    this.fileType = 'doc';
-  } else if (['ppt', 'pptx'].includes(ext!)) {
-    this.fileType = 'ppt';
-  } else if (['xls', 'xlsx'].includes(ext!)) {
-    this.fileType = 'xls';
-  } else {
-    this.fileType = 'other';
-  }
+  // ✅ Local preview (only for create)
+  this.previewUrl = URL.createObjectURL(file);
+
+  this.step = 2;
+}
+
+
+ handleDroppedFile(file: File) {
+  if (this.mode === 'edit') return;
+
+  this.selectedFile = file;
+  this.title = file.name.replace(/\.[^/.]+$/, '');
+
+  this.fileType = this.detectFileType(file.name);
+  this.previewUrl = URL.createObjectURL(file);
 
   this.isOpen = true;
   this.step = 2;
 }
+detectFileType(filename: string): FileType {
+  const ext = filename.split('.').pop()?.toLowerCase();
+
+  if (!ext) return FileType.OTHER;
+
+  if (['jpg','jpeg','png','gif','webp','bmp','svg'].includes(ext)) {
+    return FileType.IMAGE;
+  }
+
+  if (['mp4','mkv','avi','mov','webm','flv'].includes(ext)) {
+    return FileType.VIDEO;
+  }
+
+  if (['mp3','wav','aac','flac','ogg'].includes(ext)) {
+    return FileType.AUDIO;
+  }
+
+  if (['pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv'].includes(ext)) {
+    return FileType.DOCUMENT;
+  }
+
+  if (['zip','rar','7z','tar','gz'].includes(ext)) {
+    return FileType.ARCHIVE;
+  }
+
+  if (['java','js','ts','py','cpp','c','html','css','json','xml','yaml','yml'].includes(ext)) {
+    return FileType.CODE;
+  }
+
+  return FileType.OTHER;
+}
+
 
 
   /* =====================

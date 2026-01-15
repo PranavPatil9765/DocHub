@@ -52,7 +52,7 @@
       class="absolute z-50 mt-1 w-full bg-white border rounded-lg shadow-lg
              max-h-48 overflow-auto">
 
-      @for (option of options; track option[valueKey]) {
+@for (option of options; track valueKey ? option[valueKey] : option) {
 
         <!-- MULTI SELECT -->
         @if (checkbox) {

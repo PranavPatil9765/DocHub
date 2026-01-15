@@ -3,5 +3,6 @@ export interface CollectionModel {
   name: string;
   icon:string;
   description?: string;
-  state:'normal'|'default';
+  file_ids:string[];
+  created_at:string
 }

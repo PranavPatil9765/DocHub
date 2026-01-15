@@ -2,6 +2,8 @@ import { Component, Input } from '@angular/core';
 import { getFileClasses } from '../../../utilities/file-type.styles';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FILE_TYPE_BG, FILE_TYPE_COLOR, FILE_TYPE_ICON, FileRow, FileType } from '../../models/file.model';
+import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-quick-access-section',
   imports: [CommonModule,RouterModule],
@@ -9,45 +11,19 @@ import { RouterModule } from '@angular/router';
   styleUrl: './quick-access-section.scss',
 })
 export class QuickAccessSection {
-  getFileStyle = getFileClasses
+    private api = `${environment.apiBaseUrl}`;
+
+  FILE_TYPE_ICON:Record<FileType, string> = FILE_TYPE_ICON;
+FILE_TYPE_COLOR:Record<FileType, string> = FILE_TYPE_COLOR;
+FILE_TYPE_BG = FILE_TYPE_BG;
   @Input() title:string = "Frequently Used";
-  @Input() files:any[] =  [
-  {
-    id: '1',
-    name: 'Project_Proposal.pdf',
-    url: 'https://example.com/files/project_proposal.pdf',
-    type: 'pdf',
-    size: 245760, // 240 KB
-    uploadedAt: new Date('2025-01-05T10:30:00')
-  },
-  {
-    id: '2',
-    name: 'Budget_Report.xlsx',
-    url: 'https://example.com/files/budget_report.xlsx',
-    type: 'xls',
-    size: 512000, // 500 KB
-    uploadedAt: new Date('2025-01-10T14:15:00')
-  },
-  {
-    id: '3',
-    name: 'Team_Presentation.pptx',
-    url: 'https://example.com/files/team_presentation.pptx',
-    type: 'ppt',
-    size: 1048576, // 1 MB
-    uploadedAt: new Date('2025-01-15T09:00:00')
-  },
-  {
-    id: '4',
-    name: 'Office_Event_Photo.jpg',
-    url: 'https://example.com/files/office_event_photo.jpg',
-    type: 'image',
-    size: 734003, // ~717 KB
-    uploadedAt: new Date('2025-01-20T18:45:00')
-  }
-];
-;
+  @Input() files:FileRow[] = [];
   @Input() link:string = "";
 
+  onPreview(fileId:string) {
+    const url = `${this.api}/files/preview/${fileId}`;
+    window.open(url, '_blank');
+  }
   onViewAll(){}
 
 }

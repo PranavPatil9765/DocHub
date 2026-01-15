@@ -1,14 +1,81 @@
-    <!-- search bar box -->
-    <div class="w-full">
-      <div class="w-full relative m-auto">
+<div class="w-full relative filter-wrapper">
 
-        <input type="text"
-        class="drop-shadow-lg shadow shadow-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-blue-200 h-10 w-full rounded-lg pr-20 pl-3"
-        placeholder="Search...">
+  <!-- Input -->
+  <input
+    type="text"
+    [value]="query"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+      (keydown.enter)="emitSearch()"
+    placeholder="Search files..."
+    class="h-11 w-full rounded-xl border bg-white px-4 pr-24 text-sm
+           shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
 
-        <!-- Button inside input -->
-        <button class="absolute right-5 top-1/2 -translate-y-1/2 bg-blue-600 text-white md:px-8 px-2 py-1 rounded-lg">
-          Search
-        </button>
+  <!-- Search Button -->
+  <button
+    class="absolute right-2 top-1/2 -translate-y-1/2
+           rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white
+           hover:bg-blue-700 transition"
+    (click)="emitSearch()"
+  >
+    Search
+  </button>
+
+  <!-- Suggestions -->
+  <div
+    *ngIf="showSuggestions && suggestions.length"
+    class="absolute z-50 mt-2 w-full overflow-hidden
+           rounded-xl border bg-white shadow-xl"
+  >
+
+    <div
+      *ngFor="let item of suggestions; let last = last"
+      (click)="onselectSuggestion(item)"
+      class="group flex items-center justify-between gap-3
+             px-4 py-3 cursor-pointer
+             hover:bg-blue-50 transition"
+      [class.border-b]="!last"
+    >
+      <!-- Left -->
+      <div class="flex items-center gap-3">
+
+        <!-- File Icon -->
+        <div
+        class="flex h-9 w-9 items-center justify-center
+        rounded-lg bg-blue-100"
+        >
+
+        @if(item.file_type){
+          <i
+          [class]="
+              FILE_TYPE_ICON[item.file_type] +
+              ' ' +
+              FILE_TYPE_COLOR[item.file_type]
+              "
+          ></i>
+        }@else if(item.icon){
+          {{item.icon}}
+        }
+        </div>
+
+        <!-- File Name -->
+        <div class="flex flex-col">
+          <span class="text-sm font-medium text-gray-800 group-hover:text-blue-700">
+            {{ item.name }}
+          </span>
+          <span class="text-xs text-gray-400">
+            {{ item.file_type }} file
+          </span>
+        </div>
       </div>
+
+      <!-- Arrow -->
+      <span class="text-gray-300 group-hover:text-blue-500">
+        →
+      </span>
     </div>
+
+  </div>
+
+</div>

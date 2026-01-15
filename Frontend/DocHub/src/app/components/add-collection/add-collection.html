@@ -107,9 +107,16 @@
             Existing Collections
           </h3>
 
-          <app-elatic-search-bar></app-elatic-search-bar>
+          <app-elatic-search-bar
+          (searchSuggestion)="searchSuggestion.emit($event)"
+          (search)="search.emit($event)"
+          [suggestions]="suggestions"
+        ></app-elatic-search-bar>
 
           <div class="max-h-[300px] overflow-y-auto space-y-2 pr-2">
+            @if(loading){
+              <app-spinner></app-spinner>
+            }@else{
             @for (col of collections; track col.id) {
               <div
                 class="p-4 rounded-xl border cursor-pointer
@@ -127,6 +134,7 @@
                 }
               </div>
             }
+          }
           </div>
         </div>
       }

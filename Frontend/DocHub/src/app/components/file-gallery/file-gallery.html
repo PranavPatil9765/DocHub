@@ -11,7 +11,7 @@
         [file]="file"
         [clearSelection]="clearSelectedFields"
         (selectionChange)="onFileSelectionChange($event)"
-        (addToCollection)="onAddToCollection($event)"
+        (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
         (edit)="onFileEdit($event)"
       >
       </app-file-priview-card>
@@ -45,15 +45,7 @@
   (delete)="deleteAllSelected()"
 >
 </app-bottom-bar>
-@if(showOverlay){
-  <app-add-collection
-  [collections]="collections"
-  mode="both"
-  (createCollection)="onCreate($event)"
-  (selectCollection)="onSelect($event)"
-  (close)="closeOverlay()">
-</app-add-collection>
-}
+
 <app-file-upload
 [mode]="'edit'"
 [editData]="editFile"

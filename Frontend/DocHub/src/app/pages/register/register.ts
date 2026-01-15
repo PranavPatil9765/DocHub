@@ -1,20 +1,27 @@
+import { AuthService } from '../../services/auth.service';
 import { Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { SpinnerComponent } from "../../components/spinner/spinner";
+import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs';
+import { ToastService } from '../../services/toastService';
+import { registerReq } from '../../models/request';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, SpinnerComponent,CommonModule],
   templateUrl: './register.html',
   styleUrls: ['./register.css']
 })
 export class RegisterComponent {
 
   fb = inject(FormBuilder);
-  auth = inject(AuthService);
+  authService = inject(AuthService);
   router = inject(Router);
+  toast = inject(ToastService);
+  loading = false;
 
   form = this.fb.group({
     fullName: ['', Validators.required],
@@ -24,14 +31,22 @@ export class RegisterComponent {
 
   submit() {
     if (this.form.invalid) return;
+    this.loading = true;
 
-    this.auth.register(this.form.value).subscribe({
-      next: () => this.router.navigate(['/login'])
+    this.authService.register(this.form.value as registerReq )
+    .pipe(
+      finalize(() => {
+        this.loading = false;
+      })
+    )
+    .subscribe({
+      next: (res) => {
+        this.toast.show('User Registered successfully', 'success');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.toast.show( err.error.message ||'Registration Failed', 'error');
+      }
     });
-  }
-
-  // -------------------------------
-  // ⭐ Social Login Methods
-  // -------------------------------
-
 }
+  }

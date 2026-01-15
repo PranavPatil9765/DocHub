@@ -14,32 +14,49 @@
 
   <!-- Files Grid -->
   <div class="grid grid-cols-2 gap-4 p-4">
-    @for (file of files; track file.id) {
+  @for (file of files; track file.id) {
     <div
-      class="p-3 rounded-lg border shadow-sm flex gap-3 items-start hover:shadow-blue-200 hover:shadow-lg"
-      [ngClass]="[getFileStyle(file.type).bg, getFileStyle(file.type).border]"
+      class="p-4 rounded-xl border
+             flex gap-3 items-start
+             transition-all duration-200
+             hover:shadow-lg hover:-translate-y-0.5"
+      [ngClass]="FILE_TYPE_BG[file.file_type]"
+      (click)="onPreview(file.id)"
     >
       <!-- Icon -->
-      <i
-        class="fa-solid text-xl"
-        [ngClass]="[getFileStyle(file.type).icon, getFileStyle(file.type).text]"
-      ></i>
+      <div
+        class="w-10 h-10 rounded-lg
+               flex items-center justify-center
+               bg-white shadow-sm"
+      >
+        <i
+          [class]="
+            FILE_TYPE_ICON[file.file_type] +
+            ' text-lg ' +
+            FILE_TYPE_COLOR[file.file_type]
+          "
+        ></i>
+      </div>
 
       <!-- File Info -->
       <div class="flex-1 min-w-0">
         <p
-          class="font-semibold text-sm overflow-hidden text-ellipsis whitespace-nowrap max-w-full"
+          class="font-semibold text-sm truncate text-gray-800"
           title="{{ file.name }}"
         >
           {{ file.name }}
         </p>
 
-        <p class="text-sm font-medium" [ngClass]="getFileStyle(file.type).text">
-          {{ file.type | uppercase }}
+        <p
+          class="text-xs font-medium mt-0.5 uppercase tracking-wide"
+          [ngClass]="FILE_TYPE_COLOR[file.file_type]"
+        >
+          {{ file.file_type }}
         </p>
       </div>
     </div>
+  }
+</div>
 
-    }
-  </div>
+
 </div>

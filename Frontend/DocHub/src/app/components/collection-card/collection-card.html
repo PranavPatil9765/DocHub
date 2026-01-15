@@ -11,7 +11,7 @@
 >
 
   <!-- 🔹 CHECKBOX (ONLY FOR NORMAL STATE) -->
-  @if (collection.state === 'normal' && multiselect) {
+  @if (multiselect) {
     <label
       class="absolute top-2 left-2 z-20
              w-6 h-6 rounded-md
@@ -20,7 +20,10 @@
              shadow cursor-pointer
              transition
              group-hover:opacity-100"
-      [ngClass]="{ 'opacity-0': !selected, 'opacity-100': selected }"
+      [ngClass]="{
+  'opacity-100': selected,
+  'opacity-0 group-hover:opacity-100': !selected
+}"
     >
       <input
         type="checkbox"
@@ -33,7 +36,6 @@
   }
 
   <!-- 🔹 MENU (ONLY FOR NORMAL STATE) -->
-  @if (collection.state === 'normal') {
     <button
       class="absolute top-2 right-2 z-20
              w-8 h-8 rounded-full
@@ -45,10 +47,10 @@
     >
       ⋮
     </button>
-  }
+
 
   <!-- 🔹 MENU DROPDOWN -->
-  @if (collection.state === 'normal' && menuOpen) {
+  @if (menuOpen) {
     <div
       class="absolute top-12 right-2 z-30
              w-36 bg-white rounded-lg shadow-lg border

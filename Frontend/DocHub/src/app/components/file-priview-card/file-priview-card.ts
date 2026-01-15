@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, HostListener, Input, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, Output, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { getExtension } from '../../../utilities/file-functions';
-import { FileRow } from '../../models/file-row';
+import { FILE_TYPE_COLOR, FILE_TYPE_ICON, FileRow } from '../../models/file.model';
 import { DefaultFile } from '../../constants/constants';
+import { environment } from '../../../environments/environment';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 @Component({
   selector: 'app-file-priview-card',
   templateUrl: './file-priview-card.html',
@@ -16,16 +18,19 @@ export class FilePriviewCard {
   @Input() clearSelection = false;
   @Output() selectionChange = new EventEmitter<any>();
   @Output() edit = new EventEmitter<FileRow>();
-  @Output() addToCollection = new EventEmitter<any>();
+  @Output() showAddCollectionOverlay = new EventEmitter<string>();
   safeUrl!: SafeResourceUrl;
+  FILE_TYPE_ICON = FILE_TYPE_ICON;
+  FILE_TYPE_COLOR = FILE_TYPE_COLOR;
+  private api = `${environment.apiBaseUrl}`;
+  previewUrl = "";
+  private http = inject(HttpClient)
   getExtension = getExtension;
   constructor(private sanitizer: DomSanitizer, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit() {
-    if (this.isPdf) {
-      this.safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
-        this.file?.url
-      );
+  ngOnInit(): void {
+    if(this.file.thumbnail_link){
+      this.previewUrl = `${this.api}${this.file.thumbnail_link}`;
     }
   }
 
@@ -36,15 +41,6 @@ export class FilePriviewCard {
 }
 
 
- get isImage(): boolean {
-  const ext = this.getExtension(this.file.url || this.file.name);
-  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext);
-}
-
-get isPdf(): boolean {
-  const ext = this.getExtension(this.file.url || this.file.name);
-  return ext === 'pdf';
-}
 
  menuOpen = false;
 selected = false;
@@ -70,6 +66,8 @@ onCardClick(event: MouseEvent) {
     event.stopPropagation();
     this.updateSelection(!this.selected);
     return;
+  }else{
+    this.onPreview();
   }
 
   // normal click behavior
@@ -77,29 +75,37 @@ onCardClick(event: MouseEvent) {
 
 
 onPreview() {
+  const url = `${this.api}/files/preview/${this.file.id}`;
+  window.open(url, '_blank');
+
   this.menuOpen = false;
 }
-
+ downloadUrl = `${this.api}/files/download/${this.file.id}`;
 onDownload() {
-  if (!this.file?.url) return;
+  const url = `${this.api}/files/download/${this.file.id}`;
 
-  const link = document.createElement('a');
-  link.href = this.file.url;
-  link.download = this.file.name;
-  link.target = '_blank';
+  this.http.get(url, { responseType: 'blob' }).subscribe(blob => {
+    const a = document.createElement('a');
+    const objectUrl = URL.createObjectURL(blob);
 
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    a.href = objectUrl;
+    a.download = this.file.name;
+    a.click();
+
+    URL.revokeObjectURL(objectUrl);
+  });
 }
+
 
 onDelete() {
   this.menuOpen = false;
 }
-onAddCollection(){
-  this.addToCollection.emit(this.file.id);
+onShowAddCollectionOverlay(e:Event){
+  e.stopPropagation();
+  this.showAddCollectionOverlay.emit(this.file.id);
 }
-onEdit(){
+onEdit(e:Event){
+  e.stopPropagation()
   this.edit.emit(this.file);
 }
 

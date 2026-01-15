@@ -1,10 +1,15 @@
-import { collections as COLLECTIONS_CONST, DefaultCollections } from './../../constants/constants';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { CollectionService } from '../../services/collections.service';
 import { CollectionCardComponent } from '../../components/collection-card/collection-card';
 import { BottomBar } from '../../components/bottom-bar/bottom-bar';
 import { ElaticSearchBar } from '../../components/elatic-search-bar/elatic-search-bar';
 import { AddCollectionComponent } from '../../components/add-collection/add-collection';
+import { DefaultCollections } from '../../constants/constants';
+import { finalize } from 'rxjs';
+import { DocHubLoaderComponent } from "../../components/dochub-loader/dochub-loader";
+import { CollectionRequest } from '../../models/collectionRequest.model';
+import { ToastService } from '../../services/toastService';
 
 @Component({
   selector: 'app-collections',
@@ -14,24 +19,58 @@ import { AddCollectionComponent } from '../../components/add-collection/add-coll
     CollectionCardComponent,
     BottomBar,
     ElaticSearchBar,
-    AddCollectionComponent
-  ],
+    AddCollectionComponent,
+    DocHubLoaderComponent
+],
   templateUrl: './collections.html',
-  styleUrl: './collections.scss',
+  styleUrl: './collections.scss'
 })
-export class Collections {
+export class Collections implements OnInit {
 
   /* ---------------- Data ---------------- */
-  collections: any[] = [...COLLECTIONS_CONST];
-  DefaultCollections:any[] = DefaultCollections
+  collections: any[] = [];
+  DefaultCollections: any[] = [...DefaultCollections];
+  loading = false;
   /* ---------------- Selection ---------------- */
   selectedFileIds = new Set<string>();
   clearSelectedFields = false;
-  editingCollection = null
+  editingCollection: any = null;
 
   /* ---------------- Overlay ---------------- */
   showOverlay = false;
-  mode: "select" | "edit" | "create" | "both" = "create"
+  mode: 'select' | 'edit' | 'create' | 'both' = 'create';
+
+  constructor(private collectionService: CollectionService,private cdr:ChangeDetectorRef,private toast:ToastService) {}
+
+  /* ---------------- API CALL ---------------- */
+  ngOnInit() {
+    this.loadCollections();
+  }
+
+private loadCollections() {
+  this.loading = true;
+
+  this.collectionService.getCollections()
+    .pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges()
+      })
+    )
+    .subscribe({
+      next: (res) => {
+        console.log('Collections from API:', res);
+        this.collections = Array.isArray(res?.data)
+          ? res.data
+          : [];
+      },
+      error: (err) => {
+        console.error('Failed to load collections', err);
+        this.collections = [];
+      }
+    });
+}
+
   /* ---------------- Selection Logic ---------------- */
   onFileSelectionChange(event: { id: string; selected: boolean }) {
     if (event.selected) {
@@ -44,10 +83,7 @@ export class Collections {
   clearSelection() {
     this.clearSelectedFields = true;
     this.selectedFileIds.clear();
-
-    setTimeout(() => {
-      this.clearSelectedFields = false;
-    });
+    setTimeout(() => (this.clearSelectedFields = false));
   }
 
   deleteAllSelected() {
@@ -66,33 +102,70 @@ export class Collections {
   }
 
   closeOverlay() {
-    this.mode = "create"
+    this.mode = 'create';
     this.showOverlay = false;
   }
 
-  handleCollectionEdit(e:any){
-
-    this.mode = "edit"
+  handleCollectionEdit(e: any) {
+    this.mode = 'edit';
     this.editingCollection = e;
     this.showOverlay = true;
   }
+
   /* ---------------- Overlay Callbacks ---------------- */
 
-  onCreate(event: { name: string; description?: string; icon?: string }) {
-    const newCollection = {
-      id: crypto.randomUUID(),
-      name: event.name,           // optional, for consistency
+  onCreate(event:CollectionRequest) {
+    this.showOverlay = false
+    const newCollection:CollectionRequest = {
+      name: event.name,
       icon: event.icon || '📁',
       description: event.description,
-      state: 'normal',
+      fileIds:[]
     };
+const toastId = this.toast.loading('Creating collection...');
+  this.collectionService.createCollection(newCollection)
+    .pipe(
+      finalize(() => {
 
-    this.collections = [newCollection, ...this.collections];
-    this.closeOverlay();
-  }
+        this.cdr.detectChanges()
+      })
+    )
+    .subscribe({
+      next: (res) => {
+        this.toast.success(res.message ||"Collection Created");
+        this.loadCollections();
+      },
+      error: (err) => {
+        this.toast.error(err.error.message || "Failed to create Collection")
+      }
+    });
+}
+
 
   onSelect(collection: any) {
     console.log('Collection selected:', collection);
     this.closeOverlay();
+  }
+  onUpdate(e:any){
+  this.showOverlay = false
+  const toastId = this.toast.loading('Editing collection...');
+  this.collectionService.updateCollection(e.id,e)
+    .pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges()
+      })
+    )
+    .subscribe({
+      next: (res) => {
+        this.showOverlay = false
+        this.toast.success("Collection Updated");
+        this.loadCollections();
+      },
+      error: (err) => {
+        this.toast.error(err.error.message || "Failed to create Collection")
+      }
+    });
+
   }
 }

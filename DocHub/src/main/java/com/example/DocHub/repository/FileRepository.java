@@ -16,43 +16,45 @@ public interface FileRepository extends JpaRepository<FileEntity, UUID> {
 
     /* ================= SEARCH ================= */
 
-    @Query(value = """
-        SELECT *
-        FROM files f
-        WHERE f.user_id = :userId
-        AND (
-            :query IS NULL
-            OR length(trim(:query)) = 0
-            OR f.search_vector @@ plainto_tsquery('english', :query)
-            OR unaccent(lower(f.name)) ILIKE '%' || unaccent(lower(:query)) || '%'
-            OR unaccent(lower(f.description)) ILIKE '%' || unaccent(lower(:query)) || '%'
-            OR similarity(unaccent(lower(f.name)), unaccent(lower(:query))) > 0.35
-            OR similarity(unaccent(lower(f.description)), unaccent(lower(:query))) > 0.30
+  @Query(value = """
+    SELECT *
+    FROM files f
+    WHERE f.user_id = :userId
+    AND (
+        :query IS NULL
+        OR length(trim(:query)) = 0
+        OR f.search_vector @@ plainto_tsquery('english', :query)
+        OR unaccent(lower(f.name)) ILIKE '%' || unaccent(lower(:query)) || '%'
+        OR unaccent(lower(f.description)) ILIKE '%' || unaccent(lower(:query)) || '%'
+        OR similarity(unaccent(lower(f.name)), unaccent(lower(:query))) > 0.35
+        OR similarity(unaccent(lower(f.description)), unaccent(lower(:query))) > 0.30
+    )
+    AND (:fileType IS NULL OR f.file_type = :fileType)
+    AND (:favourite IS NULL OR f.is_favourite = :favourite)
+    AND (:minSize IS NULL OR f.file_size >= :minSize)
+    AND (:maxSize IS NULL OR f.file_size <= :maxSize)
+    AND (
+        CAST(:cursorTime AS timestamp) IS NULL OR
+        (f.uploaded_at, f.id) < (
+            CAST(:cursorTime AS timestamp),
+            CAST(:cursorId AS uuid)
         )
-        AND (:fileType IS NULL OR f.file_type = :fileType)
-        AND (:favourite IS NULL OR f.is_favourite = :favourite)
-        AND (:minSize IS NULL OR f.file_size >= :minSize)
-        AND (:maxSize IS NULL OR f.file_size <= :maxSize)
-        AND (
-            CAST(:cursorTime AS timestamp) IS NULL OR
-            (f.uploaded_at, f.id) < (
-                CAST(:cursorTime AS timestamp),
-                CAST(:cursorId AS uuid)
-            )
-        )
-        ORDER BY f.uploaded_at DESC, f.id DESC
-        """, nativeQuery = true)
-    List<FileEntity> searchFiles(
-            @Param("userId") UUID userId,
-            @Param("query") String query,
-            @Param("fileType") String fileType,
-            @Param("favourite") Boolean favourite,
-            @Param("minSize") Long minSize,
-            @Param("maxSize") Long maxSize,
-            @Param("cursorTime") LocalDateTime cursorTime,
-            @Param("cursorId") UUID cursorId,
-            Pageable pageable
-    );
+    )
+    """,
+    nativeQuery = true)
+List<FileEntity> searchFiles(
+    @Param("userId") UUID userId,
+    @Param("query") String query,
+    @Param("fileType") String fileType,
+    @Param("favourite") Boolean favourite,
+    @Param("minSize") Long minSize,
+    @Param("maxSize") Long maxSize,
+    @Param("cursorTime") LocalDateTime cursorTime,
+    @Param("cursorId") UUID cursorId,
+    Pageable pageable
+);
+
+
 
     /* ================= OWNERSHIP ================= */
 

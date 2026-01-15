@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { ToastComponent } from "../../components/toast/toast";
 
 @Component({
   selector: 'app-auth-layout',
   templateUrl: './auth-layout.html',
   styleUrl: './auth-layout.css',
-  imports:[RouterModule]
+  imports: [RouterModule]
 })
 export class AuthLayout {
 

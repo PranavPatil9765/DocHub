@@ -46,27 +46,25 @@
       <!-- Size -->
       <div>
         <label class="text-xs font-medium text-gray-600">File size</label>
-        <app-dropdown
-          formControlName="size"
-          label="Select size"
-          [options]="sizeOptions"
-          displayKey="label"
-          valueKey="id"
-          >
-        </app-dropdown>
+       <app-dropdown
+  formControlName="size"
+  label="Select size"
+  [options]="sizeOptions"
+  displayKey="label">
+</app-dropdown>
+
       </div>
 
       <!-- Type -->
       <div>
         <label class="text-xs font-medium text-gray-600">File type</label>
         <app-dropdown
-          formControlName="type"
-          label="Select type"
-          [options]="typeOptions"
-          displayKey="label"
-          valueKey="id"
-          >
-        </app-dropdown>
+  formControlName="type"
+  label="Select type"
+  [options]="typeOptions"
+  displayKey="label">
+</app-dropdown>
+
       </div>
 
       <!-- Actions -->
