@@ -1,46 +1,52 @@
 <div
-  class="relative w-full max-w-sm min-w-[160px] md:min-w-[250px]
-         rounded-2xl border bg-white
-         hover:shadow-xl transition shadow-md
-         group card-wrapper cursor-pointer"
+  class="relative w-full max-w-sm min-w-[160px] md:min-w-[250px] rounded-2xl border bg-white hover:shadow-xl transition shadow-md group card-wrapper cursor-pointer"
   [ngClass]="{ 'ring-2 ring-blue-400': selected }"
   (touchstart)="onTouchStart()"
   (touchend)="onTouchEnd()"
   (touchmove)="onTouchMove()"
   (click)="onCardClick($event)"
 >
-
-@if(multiselect){
-
-  <!-- Checkbox (Top-Left) -->
-  <label
-    class="absolute top-2 left-2 z-20
-           w-6 h-6 rounded-md
-           bg-white/80 backdrop-blur
-           flex items-center justify-center
-           shadow cursor-pointer
-            group-hover:opacity-100
-           transition"
-    [ngClass]="{'opacity-0':!selected,'opacity-100':selected}"
-  >
-    <input
-      type="checkbox"
-      class="accent-blue-600 scale-110"
-      [checked]="selected"
-      (click)="$event.stopPropagation()"
-      (change)="onSelectChange($event)"
-    />
-  </label>
-}
+  @if (multiselect) {
+    <!-- Checkbox (Top-Left) -->
+    <label
+      class="absolute top-2 left-2 z-20 w-6 h-6 rounded-md bg-white/80 backdrop-blur flex items-center justify-center shadow cursor-pointer group-hover:opacity-100 transition"
+      [ngClass]="{ 'opacity-0': !selected, 'opacity-100': selected }"
+    >
+      <input
+        type="checkbox"
+        class="accent-blue-600 scale-110"
+        [checked]="selected"
+        (click)="$event.stopPropagation()"
+        (change)="onSelectChange($event)"
+      />
+    </label>
+  }
+ <!-- Favourite Heart -->
+      <button
+        class="absolute top-2 right-12 z-20 w-8 h-8 rounded-full bg-white/80 backdrop-blur flex items-center justify-center shadow transition hover:bg-white active:scale-90 md:opacity-0 group-hover:opacity-100 transition hover:bg-white"
+        (click)="onToggleFavourite($event)"
+      >
+        <svg
+          class="w-5 h-5 transition-all duration-200 ease-out"
+          [ngClass]="{
+            'fill-red-500 scale-110': file.favourite,
+            'fill-transparent stroke-gray-400': !file.favourite,
+          }"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 21.682 4.318 12.682a4.5 4.5 0 010-6.364z"
+          />
+        </svg>
+      </button>
 
   <!-- Options (3 dots) -->
   <button
-    class="absolute top-2 right-2 z-20
-           w-8 h-8 rounded-full
-           bg-white/80 backdrop-blur
-           flex items-center justify-center
-           md:opacity-0 group-hover:opacity-100
-           transition hover:bg-white shadow"
+    class="absolute top-2 right-2 z-20 w-8 h-8 rounded-full bg-white/80 backdrop-blur flex items-center justify-center md:opacity-0 group-hover:opacity-100 transition hover:bg-white shadow"
     (click)="toggleMenu($event)"
   >
     ⋮
@@ -49,60 +55,60 @@
   <!-- Options Menu -->
   @if (menuOpen) {
     <div
-      class="absolute top-12 right-2 z-30
-             w-36 bg-white rounded-lg shadow-lg border
-             text-sm overflow-hidden"
+      class="absolute top-12 right-2 z-30 w-36 bg-white rounded-lg shadow-lg border text-sm overflow-hidden"
     >
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
-              (click)="onPreview()">Preview</button>
+      <button class="w-full px-4 py-2 text-left hover:bg-gray-100" (click)="onPreview()">
+        Preview
+      </button>
 
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
-              (click)="onShowAddCollectionOverlay($event)">Add to Collection</button>
+      <button
+        class="w-full px-4 py-2 text-left hover:bg-gray-100"
+        (click)="onShowAddCollectionOverlay($event)"
+      >
+        Add to Collection
+      </button>
 
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
-              (click)="onEdit($event)">Edit</button>
+      <button class="w-full px-4 py-2 text-left hover:bg-gray-100" (click)="onEdit($event)">
+        Edit
+      </button>
 
-      <button class="w-full px-4 py-2 text-left hover:bg-gray-100"
-              (click)="onDownload()">Download</button>
+      <button class="w-full px-4 py-2 text-left hover:bg-gray-100" (click)="onDownload($event)">
+        Download
+      </button>
 
-      <button class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
-              (click)="onDelete()">Delete</button>
+      <button
+        class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50"
+        (click)="onDelete($event)"
+      >
+        Delete
+      </button>
     </div>
   }
 
   <!-- Preview -->
-<!-- Preview -->
-<div
-  class="h-[100px] md:h-[150px]
-         bg-gray-100 flex items-center justify-center
-         overflow-hidden rounded-t-xl"
->
-  <!-- Thumbnail -->
-  @if (file.thumbnail_link) {
-    <img
-      [src]="previewUrl"
-      alt="file preview"
-      class="object-cover w-full h-full"
-    />
-  }
-  <!-- Icon fallback -->
-  @else {
-    <div class="flex flex-col items-center justify-center">
-      <i
-        [class]="
-          FILE_TYPE_ICON[file.file_type] +
-          ' ' +
-          FILE_TYPE_COLOR[file.file_type] +
-          ' text-4xl'
-        "
-      ></i>
+  <!-- Preview -->
+  <div
+    class="h-[100px] md:h-[150px] bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl"
+  >
+    <!-- Thumbnail -->
+    @if (file.thumbnail_link) {
+      <img [src]="previewUrl" alt="file preview" class="object-cover w-full h-full" />
+    }
+    <!-- Icon fallback -->
+    @else {
+      <div class="flex flex-col items-center justify-center">
+        <i
+          [class]="
+            FILE_TYPE_ICON[file.file_type] + ' ' + FILE_TYPE_COLOR[file.file_type] + ' text-4xl'
+          "
+        ></i>
 
-      <span class="text-xs mt-1 text-gray-500">
-        {{ file.file_type }}
-      </span>
-    </div>
-  }
-</div>
+        <span class="text-xs mt-1 text-gray-500">
+          {{ file.file_type }}
+        </span>
+      </div>
+    }
+  </div>
 
   <!-- Info -->
   <div class="p-4 space-y-1">
@@ -112,8 +118,7 @@
 
     <div class="text-sm text-gray-500 flex justify-between">
       <span>{{ file.file_type }}</span>
-      <span>{{ file.file_size }}</span>
+      <span>{{ formatSize(file.file_size )}}</span>
     </div>
   </div>
-
 </div>

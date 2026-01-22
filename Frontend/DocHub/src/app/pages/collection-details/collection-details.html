@@ -30,14 +30,17 @@
 
       <!-- ================= CONTENT ================= -->
       <div class=" mx-auto py-8">
-        <div class="flex items-center gap-4">
-          <div class="flex-1 max-w-3xl">
+        <div class="sm:flex items-center gap-4">
+          <div class="flex-1 max-w-3xl sm:mb-0 mb-3">
 <app-elatic-search-bar
-    [showSuggestionsEnabled]="false">
+    [showSuggestionsEnabled]="false"
+    (search)="onSearch($event)"
+
+    >
 </app-elatic-search-bar>
           </div>
 
-          <div class="w-48">
+          <div class="w-58 flex gap-4 justify-end">
          <app-dropdown
   label="Sort by"
   [options]="sortby"
@@ -46,12 +49,37 @@
   (valueChange)="onSortChange($event)">
 </app-dropdown>
 
+@if(!isDefaultCollection){
+<app-file-table
+  [FileSearchSuggestions]="FileSearchSuggestions"
+  (search)="onFileSearch($event)"
+  (searchSuggestion)="fetchFileSuggestions($event)"
+  [files]="Addfiles"
+  [loading]="loading"
+  [hasMore]="hasMore"
+  (loadMore)="fetchAddFiles()"
+  (confirm)="addFilesToCollection($event)">
+</app-file-table>
+}
+
           </div>
+
         </div>
         <br>
-        <app-file-gallery [files]="files"></app-file-gallery>
+        <app-file-gallery (selectionChanged)="onSelectionChanges($event)" [clearFileSelection]="clearSelectedFiles" (deleteFiles)="OnFileDelete($event)" [files]="files"></app-file-gallery>
       </div>
     </div>
   </div>
 </div>
 <app-dochub-loader [show]="isLoading"></app-dochub-loader>
+<!-- Add files to collection -->
+<app-bottom-bar
+  [mode]="'collectionFiles'"
+  (remove)="removeFiles($event)"
+  [selectedCount]="selectedFileIds.length"
+  [selectedFileIds]="selectedFileIds"
+  (clear)="clearSelection()"
+  (download)="downloadSelectedFiles($event)"
+  (delete)="OnFileDelete($event)"
+>
+</app-bottom-bar>

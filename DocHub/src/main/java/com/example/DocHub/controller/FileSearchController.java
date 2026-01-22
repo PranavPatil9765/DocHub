@@ -27,11 +27,6 @@ public class FileSearchController {
         @PostMapping("/search")
         public ResponseEntity<ScrollResponse<?>> searchFiles(
                         @RequestBody FileSearchRequest request,
-
-                        @RequestParam(name = "cursorTime", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime cursorTime,
-
-                        @RequestParam(name = "cursorId", required = false) UUID cursorId,
-
                         @RequestParam(name = "limit", defaultValue = "15") int limit
 
         ) {
@@ -43,8 +38,8 @@ public class FileSearchController {
                                 fileSearchService.search(
                                                 user.getId(),
                                                 request,
-                                                cursorTime,
-                                                cursorId,
+                                                request.getCursorTime(),
+                                                request.getCursorId(),
                                                 limit));
         }
 

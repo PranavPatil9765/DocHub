@@ -27,19 +27,32 @@
         class="px-4 py-2 text-sm rounded-lg
                bg-blue-600 text-white hover:bg-blue-700
                active:scale-95 transition"
-        (click)="download.emit()"
+        (click)="onDownload()"
       >
         Download
       </button>
 
-      <button
+      @if(mode !='collectionFiles'){
+
+        <button
         class="px-4 py-2 text-sm rounded-lg
-               bg-red-600 text-white hover:bg-red-700
-               active:scale-95 transition"
-        (click)="delete.emit()"
-      >
+        bg-red-600 text-white hover:bg-red-700
+        active:scale-95 transition"
+        (click)="onDelete()"
+        >
         Delete
       </button>
+    }@else {
+
+          <button
+        class="px-4 py-2 text-sm rounded-lg
+        bg-red-600 text-white hover:bg-red-700
+        active:scale-95 transition"
+        (click)="onRemove()"
+        >
+        Remove
+      </button>
+    }
     </div>
   </div>
 </div>

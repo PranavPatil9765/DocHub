@@ -10,8 +10,21 @@ import { CommonModule } from '@angular/common';
 export class BottomBar {
 
   @Input() selectedCount = 0;
+  @Input() selectedFileIds:string[]= [];
+  @Input() mode:'collection'|'file'|'collectionFiles'= 'file';
 
   @Output() clear = new EventEmitter<void>();
-  @Output() download = new EventEmitter<void>();
-  @Output() delete = new EventEmitter<void>();
+  @Output() download = new EventEmitter<string[]>();
+  @Output() delete = new EventEmitter<string[]>();
+  @Output() remove = new EventEmitter<string[]>();
+  onDelete(){
+    this.delete.emit([...this.selectedFileIds]);
+  }
+  onRemove(){
+    this.remove.emit([...this.selectedFileIds]);
+  }
+  onDownload(){
+    this.download.emit([...this.selectedFileIds]);
+  }
+
 }

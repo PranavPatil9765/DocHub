@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, AbstractControl, Validati
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -18,7 +19,7 @@ export class ResetPasswordComponent {
   showConfirmPassword = false;
 
   private fb = inject(FormBuilder);
-
+  private authservice = inject(AuthService)
   form = this.fb.group(
     {
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
@@ -43,19 +44,17 @@ export class ResetPasswordComponent {
   submit() {
     if (this.form.invalid) return;
 
-    const token = sessionStorage.getItem('verifiedResetToken');
+    const token = sessionStorage.getItem('PasswordResetToken');
     if (!token) {
       this.error = 'Unauthorized request';
       return;
     }
+    const password = this.form.get('newPassword')?.value as string;
 
     this.loading = true;
     this.error = '';
 
-    this.http.post('http://localhost:8080/auth/reset-password', {
-      newPassword: this.form.value.newPassword,
-      verifiedResetToken: token
-    }).subscribe({
+   this.authservice.resetPassword(token,password).subscribe({
       next: () => {
         sessionStorage.clear();
         this.router.navigate(['/login']);

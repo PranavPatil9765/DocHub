@@ -51,3 +51,30 @@ export interface SearchSuggestion {
   file_type?: FileType;
   icon?:string
 }
+export type UploadStage =
+  | 'initiated'
+  | 'queued'
+  | 'uploaded'
+  | 'tagging'
+  | 'ready';
+
+export interface UploadItem {
+  id: string;
+  file?: File;
+
+  name: string;
+  description: string;
+  tags: string[];
+
+  stage?: UploadStage;
+  progress?: number;
+previewUrl:string;
+  isExisting?: boolean;
+}
+
+export interface FileUpdateRequest{
+  id: string;
+  name: string;
+  description:string,
+  tags:string[]
+}

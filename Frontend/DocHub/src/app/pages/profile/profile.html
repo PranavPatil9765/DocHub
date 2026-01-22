@@ -39,7 +39,12 @@
                bg-blue-600 text-white
                disabled:bg-blue-300 disabled:cursor-not-allowed
                hover:bg-blue-700 transition">
-        Update Password
+        @if(isLoading){
+          <app-spinner>
+          </app-spinner>
+        }@else{
+          Update Password
+        }
       </button>
     </div>
 

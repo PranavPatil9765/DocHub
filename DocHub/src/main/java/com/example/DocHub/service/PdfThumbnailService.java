@@ -10,6 +10,7 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -21,8 +22,8 @@ public class PdfThumbnailService {
     private static final String THUMBNAIL_DIR =
             System.getProperty("user.dir") + "/thumbnails";
 
-    public String generateThumbnail(File file, String originalName) throws Exception {
-
+    public String generateThumbnail(Path tempPath, String originalName) throws Exception {
+        File file = tempPath.toFile();
         String lower = originalName.toLowerCase();
 
         if (lower.endsWith(".pdf")) {

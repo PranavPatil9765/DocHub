@@ -20,11 +20,15 @@
   [data]="storagechart">
 </app-storage-line-chart>
 <br>
+  @if(favouritesFiles.length >0){
+
     <app-card-section
-      [title]="'Favorites'"
-      [multiselect]="false"
-      [files]="favouritesFiles"
+    [title]="'Favourites'"
+    [multiselect]="false"
+    [files]="favouritesFiles"
+
     ></app-card-section>
+  }
     <br />
   </div>
   <app-dochub-loader [show]="loading"></app-dochub-loader>

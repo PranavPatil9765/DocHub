@@ -42,7 +42,6 @@ export class Navbar {
     this.loading = true;
     this.userService.getUser().subscribe({
       next: (user) => {
-        console.log(user);
 
         this.username = user.data.user_name; // or user.name / user.fullName
         this.loading=false;

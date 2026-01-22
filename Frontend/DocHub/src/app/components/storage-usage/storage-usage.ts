@@ -15,7 +15,7 @@ interface StorageSlice {
 })
 export class StorageUsageComponent {
 
-  @Input() totalStorageGB = 100;
+  @Input() totalStorageGB = 20;
 
   @Input() usedStorage: StorageSlice[] = [
     { type: 'PDF Documents', sizeGB: 32, color: 'bg-blue-600' },

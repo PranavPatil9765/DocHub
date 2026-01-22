@@ -5,9 +5,9 @@ import { environment } from '../../environments/environment';
 
 export interface ScrollResponse<T> {
   items: T[];
-  hasMore: boolean;
-  cursorTime: string | null;
-  cursorId: string | null;
+  has_more: boolean;
+  next_cursor_time: string | null;
+  next_cursor_id: string | null;
 }
 
 export interface FileSearchRequest {
@@ -32,9 +32,7 @@ export class FileSearchService {
     cursorId: string | null,
     limit = 20
   ): Observable<ScrollResponse<any>> {
-    console.log(req,
-        cursorTime,
-        cursorId);
+
 
     return this.http.post<ScrollResponse<any>>(
       `${this.api}?limit=${limit}`,

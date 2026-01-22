@@ -88,7 +88,6 @@ typeOptions: { label: string; value: FileType }[] = [
     startDate: dateRange?.start ?? null,
     endDate: dateRange?.end ?? null
   };
-  console.log("emmitted value",payload);
 
   this.applyFilters.emit(payload);
   this.isOpen = false;

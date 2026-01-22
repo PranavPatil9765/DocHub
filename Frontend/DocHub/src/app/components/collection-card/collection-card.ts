@@ -76,7 +76,13 @@ onCardClick(event: MouseEvent) {
     this.updateSelection(!this.selected);
     return;
   }
-  this.router.navigate(['/collections', this.collection.id]);
+  if(this.collection.state ==='default'){
+         this.router.navigate(['/collections/default', this.collection.name]);
+
+  }else{
+
+    this.router.navigate(['/collections', this.collection.id]);
+  }
 
   // normal click behavior
   this.open.emit();

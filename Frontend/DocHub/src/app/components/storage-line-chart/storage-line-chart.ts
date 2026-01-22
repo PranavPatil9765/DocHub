@@ -40,7 +40,6 @@ export class StorageLineChartComponent
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('data in chart:', this.data);
 
     if (changes['data'] && this.viewReady) {
       this.updateChart();

@@ -59,6 +59,12 @@ export const routes: Routes = [
           import('./pages/collection-details/collection-details')
             .then(m => m.CollectionDetailsComponent),
       },
+      {
+        path: 'default/:name',
+        loadComponent: () =>
+          import('./pages/collection-details/collection-details')
+            .then(m => m.CollectionDetailsComponent),
+      },
     ], },
       { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
 

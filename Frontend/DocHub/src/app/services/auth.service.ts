@@ -37,6 +37,16 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  forgotPassword(email:string){
+    return this.http.post(`${this.api}/send-otp`, {email});
+  }
+  verifyOtp(email:string,otp:string){
+    return this.http.post(`${this.api}/verify-otp`, {email,otp});
+  }
+  resetPassword(token:string,password:string){
+    return this.http.post(`${this.api}/reset-password`, {token,password});
+  }
+
   loginWithGoogle() {
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   }

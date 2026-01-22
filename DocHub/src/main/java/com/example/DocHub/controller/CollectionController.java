@@ -2,6 +2,7 @@ package com.example.DocHub.controller;
 
 import com.example.DocHub.dto.request.AddFilesToCollectionRequest;
 import com.example.DocHub.dto.request.CollectionRequest;
+import com.example.DocHub.dto.request.FileIdsRequest;
 import com.example.DocHub.dto.response.ApiResponse;
 import com.example.DocHub.dto.response.CollectionResponse;
 import com.example.DocHub.dto.response.CollectionWithFilesResponse;
@@ -44,6 +45,13 @@ public class CollectionController {
         return ResponseEntity.ok(service.getCollectionWithFiles( collectionId));
     }
 
+    /* GET COLLECTION + FILE IDS */
+    @GetMapping("/default/{collectionName}")
+    public ResponseEntity<CollectionWithFilesResponse> getDefault(
+            @PathVariable("collectionName") String collectionName) {
+        return ResponseEntity.ok(service.getDefaultCollection( collectionName));
+    }
+
     /* UPDATE */
     @PutMapping("/{collectionId}")
     public ResponseEntity<?> update(
@@ -56,8 +64,8 @@ public class CollectionController {
     @PostMapping("/{collectionId}/files/remove")
     public ResponseEntity<?> removeFiles(
         @PathVariable("collectionId") UUID collectionId,
-            @RequestBody List<UUID> fileIds) {
-        service.removeFiles( collectionId, fileIds);
+            @RequestBody FileIdsRequest request) {
+        service.removeFiles( collectionId, request.getFileIds());
         return ResponseEntity.ok().build();
     }
 

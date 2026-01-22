@@ -9,14 +9,23 @@
 
     @for(file of files;track file.id){
 
-      <app-file-priview-card
-      [file]="file"
-      [multiselect]="multiselect"
+         <app-file-priview-card
+        [multiselect]="multiselect"
+        [file]="file"
+        (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
+        (edit)="onFileEdit($event)"
+        (delete)="OnFileDelete($event)"
       >
-    </app-file-priview-card>
+      </app-file-priview-card>
 
   }
 
 </div>
 </div>
 
+<app-file-upload
+[mode]="'edit'"
+[editFiles]="editFile"
+[isOpen]="editFileOverlayOpen"
+(closeEdit)="closeEdit()"
+></app-file-upload>

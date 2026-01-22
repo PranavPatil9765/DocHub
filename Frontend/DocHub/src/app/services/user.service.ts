@@ -13,4 +13,8 @@ export class UserService {
   getUser() {
     return this.http.get<UserResponse>(`${this.api}/dashboard/user`);
   }
+  changePassword(oldPassword:string,newPassword:string){
+    const payload = {oldPassword,newPassword};
+        return this.http.post<UserResponse>(`${this.api}/user/change-password`,payload);
+  }
 }

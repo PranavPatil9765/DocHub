@@ -44,7 +44,7 @@ export const DefaultCollections:any[]=[
     {
       id:2,
       state:"default",
-      name:"Pdfs",
+      name:"Documents",
       imageUrl:"assets/pdf.png",
     },
     {

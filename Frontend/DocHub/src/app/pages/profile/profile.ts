@@ -3,11 +3,14 @@ import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angula
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../services/user.service';
 import { DocHubLoaderComponent } from "../../components/dochub-loader/dochub-loader";
+import { ToastService } from '../../services/toastService';
+import { finalize } from 'rxjs';
+import { SpinnerComponent } from "../../components/spinner/spinner";
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DocHubLoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, DocHubLoaderComponent, SpinnerComponent],
   templateUrl: './profile.html'
 })
 export class Profile {
@@ -15,8 +18,10 @@ export class Profile {
   username = '';
   email = '';
   loading = false;
+  isLoading = false;
     private userService = inject(UserService);
     private cdr = inject(ChangeDetectorRef)
+    private toast = inject(ToastService)
   passwordForm!: FormGroup;
 
   constructor(private fb: FormBuilder) {
@@ -38,7 +43,6 @@ export class Profile {
     this.loading = true;
     this.userService.getUser().subscribe({
       next: (user) => {
-        console.log(user);
 
         this.username = user.data.user_name; // or user.name / user.fullName
         this.email = user.data.email; // or user.name / user.fullName
@@ -66,9 +70,17 @@ export class Profile {
     if (this.passwordForm.invalid) return;
 
     const { oldPassword, newPassword } = this.passwordForm.value;
-
-    console.log('Updating password:', oldPassword, newPassword);
-
+    this.isLoading = true;
+    this.userService.changePassword(oldPassword,newPassword).pipe(finalize(()=>{
+      this.isLoading = false;
+    })).subscribe({
+      next:(res)=>{
+        this.toast.success(res?.message);
+      },
+        error:(err)=>{
+          this.toast.error(err?.error?.message || "invalid credentials")
+        }
+    })
     this.passwordForm.reset();
   }
 }

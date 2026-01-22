@@ -13,6 +13,7 @@
         (selectionChange)="onFileSelectionChange($event)"
         (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
         (edit)="onFileEdit($event)"
+        (delete)="OnFileDelete($event)"
       >
       </app-file-priview-card>
     }
@@ -38,17 +39,9 @@
   }
 </div>
 
-<app-bottom-bar
-  [selectedCount]="selectedFileIds.size"
-  (clear)="clearSelection()"
-  (download)="downloadAllSelected()"
-  (delete)="deleteAllSelected()"
->
-</app-bottom-bar>
-
 <app-file-upload
 [mode]="'edit'"
-[editData]="editFile"
+[editFiles]="editFile"
 [isOpen]="editFileOverlayOpen"
 (closeEdit)="closeEdit()"
 ></app-file-upload>

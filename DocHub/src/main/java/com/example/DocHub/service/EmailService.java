@@ -14,7 +14,7 @@ public class EmailService {
         message.setTo(toEmail);
         message.setSubject("Password Reset OTP");
         message.setText("Your OTP is: " + otp + "\nValid for 5 minutes.");
-        message.setFrom("mhatreprerana09@gmail.com");
+        message.setFrom("dochub162@gmail.com");
         mailSender.send(message);
     }
 }

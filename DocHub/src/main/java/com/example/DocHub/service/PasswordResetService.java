@@ -1,91 +1,118 @@
 package com.example.DocHub.service;
 
 import java.time.LocalDateTime;
-import java.util.Random;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.DocHub.config.PasswordResetTokenUtil;
 import com.example.DocHub.entity.PasswordResetOtp;
+import com.example.DocHub.entity.User;
 import com.example.DocHub.exception.AppException.*;
 import com.example.DocHub.repository.PasswordResetOtpRepository;
 import com.example.DocHub.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class PasswordResetService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordResetOtpRepository otpRepository;
+    private final PasswordEncoder encoder;
+    private final EmailService emailService;
+    private final PasswordResetTokenUtil passwordResetTokenUtil;
 
-    @Autowired
-    private PasswordResetOtpRepository otpRepository;
+    /* ================= SEND OTP ================= */
 
-    @Autowired
-    private EmailService emailService;
-
+    @Transactional
     public void sendOtp(String email) {
 
-    System.out.println(">>> STEP 1: sendOtp() called with email = " + email);
+        if (!userRepository.existsByEmail(email)) {
+            throw new ResourceNotFoundException("Email not registered");
+        }
 
-    boolean exists = userRepository.existsByEmail(email);
-    System.out.println(">>> STEP 2: existsByEmail = " + exists);
+        // 🔥 Remove previous reset attempts
+        otpRepository.deleteByEmail(email);
 
-    if (!exists) {
-        System.out.println(">>> STEP 3: Email not found, returning");
-        throw new ResourceNotFoundException("Email not registered");
+        // 🔢 Secure OTP
+        String otp = String.valueOf(
+                100000 + new java.security.SecureRandom().nextInt(900000)
+        );
+
+        // 🔐 JWT reset token
+        String resetToken =
+                passwordResetTokenUtil.generateResetToken(email);
+
+        PasswordResetOtp resetOtp = new PasswordResetOtp();
+        resetOtp.setEmail(email);
+        resetOtp.setOtp(otp);
+        resetOtp.setResetToken(resetToken);
+        resetOtp.setExpiryTime(LocalDateTime.now().plusMinutes(5)); // OTP expiry
+        resetOtp.setVerified(false);
+
+        otpRepository.save(resetOtp);
+
+        try {
+            emailService.sendOtpEmail(email, otp);
+        } catch (Exception e) {
+            throw new InternalServerError("Email service failed");
+        }
     }
 
-    System.out.println(">>> STEP 4: Email found, generating OTP");
+    /* ================= VERIFY OTP ================= */
 
-    String otp = String.valueOf(100000 + new Random().nextInt(900000));
+    @Transactional
+    public String verifyOtp(String email, String otp) {
 
-    PasswordResetOtp resetOtp = new PasswordResetOtp();
-    resetOtp.setEmail(email);
-    resetOtp.setOtp(otp);
-    resetOtp.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+        PasswordResetOtp resetOtp = otpRepository
+                .findByEmailAndOtp(email, otp)
+                .orElseThrow(() ->
+                        new BadRequestException("Invalid OTP"));
 
-    otpRepository.save(resetOtp);
-    System.out.println(">>> STEP 5: OTP saved in DB");
+        if (resetOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+            otpRepository.delete(resetOtp);
+            throw new BadRequestException("OTP expired");
+        }
 
-    try {
-        emailService.sendOtpEmail(email, otp);
-        System.out.println(">>> STEP 6: Email sent successfully");
-    } catch (Exception e) {
-        System.out.println(">>> STEP 6 ERROR: Email sending failed");
-        throw new InternalServerError("Email service failed");
-    }
-}
+        // ✅ Mark verified (JWT already issued)
+        resetOtp.setVerified(true);
+        otpRepository.save(resetOtp);
 
-public String verifyOtp(String email, String otp) {
-
-    PasswordResetOtp resetOtp = otpRepository
-            .findByEmailAndOtp(email, otp)
-            .orElseThrow(() ->
-                    new RuntimeException("Invalid OTP"));
-
-    // ⏱ Expiry check
-    if (resetOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
-        otpRepository.delete(resetOtp);
-        throw new RuntimeException("OTP expired");
+        return resetOtp.getResetToken();
     }
 
-    // ❌ Already used check (optional but good)
-    if (resetOtp.isUsed()) {
-        throw new RuntimeException("OTP already used");
+    /* ================= RESET PASSWORD ================= */
+
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+
+        PasswordResetOtp resetOtp = otpRepository
+                .findByResetToken(token)
+                .orElseThrow(() ->
+                        new BadRequestException("Invalid token"));
+
+        if (!resetOtp.isVerified()) {
+            throw new BadRequestException("OTP not verified");
+        }
+
+        // JWT expiry is validated separately in util,
+        // this is an extra DB safety check
+        if (resetOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+            otpRepository.delete(resetOtp);
+            throw new BadRequestException("Reset session expired");
+        }
+
+        User user = userRepository.findByEmail(resetOtp.getEmail())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
+
+        user.setPassword(encoder.encode(newPassword));
+        userRepository.save(user);
+
+        // 🔥 One-time use guarantee
+        otpRepository.deleteByEmail(resetOtp.getEmail());
     }
-
-    // ✅ OTP valid → delete from DB
-    otpRepository.delete(resetOtp);
-
-    System.out.println(">>> OTP verified and deleted successfully");
-
-    String resetToken = PasswordResetTokenUtil.generateResetToken(email);
-
-    return resetToken;
-}
-
-
 }

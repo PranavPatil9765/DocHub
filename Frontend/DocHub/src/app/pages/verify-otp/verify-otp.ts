@@ -1,13 +1,16 @@
+import { AuthService } from './../../services/auth.service';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs';
+import { SpinnerComponent } from "../../components/spinner/spinner";
 
 @Component({
   selector: 'app-verify-otp',
   templateUrl: './verify-otp.html',
-  imports:[ReactiveFormsModule,CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, SpinnerComponent],
   styleUrls:["./verify-otp.scss"]
 })
 export class VerifyOtpComponent {
@@ -21,7 +24,8 @@ export class VerifyOtpComponent {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private authservice:AuthService
   ) {}
   onOtpInput(event: Event, index: number) {
   const input = event.target as HTMLInputElement;
@@ -53,27 +57,21 @@ onBackspace(event: Event, index: number) {
 }
 
   submit() {
-    const resetToken = sessionStorage.getItem('resetToken');
-    if (!resetToken) {
-      this.error = 'Session expired';
-      return;
-    }
 
     this.loading = true;
+    const email = sessionStorage.getItem('email') as string;
+    const otp = this.form.get('otp')?.value as string;
+    console.log(email,otp);
 
-    this.http.post<any>('http://localhost:8080/auth/verify-otp', {
-      otp: this.form.value.otp,
-      resetToken
-    }).subscribe({
-      next: (res) => {
+   this.authservice.verifyOtp(email,otp).pipe(finalize(()=>{this.loading = false})).subscribe({
+      next: (res:any) => {
         // replace with VERIFIED token
-        sessionStorage.setItem('verifiedResetToken', res.verifiedResetToken);
-        sessionStorage.removeItem('resetToken');
+        sessionStorage.setItem('PasswordResetToken', res.token);
+        sessionStorage.removeItem('email');
         this.router.navigate(['/reset-password']);
       },
       error: err => {
         this.error = err.error?.message || 'Invalid OTP';
-        this.loading = false;
       }
     });
   }

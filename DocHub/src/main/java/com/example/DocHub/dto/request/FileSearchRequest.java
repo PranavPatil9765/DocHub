@@ -1,6 +1,7 @@
 package com.example.DocHub.dto.request;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.example.DocHub.dto.Enums.FileSortBy;
 import com.example.DocHub.dto.Enums.SortDirection;
@@ -41,4 +42,10 @@ public class FileSearchRequest {
 
     @JsonProperty("sortDir")
     private SortDirection sortDir = SortDirection.DESC;
+
+    @JsonProperty("cursorTime")
+    private LocalDateTime cursorTime;
+    
+    @JsonProperty("cursorId")
+    private UUID cursorId;
 }

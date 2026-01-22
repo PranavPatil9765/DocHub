@@ -1,9 +1,14 @@
 package com.example.DocHub.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "password_reset_otp")
 public class PasswordResetOtp {
 
@@ -14,7 +19,9 @@ public class PasswordResetOtp {
     private String email;
     private String otp;
     private LocalDateTime expiryTime;
-    private boolean used = false;
+    private String resetToken;
+    private boolean verified;
+
 
     // ===== GETTERS =====
 
@@ -34,9 +41,6 @@ public class PasswordResetOtp {
         return expiryTime;
     }
 
-    public boolean isUsed() {
-        return used;
-    }
 
     // ===== SETTERS =====
 
@@ -54,9 +58,5 @@ public class PasswordResetOtp {
 
     public void setExpiryTime(LocalDateTime expiryTime) {
         this.expiryTime = expiryTime;
-    }
-
-    public void setUsed(boolean used) {
-        this.used = used;
     }
 }

@@ -16,6 +16,5 @@ public class UpdateFileRequest {
     @JsonProperty("description") String description;
     @JsonProperty("tags") List<String> tags;
     @JsonProperty("isFavourite") Boolean isFavourite;
-    @JsonProperty("icon") String icon;
 }
 

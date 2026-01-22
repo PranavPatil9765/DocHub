@@ -1,9 +1,11 @@
 package com.example.DocHub.controller;
 
-import com.example.DocHub.dto.request.FileMetaRequest;
 import com.example.DocHub.entity.FileEntity;
+import com.example.DocHub.entity.User;
 import com.example.DocHub.security.CustomUserDetails;
 import com.example.DocHub.service.FileUploadService;
+import com.example.DocHub.utils.UserUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -27,19 +29,16 @@ public class FileUploadController {
 
     @PostMapping(value = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> upload(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("meta") String metaJson) throws Exception {
-        System.out.println(SecurityContextHolder.getContext().getAuthentication());
+            @RequestPart("file") MultipartFile file
+            ) throws Exception {
 
-        ObjectMapper mapper = new ObjectMapper();
-        FileMetaRequest meta = mapper.readValue(metaJson, FileMetaRequest.class);
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        
-
+        User user = UserUtil.getCurrentUser();
+        // ObjectMapper mapper = new ObjectMapper();
+        // List<String> tags = mapper.readValue(
+        //         tagsJson,
+        //         new TypeReference<List<String>>() {
+        //         });
         return ResponseEntity.ok(
-                fileUploadService.upload(file, user.getUser(), meta.tags(), meta.description(), meta.icon()));
+                fileUploadService.upload(file, user));
     }
 }

@@ -59,7 +59,6 @@ private loadCollections() {
     )
     .subscribe({
       next: (res) => {
-        console.log('Collections from API:', res);
         this.collections = Array.isArray(res?.data)
           ? res.data
           : [];
@@ -87,12 +86,10 @@ private loadCollections() {
   }
 
   deleteAllSelected() {
-    console.log('Delete selected:', [...this.selectedFileIds]);
     this.clearSelection();
   }
 
   downloadAllSelected() {
-    console.log('Download selected:', [...this.selectedFileIds]);
   }
 
   /* ---------------- Overlay Actions ---------------- */
@@ -143,7 +140,6 @@ const toastId = this.toast.loading('Creating collection...');
 
 
   onSelect(collection: any) {
-    console.log('Collection selected:', collection);
     this.closeOverlay();
   }
   onUpdate(e:any){

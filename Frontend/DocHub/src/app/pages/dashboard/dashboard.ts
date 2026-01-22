@@ -63,7 +63,6 @@ export class DashboardComponent {
       )
       .subscribe({
         next: (res: any) => {
-          console.log('response is:', res);
 
           this.analytics = res.analytics.data;
           this.recentFiles = res.recentFiles.data;
@@ -80,7 +79,6 @@ export class DashboardComponent {
 
   buildStatCardsFromAnalytics() {
     const cards: StatCard[] = [];
-    console.log(this.analytics);
 
     this.analytics.by_file_type.forEach((item) => {
       const type = item.file_type.toUpperCase();
@@ -91,7 +89,7 @@ export class DashboardComponent {
         cards.push({ title: 'Documents', count: item.file_count, bg: 'bg-red-100' });
       } else if (type === 'PDF') {
         cards.push({ title: 'PDF', count: item.file_count, bg: 'bg-green-100' });
-      } else {
+      } else if ((type === 'OTHER')) {
         cards.push({ title: 'Other', count: item.file_count, bg: 'white' });
       }
     });
@@ -141,7 +139,6 @@ export class DashboardComponent {
   });
 
   this.storageData = data;
-  console.log("storagebardata:",data);
 
 }
 

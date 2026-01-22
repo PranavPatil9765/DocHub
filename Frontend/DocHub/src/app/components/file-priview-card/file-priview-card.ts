@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, Output, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { getExtension } from '../../../utilities/file-functions';
+import { formatFileSize, getExtension } from '../../../utilities/file-functions';
 import { FILE_TYPE_COLOR, FILE_TYPE_ICON, FileRow } from '../../models/file.model';
 import { DefaultFile } from '../../constants/constants';
 import { environment } from '../../../environments/environment';
 import { HttpClient, HttpRequest } from '@angular/common/http';
+import { FileService } from '../../services/file.service';
+import { ToastService } from '../../services/toastService';
 @Component({
   selector: 'app-file-priview-card',
   templateUrl: './file-priview-card.html',
@@ -16,10 +18,14 @@ export class FilePriviewCard {
   @Input() multiselect:boolean = true;
   @Input() multiselectActive:boolean = false;
   @Input() clearSelection = false;
+  fileService = inject(FileService)
   @Output() selectionChange = new EventEmitter<any>();
   @Output() edit = new EventEmitter<FileRow>();
+  @Output() delete = new EventEmitter<string[]>();
   @Output() showAddCollectionOverlay = new EventEmitter<string>();
+  toast = inject(ToastService)
   safeUrl!: SafeResourceUrl;
+  formatSize = formatFileSize;
   FILE_TYPE_ICON = FILE_TYPE_ICON;
   FILE_TYPE_COLOR = FILE_TYPE_COLOR;
   private api = `${environment.apiBaseUrl}`;
@@ -81,9 +87,11 @@ onPreview() {
   this.menuOpen = false;
 }
  downloadUrl = `${this.api}/files/download/${this.file.id}`;
-onDownload() {
-  const url = `${this.api}/files/download/${this.file.id}`;
+onDownload(e:Event) {
+    e.stopPropagation();
 
+  const url = `${this.api}/files/download/${this.file.id}`;
+  const toastId = this.toast.loading("Downloading file ...")
   this.http.get(url, { responseType: 'blob' }).subscribe(blob => {
     const a = document.createElement('a');
     const objectUrl = URL.createObjectURL(blob);
@@ -91,13 +99,33 @@ onDownload() {
     a.href = objectUrl;
     a.download = this.file.name;
     a.click();
-
+    this.toast.success("File downloaded successfully")
     URL.revokeObjectURL(objectUrl);
+
   });
 }
 
+onToggleFavourite(event: MouseEvent) {
+  event.stopPropagation();
 
-onDelete() {
+  const prev = this.file.favourite;
+  this.file.favourite = !this.file.favourite;
+  console.log(this.file.id);
+
+  const req$ = this.file.favourite
+    ? this.fileService.AddFavourite([this.file.id])
+    : this.fileService.DeleteFavourite([this.file.id]);
+
+  req$.subscribe({
+    error: () => {
+      this.file.favourite = prev; // rollback
+    }
+  });
+}
+
+onDelete(e:Event) {
+  e.stopPropagation();
+  this.delete.emit([this.file.id]);
   this.menuOpen = false;
 }
 onShowAddCollectionOverlay(e:Event){

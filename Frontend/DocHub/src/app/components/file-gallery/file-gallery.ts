@@ -1,11 +1,12 @@
+import { FileService } from '../../services/file.service';
 import { collections, DefaultFile } from './../../constants/constants';
-import { Component, Input, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FilePriviewCard } from '../file-priview-card/file-priview-card';
 import { BottomBar } from '../bottom-bar/bottom-bar';
 import { AddCollectionComponent } from "../add-collection/add-collection";
 import { FileUploadComponent } from "../file-upload/file-upload";
-import { FileRow } from '../../models/file.model';
+import { FileRow, UploadItem } from '../../models/file.model';
 import { CollectionRequest } from '../../models/collectionRequest.model';
 import { CollectionService } from '../../services/collections.service';
 import { ToastService } from '../../services/toastService';
@@ -17,7 +18,6 @@ import { finalize } from 'rxjs';
   imports: [
     CommonModule,
     FilePriviewCard,
-    BottomBar,
     FileUploadComponent
 ]
 })
@@ -26,9 +26,17 @@ export class FileGalleryComponent {
   @Input() files: any[] = [];
   @Input() loading = false;
   @Input() hasMore = true;
-  editFile:FileRow = DefaultFile
+  @Input() clearFileSelection = false;
+
+  editFile:UploadItem[] = []
   @Output() loadMore = new EventEmitter<void>();
+  @Output() deleteFiles = new EventEmitter<string[]>();
   @Output() showAddCollectionOverlay = new EventEmitter<string>();
+  @Output() selectionChanged = new EventEmitter<string[]>();
+  @Output() downloadSelected = new EventEmitter<string[]>();
+  @Output() removeSelectedFromCollection = new EventEmitter<string[]>();
+
+  fileService = inject(FileService)
   editFileOverlayOpen = false;
   selectedFileId = ""
   selectedFileIds = new Set<string>();
@@ -37,14 +45,24 @@ export class FileGalleryComponent {
   collectionService = inject(CollectionService)
   cdr = inject(ChangeDetectorRef)
   toast = inject(ToastService)
+
+ ngOnChanges(changes: SimpleChanges): void {
+    if (changes['clearFileSelection']) {
+      this.clearSelection();
+    }
+  }
+
+
   onScroll(event: Event) {
-    if (this.loading || !this.hasMore) return;
+
+    if (this.loading ) return;
 
     const el = event.target as HTMLElement;
-    const threshold = 80;
+    const threshold = 60;
 
     if (el.scrollTop + el.clientHeight >= el.scrollHeight - threshold) {
       this.loadMore.emit();
+
     }
   }
 
@@ -54,6 +72,10 @@ export class FileGalleryComponent {
     } else {
       this.selectedFileIds.delete(event.id);
     }
+    this.selectionChanged.emit([...this.selectedFileIds]);
+  }
+  OnFileDelete(e:string[]){
+   this.deleteFiles.emit(e);
   }
 
   clearSelection() {
@@ -65,27 +87,22 @@ export class FileGalleryComponent {
     });
   }
 
-  deleteAllSelected() {
-    this.files = this.files.filter(
-      f => !this.selectedFileIds.has(f.id)
-    );
-    this.clearSelection();
-  }
-
-  downloadAllSelected() {
-    const selectedFiles = this.files.filter(
-      f => this.selectedFileIds.has(f.id)
-    );
-    console.log('Downloading:', selectedFiles);
-  }
   onShowAddCollectionOverlay(fileId:string){
     this.selectedFileId=fileId
     this.showAddCollectionOverlay.emit(this.selectedFileId);
   }
 
   onFileEdit(e:FileRow){
-    console.log("File to edit",e);
-    this.editFile = e;
+    const file:UploadItem = {
+       id: e.id,
+        name: e.name,
+        description: e.description,
+        tags: e.tags,
+        stage: 'ready',
+        progress:100,
+      previewUrl:e.thumbnail_link,
+    }
+    this.editFile = [file];
     this.editFileOverlayOpen = true;
   }
 
@@ -97,7 +114,6 @@ export class FileGalleryComponent {
 
 /* ---------------- Create Collection ---------------- */
 onCreate(event: CollectionRequest) {
-  console.log('Create collection triggered:', event);
 
   const newCollection = {
     id: crypto.randomUUID(),
@@ -108,13 +124,11 @@ onCreate(event: CollectionRequest) {
   // Dummy add (prepend)
   this.files = [newCollection, ...this.files];
 
-  console.log('Updated collections list:', this.files);
 
 }
 
 /* ---------------- Select Existing Collection ---------------- */
 onSelect(collection: any) {
-  console.log('Collection selected:', collection);
 
   // Dummy action – later replace with API call
   // this.fileService.addToCollection(fileIds, collection.id)

@@ -1,9 +1,11 @@
 package com.example.DocHub.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class VerifyOtpRequest {
 
-    private String email;
-    private String otp;
+    @JsonProperty("email") private String email;
+  @JsonProperty("otp")  private String otp;
 
     public String getEmail() {
         return email;

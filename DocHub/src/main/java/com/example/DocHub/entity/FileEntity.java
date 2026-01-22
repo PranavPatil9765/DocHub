@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.DocHub.dto.Enums.FileStatus;
+
 @Entity
 @Table(name = "files")
 @Getter
@@ -17,7 +19,6 @@ import java.util.UUID;
 public class FileEntity {
 
     @Id
-    @GeneratedValue
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -27,6 +28,18 @@ public class FileEntity {
     private String telegramFileId;
     private String thumbnailLink;
     private String name;
+
+    private Integer uploadProgress; // 0–100 (ONLY used during upload)
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FileStatus status;
+
+     @Column(columnDefinition = "TEXT")
+    private String tempFilePath;
+
+    @Column(columnDefinition = "TEXT")
+    private String errorMessage;
 
     @Column(columnDefinition = "TEXT")
     private String description;

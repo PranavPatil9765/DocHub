@@ -1,23 +1,29 @@
-<!-- Floating + Button -->
+
+
 <!-- Drag Overlay -->
 @if (isDragging && mode !== 'edit') {
 <div
-  class="fixed inset-0 z-[60] bg-blue-600/30 backdrop-blur-sm flex items-center justify-center pointer-events-none"
+  class="fixed inset-0 z-[60] bg-blue-600/30 backdrop-blur-sm
+         flex items-center justify-center pointer-events-none"
 >
   <div
-    class="bg-white rounded-2xl border-2 border-dashed border-blue-500 px-10 py-8 text-center shadow-2xl"
+    class="bg-white rounded-2xl border-2 border-dashed border-blue-500
+           px-10 py-8 text-center shadow-2xl"
   >
     <div class="text-5xl mb-3">📂</div>
-
     <h3 class="text-lg font-semibold text-blue-700">Drop file to upload</h3>
-
     <p class="text-sm text-blue-500 mt-1">Release your mouse to continue</p>
   </div>
 </div>
-} @if (mode !== 'edit') {
+}
+
+<!-- Floating Add Button -->
+@if (mode !== 'edit') {
 <button
   (click)="open()"
-  class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold shadow-sm hover:bg-blue-700 active:scale-95 transition"
+  class="flex items-center gap-2 px-3 py-2 rounded-lg
+         bg-blue-600 text-white text-sm font-semibold
+         shadow-sm hover:bg-blue-700 active:scale-95 transition"
 >
   <span class="text-lg leading-none">+</span>
   Add
@@ -26,131 +32,180 @@
 
 <!-- Overlay -->
 @if (isOpen) {
-<div class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
-  <!-- Popover -->
+<div class="fixed inset-0 z-50 bg-blue-900/30 backdrop-blur-sm
+            flex justify-center items-center">
+
+  <!-- MODAL -->
   <div
-    class="w-[420px] max-w-full bg-white rounded-2xl shadow-2xl border border-blue-100 p-6 space-y-4"
+    class="relative bg-white w-full h-full
+           sm:w-[820px] sm:h-[540px]
+           rounded-none sm:rounded-2xl
+           shadow-2xl flex flex-col sm:flex-row overflow-hidden"
   >
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-      <h3 class="text-lg font-semibold text-blue-700">
-        {{ mode === 'edit' ? 'Edit File' : 'Upload File' }}
-      </h3>
 
-      <button class="text-gray-400 hover:text-red-500" (click)="close()">✕</button>
-    </div>
+    <!-- CLOSE BUTTON (ALWAYS VISIBLE) -->
+    <button
+      (click)="deletefiles()"
+      class="absolute top-3 right-3 z-50
+             w-9 h-9 rounded-full bg-white
+             text-gray-600 border shadow
+             hover:bg-red-50 hover:text-red-600
+             active:scale-95 transition"
+    >
+      ✕
+    </button>
 
-    <!-- ================= STEP 1 ================= -->
-    @if (step === 1 && mode !== 'edit') {
-    <div class="animate-step-in">
-      <label
-        class="flex flex-col items-center justify-center border-2 border-dashed border-blue-300 rounded-xl p-8 cursor-pointer hover:bg-blue-50 transition"
-      >
-        <span class="text-blue-600 text-4xl mb-2">⬆️</span>
-        <span class="text-sm text-gray-600"> Click to upload file </span>
-
-        <input type="file" class="hidden" (change)="onFileSelected($event)" />
+    <!-- LEFT TABS -->
+    <div
+      class="sm:w-56 w-full bg-blue-50
+             border-b sm:border-b-0 sm:border-r
+             p-3 space-y-2 overflow-x-auto sm:overflow-y-auto
+             flex sm:flex-col gap-2"
+    >
+      <label class="text-sm font-semibold text-blue-700">
+        Upload Files
       </label>
-    </div>
-    }
 
-    <!-- ================= STEP 2 ================= -->
-    @if (step === 2) {
-    <div class="animate-step-in space-y-4">
-      <!-- Preview -->
-      <!-- Preview -->
-      <div
-        class="w-full h-40 rounded-xl border flex flex-col items-center justify-center bg-blue-50 text-blue-700"
+      @if (mode !== 'edit') {
+      <label
+        class="border-2 border-dashed border-blue-300 rounded-xl
+               px-4 py-2 text-center cursor-pointer
+               hover:bg-blue-100 transition"
       >
-        <!-- Thumbnail preview -->
-        @if (previewUrl) {
-        <img
-          [src]="previewUrl"
-          class="w-full h-full object-contain rounded-xl"
-          alt="File preview"
-        />
-        }
-        <!-- Icon fallback -->
-        @else {
-        <i [class]="FILE_TYPE_ICON[fileType] + ' ' + FILE_TYPE_COLOR[fileType] + ' text-5xl'"></i>
+        <span class="text-blue-600 text-sm">➕ Add Files</span>
+        <input type="file" multiple hidden (change)="onFilesSelected($event)" />
+      </label>
+      }
 
-        <span class="mt-2 text-sm font-medium text-blue-700">
-          {{ fileTypeLabel }}
-        </span>
-        }
+      @for (file of uploads; track file.id; let i = $index) {
+      <div
+        (click)="activeIndex = i"
+        class="relative p-3 rounded-xl cursor-pointer border transition"
+        [class.bg-blue-100]="i === activeIndex"
+        [class.bg-green-100]="file.progress === 100"
+      >
+        <div class="text-sm font-medium truncate">{{ file.name }}</div>
+
+        <div class="h-1 mt-2 bg-gray-200 rounded">
+          <div
+            class="h-full bg-blue-500 rounded transition-all"
+            [style.width.%]="file.progress"
+          ></div>
+        </div>
+
+        <button
+          class="absolute top-1 right-2 text-xs text-red-500"
+          (click)="removeUpload(i); $event.stopPropagation()"
+        >✕</button>
+      </div>
+      }
+    </div>
+
+    <!-- RIGHT PANEL -->
+    @if (active) {
+    <div class="flex-1 p-4 sm:p-5 space-y-4 overflow-y-auto">
+
+      <!-- PROGRESS WITH STAGES -->
+      <div class="relative mt-2">
+
+        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            class="h-full rounded-full transition-all duration-700 ease-out"
+            [ngClass]="{
+              'bg-gray-400': active.stage === 'initiated',
+              'bg-blue-500': active.stage === 'queued',
+              'bg-indigo-500': active.stage === 'uploaded',
+              'bg-purple-500': active.stage === 'tagging',
+              'bg-green-600': active.stage === 'ready'
+            }"
+            [style.width.%]="stageProgress(active.stage)"
+          ></div>
+        </div>
+
+        <!-- CHECKPOINTS -->
+        <div class="absolute inset-0 flex justify-between items-center px-1">
+          @for (stage of stagesWithStatus(active.stage); track stage.key) {
+          <div class="relative group">
+            <div
+              class="w-3 h-3 rounded-full border-2 transition-all"
+              [ngClass]="{
+                'bg-green-600 border-green-600': stage.done,
+                'bg-white border-gray-400': !stage.done
+              }"
+            ></div>
+
+            <div
+              class="absolute -top-8 left-1/2 -translate-x-1/2
+                     text-xs whitespace-nowrap bg-black text-white
+                     px-2 py-1 rounded opacity-0
+                     group-hover:opacity-100 transition"
+            >
+              {{ stage.label }}
+            </div>
+          </div>
+          }
+        </div>
+
       </div>
 
-      <!-- Title -->
+      <!-- PREVIEW -->
+      @if(active.previewUrl){
+
+        <img
+        *ngIf="active.previewUrl"
+        [src]="active.previewUrl"
+        class="h-40 w-full object-contain border rounded-xl bg-blue-50"
+        />
+      }@else{
+        <div class="h-40 w-full object-contain flex justify-center items-center border rounded-xl bg-blue-50">
+          <i
+          [class]="
+            FILE_TYPE_ICON['DOCUMENT'] + ' ' + FILE_TYPE_COLOR['DOCUMENT'] + ' text-4xl'
+          "
+        ></i>
+        </div>
+      }
+
+      <!-- TITLE -->
       <input
-        type="text"
+        class="w-full border rounded-lg px-4 py-2
+               focus:ring-2 focus:ring-blue-400"
+        [(ngModel)]="active.name"
         placeholder="Title"
-        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-        [(ngModel)]="title"
       />
 
-      <!-- Description -->
+      <!-- DESCRIPTION -->
       <textarea
         rows="2"
-        placeholder="Description (optional)"
-        class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-        [(ngModel)]="description"
+        class="w-full border rounded-lg px-4 py-2
+               focus:ring-2 focus:ring-blue-400"
+        [(ngModel)]="active.description"
+        placeholder="Description"
       ></textarea>
 
-      <!-- Tags -->
-      <div class="border-2 border-blue-200 rounded-xl p-4 bg-blue-50 space-y-3">
-        <!-- Header -->
-        <div class="flex items-center justify-between">
-          <h4 class="text-sm font-semibold text-blue-800">
-            Tags <span class="text-blue-500">(required)</span>
-          </h4>
-
-          <span class="text-xs text-blue-500"> Helps smart search & organization </span>
-        </div>
-
-        <!-- Loader -->
-        @if (isTagsLoading) {
-        <div class="space-y-2">
-          <div class="h-6 w-24 bg-blue-200 rounded-full animate-pulse"></div>
-          <div class="h-6 w-32 bg-blue-200 rounded-full animate-pulse"></div>
-          <div class="h-6 w-20 bg-blue-200 rounded-full animate-pulse"></div>
-        </div>
-        }
-
-        <!-- Tags Display -->
-        @else {
-        <!-- Tags Display (Scrollable) -->
-        <div
-          class="flex gap-2 flex-wrap min-h-[40px] max-h-[120px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-transparent"
-        >
-          @if (tags.length === 0) {
-          <span class="text-sm text-blue-500 italic"> No tags added yet </span>
-          } @for (tag of tags; track tag) {
+      <!-- TAGS -->
+      <div class="border-2 border-blue-200 rounded-xl p-4 bg-blue-50">
+        <div class="flex gap-2 flex-wrap mb-2">
+          @for (tag of active.tags; track tag) {
           <span
-            class="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-full text-sm shadow-sm"
+            class="bg-blue-600 text-white px-3 py-1 rounded-full
+                   text-sm flex gap-2 items-center"
           >
             {{ tag }}
-
-            <button class="text-white/80 hover:text-red-300 transition" (click)="removeTag(tag)">
-              ✕
-            </button>
+            <button (click)="removeTag(tag)">✕</button>
           </span>
           }
         </div>
 
-        }
-
-        <!-- Input -->
         <div class="flex gap-2">
           <input
-            type="text"
-            placeholder="Add tag (e.g. invoice, resume, project)"
-            class="flex-1 border-2 border-blue-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+            class="flex-1 border rounded-lg px-3 py-2"
+            placeholder="Add tag"
             [(ngModel)]="tagInput"
             (keyup.enter)="addTag()"
           />
-
           <button
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            class="bg-blue-600 text-white px-4 rounded-lg"
             (click)="addTag()"
           >
             Add
@@ -158,14 +213,25 @@
         </div>
       </div>
 
-      <!-- Submit -->
-      <button
-        class="w-full py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 transition"
-        [disabled]="!canUpload()"
-        (click)="submit()"
-      >
-        {{ mode === 'edit' ? 'Update' : 'Upload' }}
-      </button>
+      <!-- ACTIONS -->
+      <div class="flex gap-3 pt-2">
+        <button
+          class="flex-1 py-2 bg-blue-600 text-white
+                 rounded-lg disabled:bg-blue-300"
+          [disabled]="!canUploadAll()"
+          (click)="uploadAll()"
+        >
+          Upload All
+        </button>
+
+        <button
+          class="px-4 py-2 text-red-500 border rounded-lg"
+          (click)="deletefiles()"
+        >
+          Cancel
+        </button>
+
+      </div>
     </div>
     }
   </div>

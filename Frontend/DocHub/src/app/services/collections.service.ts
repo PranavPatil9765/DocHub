@@ -22,10 +22,20 @@ export class CollectionService {
   updateCollection(id: string, payload: CollectionRequest){
     return this.http.put(`${this.api}/collections/${id}`, payload);
   }
-  AddFilesInCollection(id: string, payload: {fileIds:string[]}){
+  AddFilesInCollection(id: string,fileIds:string[]){
+    const payload = {fileIds:fileIds};
     return this.http.post(`${this.api}/collections/${id}/files`, payload);
+  }
+  RemoveFilesInCollection(id: string,fileIds:string[]){
+    const payload = {fileIds:fileIds};
+    return this.http.post(`${this.api}/collections/${id}/files/remove`, payload);
   }
   createCollection(Collection:CollectionRequest) {
     return this.http.post<any>(`${this.api}/collections`,Collection);
+  }
+  getDefaultCollections(collectionName:string|null){
+
+      return this.http.get<any>(`${this.api}/collections/default/${collectionName}`);
+
   }
 }

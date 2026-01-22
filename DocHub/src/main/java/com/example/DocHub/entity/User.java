@@ -25,6 +25,7 @@ public class User {
 
     private String fullName;
 
-    private Long storageUsedBytes = 0L;
+    @Column(nullable = false)
+    private Long storageUsedBytes;
 
 }

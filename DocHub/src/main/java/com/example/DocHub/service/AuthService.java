@@ -32,6 +32,7 @@ public class AuthService {
                 .email(req.email())
                 .password(encoder.encode(req.password()))
                 .fullName(req.fullName())
+                .storageUsedBytes(0L)
                 .build();
 
         repo.save(user);

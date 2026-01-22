@@ -22,13 +22,18 @@ public class TelegramService {
     @Value("${telegram.bot-token}")
     private String botToken;
 
-    // ✅ Keep as String (Telegram IDs can exceed Integer range)
+    // Telegram channel or chat ID
     @Value("${telegram.channel-id}")
     private String channelId;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public TelegramUploadResult sendDocument(String filename, File file) {
+    public TelegramUploadResult upload(String filePath, String filename) {
+
+        File file = new File(filePath);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File not found at path: " + filePath);
+        }
 
         String url = "https://api.telegram.org/bot" + botToken + "/sendDocument";
 
@@ -46,10 +51,14 @@ public class TelegramService {
         ResponseEntity<Map> response =
                 restTemplate.postForEntity(url, request, Map.class);
 
-        Map result = (Map) response.getBody().get("result");
-        Map document = (Map) result.get("document");
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new RuntimeException("Telegram upload failed");
+        }
 
-        // ✅ SAFE conversion (Integer OR Long)
+        Map<?, ?> result = (Map<?, ?>) response.getBody().get("result");
+        Map<?, ?> document = (Map<?, ?>) result.get("document");
+
+        // Telegram can return Integer or Long
         Number fileSizeNumber = (Number) document.get("file_size");
         Long fileSize = fileSizeNumber != null ? fileSizeNumber.longValue() : null;
 
@@ -59,3 +68,4 @@ public class TelegramService {
         );
     }
 }
+

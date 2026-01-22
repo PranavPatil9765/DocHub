@@ -1,16 +1,16 @@
+import { FILE_TYPE_COLOR, FILE_TYPE_ICON, SearchSuggestion } from './../../models/file.model';
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FileRow } from '../../models/file.model';
-import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog';
+import { ElaticSearchBar } from "../elatic-search-bar/elatic-search-bar";
 
 @Component({
   selector: 'app-file-table',
-  templateUrl: './file-table.html',
-  imports:[CommonModule,ConfirmDialogComponent]
+  standalone: true,
+  imports: [CommonModule, FormsModule, ElaticSearchBar],
+  templateUrl: './file-table.html'
 })
-
-
-
 export class FileTableComponent {
 
   /* ---------- INPUTS ---------- */
@@ -18,47 +18,54 @@ export class FileTableComponent {
   @Input() loading = false;
   @Input() hasMore = true;
   @Input() selectable = true;
-
+  FILE_TYPE_COLOR = FILE_TYPE_COLOR
+  FILE_TYPE_ICON = FILE_TYPE_ICON
+  @Input() FileSearchSuggestions:SearchSuggestion[] = []
   /* ---------- OUTPUTS ---------- */
   @Output() loadMore = new EventEmitter<void>();
-  @Output() selectionChange = new EventEmitter<FileRow[]>();
-  @Output() open = new EventEmitter<FileRow>();
-  @Output() download = new EventEmitter<FileRow>();
-  @Output() edit = new EventEmitter<FileRow>();
-  @Output() delete = new EventEmitter<FileRow>();
-  @Output() deleteSelected = new EventEmitter<string[]>();
-  @Output() downloadSelected = new EventEmitter<string[]>();
-  @Output() clearSelection = new EventEmitter<void>();
+  @Output() confirm = new EventEmitter<FileRow[]>();
+  @Output() searchSuggestion = new EventEmitter<string>();
+  @Output() search = new EventEmitter<string>();
 
+  /* ---------- UI STATE ---------- */
+  showOverlay = false;
 
-  selected = new Set<string>();
-  showDeleteConfirm = false;
   /* ---------- SELECTION ---------- */
-  toggleAll(checked: boolean) {
-    if (checked) {
-      this.files.forEach(f => this.selected.add(f.id));
-    } else {
-      this.selected.clear();
-    }
-    this.emitSelection();
+  selected = new Set<string>();
+
+  openOverlay() {
+    this.loadMore.emit();
+    this.showOverlay = true;
+  }
+
+  closeOverlay() {
+    this.showOverlay = false;
+    this.clearAllSelection();
   }
 
   toggleOne(id: string) {
     this.selected.has(id)
       ? this.selected.delete(id)
       : this.selected.add(id);
-    this.emitSelection();
   }
 
-  isAllSelected() {
-    return this.files.length > 0 && this.selected.size === this.files.length;
+  get selectedCount(): number {
+    return this.selected.size;
   }
 
-  emitSelection() {
-    this.selectionChange.emit(
-      this.files.filter(f => this.selected.has(f.id))
+  clearAllSelection() {
+    this.selected.clear();
+  }
+
+  confirmSelection() {
+    const selectedFiles = this.files.filter(f =>
+      this.selected.has(f.id)
     );
+    this.confirm.emit(selectedFiles);
+    this.closeOverlay();
   }
+
+
 
   /* ---------- UTILS ---------- */
   readableSize(bytes: number) {
@@ -69,33 +76,14 @@ export class FileTableComponent {
     return `assets/icons/${type}.svg`;
   }
 
-  get selectedCount(): number {
-  return this.selected.size;
-}
-
-clearAllSelection() {
-  this.selected.clear();
-  this.emitSelection();
-  this.clearSelection.emit();
-}
-
-deleteAllSelected() {
-  const ids = Array.from(this.selected);
-  this.deleteSelected.emit(ids);
-}
-
-downloadAllSelected() {
-  const ids = Array.from(this.selected);
-  this.downloadSelected.emit(ids);
-}
-
   /* ---------- INFINITE SCROLL ---------- */
   onScroll(event: Event) {
     const el = event.target as HTMLElement;
-    const atBottom =
-      el.scrollHeight - el.scrollTop <= el.clientHeight + 50;
-
-    if (atBottom && !this.loading && this.hasMore) {
+    if (
+      el.scrollHeight - el.scrollTop <= el.clientHeight + 50 &&
+      !this.loading &&
+      this.hasMore
+    ) {
       this.loadMore.emit();
     }
   }

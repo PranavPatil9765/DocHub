@@ -136,6 +136,7 @@ public class CollectionService {
 
                 collection.getFiles()
                                 .removeIf(file -> fileIds.contains(file.getId()));
+                                 repository.save(collection);
         }
 
 
@@ -169,5 +170,55 @@ public class CollectionService {
                 return new ApiResponse<>(true, "File/s Added Successfully", null);
 
         }
+@Transactional(readOnly = true)
+public CollectionWithFilesResponse getDefaultCollection(
+        String collectionName
+) {
+
+    User user = UserUtil.getCurrentUser();
+
+    List<FileEntity> files;
+
+    switch (collectionName) {
+
+        case "Images":
+            files = fileRepository.findByUserAndFileType(
+                    user,
+                    "IMAGE"
+            );
+            break;
+
+        case "Documents":
+            files = fileRepository.findByUserAndFileType(
+                    user,
+                    "DOCUMENT"
+            );
+            break;
+
+        case "Favourites":
+            files = fileRepository.findByUserAndIsFavouriteTrue(user);
+            break;
+
+        default:
+            throw new AppException.BadRequestException(
+                    "Invalid default collection: " + collectionName
+            );
+    }
+
+    // ✅ Convert FileEntity → FileResponse
+    List<FileResponse> fileResponses = files.stream()
+            .map(FileResponse::from)
+            .toList();
+
+    // ✅ Virtual collection response
+    return  CollectionWithFilesResponse.builder()
+                    .collectionId(null) // virtual
+                    .name(collectionName)
+                    .description("Default " + collectionName + " collection")
+                    .icon("")
+                    .files(fileResponses)
+                    .createdAt(null)
+                    .build();
+}
 
 }

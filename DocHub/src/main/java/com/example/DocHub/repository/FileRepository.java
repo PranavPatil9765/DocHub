@@ -1,6 +1,7 @@
 package com.example.DocHub.repository;
 
 import com.example.DocHub.entity.FileEntity;
+import com.example.DocHub.entity.User;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -15,31 +16,51 @@ import java.util.UUID;
 public interface FileRepository extends JpaRepository<FileEntity, UUID> {
 
     /* ================= SEARCH ================= */
-
-  @Query(value = """
-    SELECT *
+@Query(value = """
+  SELECT *
+FROM (
+    SELECT f.*,
+      (
+        ts_rank_cd(f.search_vector, plainto_tsquery('english', :query)) * 5 +
+        similarity(unaccent(lower(f.name)), unaccent(lower(:query))) * 3 +
+        similarity(unaccent(lower(f.description)), unaccent(lower(:query))) * 1
+      ) AS rank_score
     FROM files f
     WHERE f.user_id = :userId
+
     AND (
-        :query IS NULL
-        OR length(trim(:query)) = 0
-        OR f.search_vector @@ plainto_tsquery('english', :query)
-        OR unaccent(lower(f.name)) ILIKE '%' || unaccent(lower(:query)) || '%'
-        OR unaccent(lower(f.description)) ILIKE '%' || unaccent(lower(:query)) || '%'
-        OR similarity(unaccent(lower(f.name)), unaccent(lower(:query))) > 0.35
-        OR similarity(unaccent(lower(f.description)), unaccent(lower(:query))) > 0.30
+      :query IS NULL
+      OR length(trim(:query)) = 0
+      OR f.search_vector @@ plainto_tsquery('english', :query)
+      OR unaccent(lower(f.name)) ILIKE '%' || unaccent(lower(:query)) || '%'
+      OR unaccent(lower(f.description)) ILIKE '%' || unaccent(lower(:query)) || '%'
+      OR similarity(unaccent(lower(f.name)), unaccent(lower(:query))) > 0.35
+      OR similarity(unaccent(lower(f.description)), unaccent(lower(:query))) > 0.30
     )
+
     AND (:fileType IS NULL OR f.file_type = :fileType)
     AND (:favourite IS NULL OR f.is_favourite = :favourite)
     AND (:minSize IS NULL OR f.file_size >= :minSize)
     AND (:maxSize IS NULL OR f.file_size <= :maxSize)
+
     AND (
-        CAST(:cursorTime AS timestamp) IS NULL OR
-        (f.uploaded_at, f.id) < (
-            CAST(:cursorTime AS timestamp),
-            CAST(:cursorId AS uuid)
-        )
+      CAST(:cursorTime AS timestamp) IS NULL OR
+      f.uploaded_at < CAST(:cursorTime AS timestamp) OR
+      (
+        f.uploaded_at = CAST(:cursorTime AS timestamp)
+        AND f.id < CAST(:cursorId AS uuid)
+      )
     )
+) ranked
+ORDER BY
+  CASE
+    WHEN :query IS NOT NULL AND length(trim(:query)) > 0
+      THEN ranked.rank_score
+    ELSE NULL
+  END DESC,
+  ranked.uploaded_at DESC,
+  ranked.id DESC
+
     """,
     nativeQuery = true)
 List<FileEntity> searchFiles(
@@ -53,8 +74,6 @@ List<FileEntity> searchFiles(
     @Param("cursorId") UUID cursorId,
     Pageable pageable
 );
-
-
 
     /* ================= OWNERSHIP ================= */
 
@@ -143,5 +162,13 @@ List<FileEntity> searchFiles(
     ORDER BY day
 """, nativeQuery = true)
 List<Object[]> storageUsedByDate(@Param("userId") UUID userId);
+
+
+List<FileEntity> findByUserAndFileType(
+        User user,
+        String file_type
+);
+
+List<FileEntity> findByUserAndIsFavouriteTrue(User user);
 
 }

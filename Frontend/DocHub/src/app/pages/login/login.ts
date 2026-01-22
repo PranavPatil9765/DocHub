@@ -44,8 +44,8 @@ export class LoginComponent {
         this.toast.success('Login successfully!');
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
-        this.toast.show('Invalid credentials', 'error');
+      error: (err) => {
+        this.toast.show(err?.error.message);
       }
     });
 }

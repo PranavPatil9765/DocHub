@@ -59,22 +59,34 @@
       [hasMore]="hasMore"
       (loadMore)="fetchNextPage()"
       (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
+      (selectionChanged)="onSelectionChanges($event)"
+      [clearFileSelection]="clearSelectedFiles"
+      (deleteFiles)="OnFileDelete($event)"
     >
     </app-file-gallery>
   </div>
 </div>
-@if(showAddtoCollectionOverlay){
-<app-add-collection
-  [collections]="collectionsToShow"
-  [fileId]="AddtoCollectionFileId"
-  (searchSuggestion)="onCollectionSearchSuggestion($event)"
-  (search)="onCollectionsearch($event)"
-  [suggestions]="CollectionSuggestion"
-  mode="both"
-  (createCollection)="onCreateCollection($event)"
-  (selectCollection)="onAddtoCollection($event)"
-  (close)="closeAddToCollectionOverlay()"
-  [loading]="loadingCollections"
->
-</app-add-collection>
+@if (showAddtoCollectionOverlay) {
+  <app-add-collection
+    [collections]="collectionsToShow"
+    [fileId]="AddtoCollectionFileId"
+    (searchSuggestion)="onCollectionSearchSuggestion($event)"
+    (search)="onCollectionsearch($event)"
+    [suggestions]="CollectionSuggestion"
+    mode="both"
+    (createCollection)="onCreateCollection($event)"
+    (selectCollection)="onAddtoCollection($event)"
+    (close)="closeAddToCollectionOverlay()"
+    [loading]="loadingCollections"
+  >
+  </app-add-collection>
 }
+<app-bottom-bar
+  [mode]="'file'"
+  [selectedCount]="selectedFileIds.length"
+  [selectedFileIds]="selectedFileIds"
+  (clear)="clearSelection()"
+  (download)="downloadSelectedFiles($event)"
+  (delete)="OnFileDelete($event)"
+>
+</app-bottom-bar>

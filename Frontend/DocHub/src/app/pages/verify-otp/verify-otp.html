@@ -56,7 +56,12 @@
                text-white font-semibold py-3 rounded-xl
                shadow-lg shadow-blue-500/40 transition-all"
       >
+      @if(loading){
+        <app-spinner></app-spinner>
+      }@else{
+
         Verify OTP
+      }
       </button>
 
     </form>
