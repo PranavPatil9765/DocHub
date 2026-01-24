@@ -2,6 +2,7 @@ package com.example.DocHub.controller;
 
 import com.example.DocHub.dto.request.AddFilesToCollectionRequest;
 import com.example.DocHub.dto.request.CollectionRequest;
+import com.example.DocHub.dto.request.CollectionsIdsRequest;
 import com.example.DocHub.dto.request.FileIdsRequest;
 import com.example.DocHub.dto.response.ApiResponse;
 import com.example.DocHub.dto.response.CollectionResponse;
@@ -42,40 +43,50 @@ public class CollectionController {
     @GetMapping("/{collectionId}")
     public ResponseEntity<CollectionWithFilesResponse> getOne(
             @PathVariable("collectionId") UUID collectionId) {
-        return ResponseEntity.ok(service.getCollectionWithFiles( collectionId));
+        return ResponseEntity.ok(service.getCollectionWithFiles(collectionId));
     }
+
 
     /* GET COLLECTION + FILE IDS */
     @GetMapping("/default/{collectionName}")
     public ResponseEntity<CollectionWithFilesResponse> getDefault(
             @PathVariable("collectionName") String collectionName) {
-        return ResponseEntity.ok(service.getDefaultCollection( collectionName));
+        return ResponseEntity.ok(service.getDefaultCollection(collectionName));
     }
+
+   /* DELETE MULTIPLE COLLECTIONS */
+    @DeleteMapping
+    public ResponseEntity<ApiResponse<Void>> deleteMultiple(
+            @RequestBody CollectionsIdsRequest request
+    ) {
+        return ResponseEntity.ok(
+             service.deleteCollections(request.getCollectionIds())
+        );
+    }
+
 
     /* UPDATE */
     @PutMapping("/{collectionId}")
     public ResponseEntity<?> update(
-        @PathVariable("collectionId") UUID collectionId,
+            @PathVariable("collectionId") UUID collectionId,
             @RequestBody CollectionRequest req) {
-        return ResponseEntity.ok(service.update( collectionId, req));
+        return ResponseEntity.ok(service.update(collectionId, req));
     }
 
     /* REMOVE MULTIPLE FILES FROM COLLECTION */
     @PostMapping("/{collectionId}/files/remove")
     public ResponseEntity<?> removeFiles(
-        @PathVariable("collectionId") UUID collectionId,
+            @PathVariable("collectionId") UUID collectionId,
             @RequestBody FileIdsRequest request) {
-        service.removeFiles( collectionId, request.getFileIds());
+        service.removeFiles(collectionId, request.getFileIds());
         return ResponseEntity.ok().build();
     }
 
-     @PostMapping("/{collectionId}/files")
+    @PostMapping("/{collectionId}/files")
     public ApiResponse<?> addFilesToCollection(
             @PathVariable("collectionId") UUID collectionId,
-            @RequestBody AddFilesToCollectionRequest request
-    ) {
+            @RequestBody AddFilesToCollectionRequest request) {
         return service.addFilesToCollection(collectionId, request.getFileIds());
     }
-
 
 }

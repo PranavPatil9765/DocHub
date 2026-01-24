@@ -18,25 +18,27 @@ public class FileResponse {
 
     private UUID id;
     private String name;
-    private String fileType;
+    private String type;
     private String description;
-    private Long fileSize;
-    private String thumbnailLink;
+    private Long size;
+    private String previewUrl;
     private boolean isFavourite;
     private List<String>tags;
     private LocalDateTime uploadedAt;
+    private String status;
 
     public static FileResponse from(FileEntity file) {
         return FileResponse.builder()
                 .id(file.getId())
                 .name(file.getName())
-                .fileType(file.getFileType())
+                .type(file.getFileType())
                 .tags(file.getTags())
                 .description(file.getDescription())
-                .fileSize(file.getFileSize())
-                .thumbnailLink(file.getThumbnailLink())
+                .size(file.getFileSize())
+                .previewUrl(file.getThumbnailLink())
                 .isFavourite(file.isFavourite())
                 .uploadedAt(file.getUploadedAt())
+                .status(file.getStatus().toString())
                 .build();
     }
 }

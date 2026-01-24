@@ -52,7 +52,11 @@ public class FileEntity {
     private boolean isFavourite;
     private LocalDateTime uploadedAt;
 
-    @ManyToMany(mappedBy = "files")
+     @OneToMany(
+        mappedBy = "files",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
     private List<CollectionEntity> collections;
 
     @Column(columnDefinition = "tsvector", insertable = false, updatable = false)

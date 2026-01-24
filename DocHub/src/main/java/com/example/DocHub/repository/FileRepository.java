@@ -1,5 +1,6 @@
 package com.example.DocHub.repository;
 
+import com.example.DocHub.dto.Enums.FileStatus;
 import com.example.DocHub.entity.FileEntity;
 import com.example.DocHub.entity.User;
 
@@ -170,5 +171,8 @@ List<FileEntity> findByUserAndFileType(
 );
 
 List<FileEntity> findByUserAndIsFavouriteTrue(User user);
+
+List<FileEntity> findByStatus(FileStatus status);
+
 
 }

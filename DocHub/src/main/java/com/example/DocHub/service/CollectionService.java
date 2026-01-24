@@ -1,6 +1,7 @@
 package com.example.DocHub.service;
 
 import com.example.DocHub.dto.request.CollectionRequest;
+import com.example.DocHub.dto.request.CollectionsIdsRequest;
 import com.example.DocHub.dto.response.ApiResponse;
 import com.example.DocHub.dto.response.CollectionResponse;
 import com.example.DocHub.dto.response.CollectionWithFilesResponse;
@@ -15,8 +16,10 @@ import com.example.DocHub.utils.UserUtil;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -58,6 +61,24 @@ public class CollectionService {
                 return new ApiResponse<>(true, "Collection Created Successfully", null);
         }
 
+        /* DELETE MULTIPLE COLLECTIONS */
+        @Transactional
+        public ApiResponse<Void> deleteCollections(List<UUID> collectionIds) {
+
+                if (collectionIds == null || collectionIds.isEmpty()) {
+                        throw new AppException.BadRequestException("Invalid Collection");
+                }
+                UUID userId = UserUtil.getCurrentUser().getId();
+                List<CollectionEntity> collections = repository.findAllByIdInAndUserId(collectionIds,userId);
+
+                if (collections.isEmpty()) {
+                      throw new AppException.ResourceNotFoundException("Collection Not Found");
+                }
+
+                repository.deleteAll(collections);
+                return new ApiResponse<Void>(true,"Collection Deleted Successfully", null);
+        }
+
         /* ================= GET USER COLLECTIONS ================= */
 
         public ApiResponse<List<CollectionResponse>> getUserCollections() {
@@ -67,7 +88,7 @@ public class CollectionService {
                 List<CollectionEntity> collections = repository.findByUser_id(user.getId());
 
                 List<CollectionResponse> response = collections.stream()
-                                .map(CollectionResponse::from )
+                                .map(CollectionResponse::from)
                                 .toList();
 
                 return new ApiResponse<>(
@@ -136,9 +157,8 @@ public class CollectionService {
 
                 collection.getFiles()
                                 .removeIf(file -> fileIds.contains(file.getId()));
-                                 repository.save(collection);
+                repository.save(collection);
         }
-
 
         @Transactional
         public ApiResponse<?> addFilesToCollection(UUID collectionId, List<UUID> fileIds) {
@@ -170,55 +190,52 @@ public class CollectionService {
                 return new ApiResponse<>(true, "File/s Added Successfully", null);
 
         }
-@Transactional(readOnly = true)
-public CollectionWithFilesResponse getDefaultCollection(
-        String collectionName
-) {
 
-    User user = UserUtil.getCurrentUser();
+        @Transactional(readOnly = true)
+        public CollectionWithFilesResponse getDefaultCollection(
+                        String collectionName) {
 
-    List<FileEntity> files;
+                User user = UserUtil.getCurrentUser();
 
-    switch (collectionName) {
+                List<FileEntity> files;
 
-        case "Images":
-            files = fileRepository.findByUserAndFileType(
-                    user,
-                    "IMAGE"
-            );
-            break;
+                switch (collectionName) {
 
-        case "Documents":
-            files = fileRepository.findByUserAndFileType(
-                    user,
-                    "DOCUMENT"
-            );
-            break;
+                        case "Images":
+                                files = fileRepository.findByUserAndFileType(
+                                                user,
+                                                "IMAGE");
+                                break;
 
-        case "Favourites":
-            files = fileRepository.findByUserAndIsFavouriteTrue(user);
-            break;
+                        case "Documents":
+                                files = fileRepository.findByUserAndFileType(
+                                                user,
+                                                "DOCUMENT");
+                                break;
 
-        default:
-            throw new AppException.BadRequestException(
-                    "Invalid default collection: " + collectionName
-            );
-    }
+                        case "Favourites":
+                                files = fileRepository.findByUserAndIsFavouriteTrue(user);
+                                break;
 
-    // ✅ Convert FileEntity → FileResponse
-    List<FileResponse> fileResponses = files.stream()
-            .map(FileResponse::from)
-            .toList();
+                        default:
+                                throw new AppException.BadRequestException(
+                                                "Invalid default collection: " + collectionName);
+                }
 
-    // ✅ Virtual collection response
-    return  CollectionWithFilesResponse.builder()
-                    .collectionId(null) // virtual
-                    .name(collectionName)
-                    .description("Default " + collectionName + " collection")
-                    .icon("")
-                    .files(fileResponses)
-                    .createdAt(null)
-                    .build();
-}
+                // ✅ Convert FileEntity → FileResponse
+                List<FileResponse> fileResponses = files.stream()
+                                .map(FileResponse::from)
+                                .toList();
+
+                // ✅ Virtual collection response
+                return CollectionWithFilesResponse.builder()
+                                .collectionId(null) // virtual
+                                .name(collectionName)
+                                .description("Default " + collectionName + " collection")
+                                .icon("")
+                                .files(fileResponses)
+                                .createdAt(null)
+                                .build();
+        }
 
 }

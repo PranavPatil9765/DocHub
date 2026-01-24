@@ -34,7 +34,6 @@ public class SseEmitterRegistry {
                 .data(data)
         );
     } catch (Exception e) {
-        emitter.completeWithError(e);
         emitters.remove(fileId);
     }
 }

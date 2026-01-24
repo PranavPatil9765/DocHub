@@ -56,7 +56,7 @@ public class FilePreviewController {
             response.flushBuffer();
 
         } catch (Exception e) {
-            throw new RuntimeException("File preview failed", e);
+            throw new AppException.InternalServerError("File preview failed");
         }
     }
 

@@ -131,7 +131,7 @@ public class FileDownloadController {
             response.flushBuffer();
 
         } catch (Exception e) {
-            throw new RuntimeException("Single file download failed", e);
+            throw new AppException.InternalServerError("Single file download failed");
         }
     }
 }

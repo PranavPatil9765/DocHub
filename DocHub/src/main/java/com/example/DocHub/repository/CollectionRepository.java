@@ -17,15 +17,21 @@ public interface CollectionRepository extends JpaRepository<CollectionEntity, UU
 
     Optional<CollectionEntity> findByIdAndUser_Id(UUID id, UUID userId);
 
-
-    
     long countByUser_Id(UUID userId);
 
-    /* =============================
-       COLLECTION WITH FILES
-       (avoid LazyInitialization issues)
-    ============================== */
+    /*
+     * =============================
+     * COLLECTION WITH FILES
+     * (avoid LazyInitialization issues)
+     * ==============================
+     */
 
     @EntityGraph(attributePaths = "files")
     Optional<CollectionEntity> findWithFilesByIdAndUser_Id(UUID collectionId, UUID userId);
+
+        List<CollectionEntity> findAllByIdInAndUserId(
+                List<UUID> ids,
+                UUID userId);
+    
+
 }

@@ -36,7 +36,7 @@ public class TagGenerationService {
         try {
             String extractedText = extractText(filePath);
 
-            if (extractedText.length() < 30) {
+            if (extractedText.length() < 10) {
          List<String> temptags = new ArrayList<>();
             temptags.add(fileName);
             return temptags;
@@ -53,7 +53,7 @@ public class TagGenerationService {
             return tags;
 
         } catch (Exception e) {
-            throw new RuntimeException("Tag generation failed", e);
+            throw new AppException.BadRequestException("Tag generation failed");
         }
     }
 
@@ -80,7 +80,7 @@ public class TagGenerationService {
                         "role", "user",
                         "content",
                         """
-                        Extract 25–30 short, relevant tags from the text below.
+                        Extract 10–30 short, relevant tags from the text below.
                         Return ONLY a valid JSON array of strings.
 
                         Text:

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.DocHub.entity.FileEntity;
 import com.example.DocHub.entity.User;
+import com.example.DocHub.exception.AppException;
 import com.example.DocHub.repository.FileRepository;
 import com.example.DocHub.repository.UserRepository;
 
@@ -60,7 +61,7 @@ public class FileDeleteService {
 
         // update user storage
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException.InternalServerError("User not found"));
 
         user.setStorageUsedBytes(
                 Math.max(0, user.getStorageUsedBytes() - totalBytes)

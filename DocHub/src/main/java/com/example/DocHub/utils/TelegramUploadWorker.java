@@ -6,16 +6,22 @@ import java.util.UUID;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import com.example.DocHub.dto.TelegramUploadResult;
 import com.example.DocHub.dto.Enums.FileStatus;
 import com.example.DocHub.entity.FileEntity;
-import com.example.DocHub.exception.AppException;
 import com.example.DocHub.repository.FileRepository;
 import com.example.DocHub.service.TelegramService;
 import com.example.DocHub.sse.SseEmitterRegistry;
 
+import jakarta.transaction.Transactional;
+
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
 import lombok.RequiredArgsConstructor;
+
 @Component
 @RequiredArgsConstructor
 public class TelegramUploadWorker {
@@ -24,7 +30,7 @@ public class TelegramUploadWorker {
     private final TelegramService telegramService;
     private final TagQueuePublisher tagQueuePublisher;
     private final SseEmitterRegistry sseEmitterRegistry;
-
+    @Transactional
     @RabbitListener(queues = "file-processing-queue")
     public void uploadToTelegram(String fileIdStr) {
 
@@ -32,24 +38,21 @@ public class TelegramUploadWorker {
         try {
             fileId = UUID.fromString(fileIdStr);
         } catch (IllegalArgumentException e) {
-            // ❌ invalid UUID → skip message
             System.err.println("Invalid fileId received: " + fileIdStr);
             return;
         }
 
-        System.out.println(fileId + " searching .............");
-
         Optional<FileEntity> optionalFile = fileRepository.findById(fileId);
 
         if (optionalFile.isEmpty()) {
-            System.out.println("File not found for id " + fileId + ". Skipping Telegram upload.");
-            return; // ✅ ACK message, no retry
+            System.out.println("File not found for id " + fileId);
+            return;
         }
 
-        FileEntity file = optionalFile.get(); // ✅ CORRECT TYPECAST
+        FileEntity file = optionalFile.get();
 
         try {
-            // Upload to Telegram (slow operation)
+            // Upload to Telegram
             TelegramUploadResult telegramUploadResult =
                     telegramService.upload(file.getTempFilePath(), file.getName());
 
@@ -60,20 +63,37 @@ public class TelegramUploadWorker {
             file.setStatus(FileStatus.TAG_GENERATION);
             fileRepository.save(file);
 
-            // Notify client
+            // ✅ SUCCESS SSE
             sseEmitterRegistry.send(
                 fileId,
                 "file-uploaded",
                 Map.of("status", "FILE_UPLOADED")
             );
 
-            // Trigger tag generation
-            tagQueuePublisher.publish(fileId);
-
+            TransactionSynchronizationManager.registerSynchronization(
+        new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                tagQueuePublisher.publish(fileId);
+            }
+            }
+        );
         } catch (Exception e) {
+
+            // ❌ UPDATE STATUS
             file.setStatus(FileStatus.FAILED);
             file.setErrorMessage("Upload failed: " + e.getMessage());
             fileRepository.save(file);
+
+            // ❌ FAILURE SSE (NEW)
+            sseEmitterRegistry.send(
+                fileId,
+                "file-failed",
+                Map.of(
+                    "status", "FAILED",
+                    "error", e.getMessage()
+                )
+            );
         }
     }
 }

@@ -111,7 +111,7 @@ public class FileUploadService {
             } catch (IOException ignored) {
             }
 
-            throw new RuntimeException("File upload failed", e);
+            throw new AppException.InternalServerError("File upload failed");
         }
     }
 }

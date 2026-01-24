@@ -21,7 +21,6 @@ import com.example.DocHub.service.TagGenerationService;
 import com.example.DocHub.sse.SseEmitterRegistry;
 
 import lombok.RequiredArgsConstructor;
-
 @Component
 @RequiredArgsConstructor
 public class TagGenerationWorker {
@@ -29,15 +28,19 @@ public class TagGenerationWorker {
     private final FileRepository fileRepository;
     private final TagGenerationService tagService;
     private final SseEmitterRegistry sseRegistry;
+
     @Transactional
     @RabbitListener(queues = "tag-generation-queue")
     public void generateTags(String fileIdStr) {
 
         UUID fileId = UUID.fromString(fileIdStr);
-        FileEntity file = fileRepository.findById(fileId)
-                .orElseThrow(() -> new RuntimeException("File not found"));
-
+        Optional<FileEntity> optionalFile = fileRepository.findById(fileId);
+        if (optionalFile.isEmpty()) {
+            System.out.println("File Not found -- id:"+fileIdStr);
+            return; // ❌ stale message → ACK & drop
+        }
         // ✅ Idempotency guard
+        FileEntity file = optionalFile.get();
         if (file.getStatus() == FileStatus.READY) {
             return;
         }
@@ -50,7 +53,6 @@ public class TagGenerationWorker {
         try {
             Path filePath = Paths.get(file.getTempFilePath());
 
-            // 🔥 ACTUAL USE OF SERVICE
             List<String> aiTags = tagService.generateTags(filePath, file.getName());
             List<String> userTags = Optional
                     .ofNullable(file.getTags())
@@ -63,18 +65,33 @@ public class TagGenerationWorker {
             file.setStatus(FileStatus.READY);
 
             // 🧹 CLEANUP
-            Files.deleteIfExists(Paths.get(file.getTempFilePath()));
+            Files.deleteIfExists(filePath);
             file.setTempFilePath(null);
             fileRepository.save(file);
-             sseRegistry.send(
+
+            // ✅ SUCCESS SSE
+            sseRegistry.send(
                 fileId,
                 "tags-generated",
                 mergedTags
             );
+
         } catch (Exception e) {
+
             file.setStatus(FileStatus.FAILED);
-            file.setErrorMessage("Tag generation failed: " + e.getMessage());
+            file.setErrorMessage("Tag generation failed ");
             fileRepository.save(file);
+
+            // ❌ FAILURE SSE (NEW)
+            sseRegistry.send(
+                fileId,
+                "tags-failed",
+                Map.of(
+                    "status", "FAILED",
+                    "error", file.getErrorMessage()
+                )
+            );
+            return;
         }
     }
 }

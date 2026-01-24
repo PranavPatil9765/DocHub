@@ -28,4 +28,6 @@ public class User {
     @Column(nullable = false)
     private Long storageUsedBytes;
 
+    private boolean isVerified;
+
 }

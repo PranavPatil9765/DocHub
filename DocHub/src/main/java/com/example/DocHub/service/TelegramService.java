@@ -8,6 +8,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.DocHub.dto.TelegramUploadResult;
+import com.example.DocHub.exception.AppException;
 
 import org.springframework.http.*;
 import org.springframework.core.io.FileSystemResource;
@@ -52,7 +53,7 @@ public class TelegramService {
                 restTemplate.postForEntity(url, request, Map.class);
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new RuntimeException("Telegram upload failed");
+            throw new AppException.InternalServerError("Telegram upload failed");
         }
 
         Map<?, ?> result = (Map<?, ?>) response.getBody().get("result");
