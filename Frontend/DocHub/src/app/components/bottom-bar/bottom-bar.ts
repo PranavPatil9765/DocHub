@@ -18,6 +18,8 @@ export class BottomBar {
   @Output() delete = new EventEmitter<string[]>();
   @Output() remove = new EventEmitter<string[]>();
   onDelete(){
+    console.log("emmitting for ",this.selectedFileIds);
+
     this.delete.emit([...this.selectedFileIds]);
   }
   onRemove(){

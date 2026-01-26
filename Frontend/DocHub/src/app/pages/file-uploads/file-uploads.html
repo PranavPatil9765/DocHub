@@ -1,0 +1,181 @@
+<div class="max-w-6xl mx-auto p-6 space-y-6">
+
+  <!-- SEARCH + SORT -->
+  <div
+    class="bg-white rounded-xl shadow-sm
+           border border-blue-100
+           p-4 grid md:grid-cols-3 gap-4 items-center"
+  >
+    <div class="md:col-span-2">
+      <app-elatic-search-bar
+        (searchSuggestion)="fetchFileSuggestions($event)"
+        (search)="onSearch($event)"
+        [suggestions]="FileSearchSuggestions"
+      ></app-elatic-search-bar>
+    </div>
+
+    <div class="md:col-span-1 flex justify-end">
+      <app-dropdown
+        class="w-56"
+        label="Sort by"
+        [options]="sortOptions"
+        displayKey="label"
+        valueKey="value"
+        (valueChange)="onSortChange($event)"
+      ></app-dropdown>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div
+    class="bg-white rounded-2xl shadow
+           border border-blue-100
+           divide-y
+           max-h-[70vh] overflow-y-auto"
+    (scroll)="onScrollBottom()"
+  >
+  @if(uploads.length ==0){
+  <div
+    class="flex flex-col items-center justify-center
+           py-16 text-gray-400 select-none"
+  >
+    <!-- Icon -->
+    <div
+      class="w-14 h-14 mb-3 rounded-full
+             bg-gray-100 flex items-center justify-center"
+    >
+      <i class="fa-regular fa-folder-open text-2xl text-gray-400"></i>
+    </div>
+
+    <!-- Text -->
+    <p class="text-sm font-semibold text-gray-500">
+      No files available
+    </p>
+    <p class="text-xs text-gray-400 mt-1">
+      Upload files to see them here
+    </p>
+  </div>
+
+
+  }@else{
+
+    @for (file of uploads; track file.id) {
+    <div
+      class="flex items-center gap-4 px-5 py-4
+             hover:bg-blue-50/40 transition"
+    >
+
+      <!-- THUMB -->
+      <div class="shrink-0">
+        @if (file.preview_url) {
+          <img
+            [src]="file.preview_url"
+            class="w-12 h-12 rounded-lg
+                   object-cover border"
+          />
+        } @else {
+          <div
+            class="w-12 h-12 rounded-lg
+                   bg-blue-100 text-blue-600
+                   flex items-center justify-center text-xl"
+          >
+             <i
+          [class]="
+              FILE_TYPE_ICON[file.type]"
+          ></i>
+          </div>
+        }
+      </div>
+
+      <!-- META -->
+      <div class="flex-1 min-w-0 space-y-1">
+
+        <div class="flex items-center gap-2">
+          <span class="font-semibold text-blue-900 truncate">
+            {{ file.name }}
+          </span>
+
+          <!-- STAGE BADGE -->
+          <span
+            class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            [ngClass]="{
+              'bg-gray-200 text-gray-600': file.stage === 'initiated',
+              'bg-blue-100 text-blue-700': file.stage === 'queued',
+              'bg-indigo-100 text-indigo-700': file.stage === 'uploaded',
+              'bg-purple-100 text-purple-700': file.stage === 'tagging',
+              'bg-green-100 text-green-700': file.stage === 'ready',
+              'bg-red-100 text-red-700': file.stage === 'failed'
+            }"
+          >
+            {{ file.stage | uppercase }}
+          </span>
+        </div>
+
+        <!-- PROGRESS -->
+        @if (file.stage !== 'ready' && file.stage !== 'failed') {
+        <div class="mt-2 space-y-1">
+          <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              class="h-full bg-gradient-to-r
+                     from-blue-500 to-indigo-500
+                     rounded-full transition-all duration-500"
+              [style.width.%]="file.progress || 25"
+            ></div>
+          </div>
+          <div class="text-[11px] text-blue-600">
+            {{ file.progress || 25 }}%
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- ACTIONS -->
+      @if (file.stage != 'ready') {
+      <div class="flex gap-2 shrink-0">
+
+        <button
+          class="px-3 py-1.5 text-xs rounded-lg
+                 bg-yellow-500 text-white
+                 hover:bg-yellow-600
+                 transition disabled:opacity-50"
+          [disabled]="file.isRetrying"
+          (click)="retry(file)"
+        >
+          @if (file.isRetrying) {
+            ⏳ Retrying
+          } @else {
+            Retry
+          }
+        </button>
+
+        <button
+          class="px-3 py-1.5 text-xs rounded-lg
+                 bg-red-500 text-white
+                 hover:bg-red-600 transition"
+          (click)="delete(file)"
+        >
+          Delete
+        </button>
+
+      </div>
+      }
+    </div>
+    }
+  }
+
+    <!-- LOADING -->
+    @if (loading) {
+    <div class="p-5 text-center text-blue-500 text-sm">
+      Loading more uploads…
+    </div>
+    }
+
+    <!-- END -->
+    @if (!hasMore && uploads.length) {
+    <div class="p-4 text-center text-gray-400 text-xs">
+      No more Uploads
+    </div>
+    }
+
+  </div>
+</div>

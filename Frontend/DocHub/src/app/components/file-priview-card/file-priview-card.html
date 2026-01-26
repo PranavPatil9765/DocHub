@@ -91,7 +91,7 @@
     class="h-[100px] md:h-[150px] bg-gray-100 flex items-center justify-center overflow-hidden rounded-t-xl"
   >
     <!-- Thumbnail -->
-    @if (file.thumbnail_link) {
+    @if (file.preview_url) {
       <img [src]="previewUrl" alt="file preview" class="object-cover w-full h-full" />
     }
     <!-- Icon fallback -->
@@ -99,12 +99,12 @@
       <div class="flex flex-col items-center justify-center">
         <i
           [class]="
-            FILE_TYPE_ICON[file.file_type] + ' ' + FILE_TYPE_COLOR[file.file_type] + ' text-4xl'
+            FILE_TYPE_ICON[file.type] + ' ' + FILE_TYPE_COLOR[file.type] + ' text-4xl'
           "
         ></i>
 
         <span class="text-xs mt-1 text-gray-500">
-          {{ file.file_type }}
+          {{ file.type }}
         </span>
       </div>
     }
@@ -117,8 +117,8 @@
     </p>
 
     <div class="text-sm text-gray-500 flex justify-between">
-      <span>{{ file.file_type }}</span>
-      <span>{{ formatSize(file.file_size )}}</span>
+      <span>{{ file.type }}</span>
+      <span>{{ formatSize(file.size )}}</span>
     </div>
   </div>
 </div>

@@ -35,9 +35,11 @@ export class FilePriviewCard {
   constructor(private sanitizer: DomSanitizer, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    if(this.file.thumbnail_link){
-      this.previewUrl = `${this.api}${this.file.thumbnail_link}`;
+    if(this.file.preview_url){
+      this.previewUrl = `${this.api}${this.file.preview_url}`;
+      console.log(this.previewUrl);
     }
+
   }
 
   ngOnChanges(changes: SimpleChanges) {

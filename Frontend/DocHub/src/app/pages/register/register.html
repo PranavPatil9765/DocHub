@@ -55,7 +55,9 @@
       <!-- GitHub Login -->
       <button
         class="px-2 flex items-center justify-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 rounded-lg shadow transition"
-      >
+        (click)="authService.loginWithGithub()"
+
+        >
         <img src="assets/github.svg" class="w-5 h-5 invert" />
         Continue with GitHub
       </button>

@@ -5,58 +5,87 @@
       {{ title }}
     </h3>
 
-    <button class="text-blue-600 text-sm font-medium hover:underline" routerLink="/dochub">
+    <button
+      class="text-blue-600 text-sm font-medium hover:underline"
+      routerLink="/dochub"
+    >
       View All
     </button>
   </div>
 
   <hr />
 
-  <!-- Files Grid -->
-  <div class="grid grid-cols-2 gap-4 p-4">
-  @for (file of files; track file.id) {
+  <!-- Empty State -->
+  @if (!files || files.length === 0) {
+
+  <div
+    class="flex flex-col items-center justify-center
+           py-16 text-gray-400 select-none"
+  >
+    <!-- Icon -->
     <div
-      class="p-4 rounded-xl border
-             flex gap-3 items-start
-             transition-all duration-200
-             hover:shadow-lg hover:-translate-y-0.5"
-      [ngClass]="FILE_TYPE_BG[file.file_type]"
-      (click)="onPreview(file.id)"
+      class="w-14 h-14 mb-3 rounded-full
+             bg-gray-100 flex items-center justify-center"
     >
-      <!-- Icon -->
-      <div
-        class="w-10 h-10 rounded-lg
-               flex items-center justify-center
-               bg-white shadow-sm"
-      >
-        <i
-          [class]="
-            FILE_TYPE_ICON[file.file_type] +
-            ' text-lg ' +
-            FILE_TYPE_COLOR[file.file_type]
-          "
-        ></i>
-      </div>
+      <i class="fa-regular fa-folder-open text-2xl text-gray-400"></i>
+    </div>
 
-      <!-- File Info -->
-      <div class="flex-1 min-w-0">
-        <p
-          class="font-semibold text-sm truncate text-gray-800"
-          title="{{ file.name }}"
-        >
-          {{ file.name }}
-        </p>
+    <!-- Text -->
+    <p class="text-sm font-semibold text-gray-500">
+      No files available
+    </p>
+    <p class="text-xs text-gray-400 mt-1">
+      Upload files to see them here
+    </p>
+  </div>
 
-        <p
-          class="text-xs font-medium mt-0.5 uppercase tracking-wide"
-          [ngClass]="FILE_TYPE_COLOR[file.file_type]"
+
+  } @else {
+
+    <!-- Files Grid -->
+    <div class="grid grid-cols-2 gap-4 p-4">
+      @for (file of files; track file.id) {
+        <div
+          class="p-4 rounded-xl border
+                 flex gap-3 items-start
+                 transition-all duration-200
+                 hover:shadow-lg hover:-translate-y-0.5"
+          [ngClass]="FILE_TYPE_BG[file.type]"
+          (click)="onPreview(file.id)"
         >
-          {{ file.file_type }}
-        </p>
-      </div>
+          <!-- Icon -->
+          <div
+            class="w-10 h-10 rounded-lg
+                   flex items-center justify-center
+                   bg-white shadow-sm"
+          >
+            <i
+              [class]="
+                FILE_TYPE_ICON[file.type] +
+                ' text-lg ' +
+                FILE_TYPE_COLOR[file.type]
+              "
+            ></i>
+          </div>
+
+          <!-- File Info -->
+          <div class="flex-1 min-w-0">
+            <p
+              class="font-semibold text-sm truncate text-gray-800"
+              title="{{ file.name }}"
+            >
+              {{ file.name }}
+            </p>
+
+            <p
+              class="text-xs font-medium mt-0.5 uppercase tracking-wide"
+              [ngClass]="FILE_TYPE_COLOR[file.type]"
+            >
+              {{ file.type }}
+            </p>
+          </div>
+        </div>
+      }
     </div>
   }
-</div>
-
-
 </div>

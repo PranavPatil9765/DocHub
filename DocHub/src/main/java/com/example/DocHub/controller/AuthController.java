@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +37,15 @@ public class AuthController {
         private final UserRepository userRepo;
         private final PasswordEncoder encoder;
         private final VerificationTokenRepository tokenRepo;
-
+        @Value("${app.frontend-url}")
+        private String baseUrl;
         /* ================= REGISTER ================= */
 
         @PostMapping("/register")
         public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
                 authService.register(request);
                 return ResponseEntity.ok(
-                                new ApiResponse<>(true, "Verification Link Sent to "+request.email(), null));
+                                new ApiResponse<>(true, "Verification Link Sent to " + request.email(), null));
         }
 
         @GetMapping("/verify")
@@ -55,7 +57,7 @@ public class AuthController {
                                 .orElseThrow(() -> new AppException.BadRequestException("Invalid token"));
 
                 if (vt.isUsed() || vt.getExpiryTime().isBefore(LocalDateTime.now())) {
-                        response.sendRedirect("http://localhost:4200/login?verified=false");
+                        response.sendRedirect(baseUrl+"/login?verified=false");
                         return;
                 }
 
@@ -67,7 +69,7 @@ public class AuthController {
                 tokenRepo.save(vt);
 
                 // ✅ Redirect to frontend login page
-                response.sendRedirect("http://localhost:4200/login?verified=true");
+                response.sendRedirect(baseUrl+"/login?verified=true");
         }
 
         /* ================= LOGIN ================= */

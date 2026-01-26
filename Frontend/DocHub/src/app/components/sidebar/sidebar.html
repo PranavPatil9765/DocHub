@@ -149,6 +149,21 @@
       <i class="fa-solid fa-user w-4"></i>
       Profile
     </li>
+    <li
+      routerLink="/file-uploads"
+      class="flex items-center gap-3
+             px-3 py-2 rounded-lg
+             text-sm font-medium
+             text-blue-700
+             cursor-pointer
+             transition
+             hover:bg-blue-50"
+      [class.bg-blue-100]="currentUrl === '/file-uploads'"
+      [class.text-blue-900]="currentUrl === '/file-uploads'"
+      [class.font-semibold]="currentUrl === '/file-uploads'">
+      <i class="fa-solid fa-upload w-4"></i>
+      Uploads
+    </li>
 
   </ul>
 

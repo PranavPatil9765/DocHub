@@ -16,13 +16,14 @@ import {
   FILE_TYPE_ICON,
   FileRow,
   FileType,
-  FileUpdateRequest,
-  UploadItem
+  FileUpdateRequest
 } from '../../models/file.model';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ToastService } from '../../services/toastService';
 import { finalize } from 'rxjs';
+import { SpinnerComponent } from "../spinner/spinner";
+import { getFileType } from '../../../utilities/file-functions';
 
 /* ===================== STAGE TYPES ===================== */
 
@@ -30,6 +31,7 @@ type UploadStage =
   | 'initiated'
   | 'queued'
   | 'uploaded'
+  | 'failed'
   | 'tagging'
   | 'ready';
 
@@ -38,7 +40,7 @@ type UploadStage =
 @Component({
   selector: 'app-file-upload',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SpinnerComponent],
   templateUrl: './file-upload.html'
 })
 export class FileUploadComponent {
@@ -52,14 +54,14 @@ export class FileUploadComponent {
   @Input() mode: 'create' | 'edit' = 'create';
 
   /** Used only in edit mode */
-  @Input() editFiles: UploadItem[] = [];
+  @Input() editFiles: FileRow[] = [];
 
   @Output() closed = new EventEmitter<void>();
   @Output() updated = new EventEmitter<void>();
 
   /* ===================== STATE ===================== */
 
-  uploads: UploadItem[] = [];
+  uploads: FileRow[] = [];
   activeIndex = 0;
   isDragging = false;
   tagInput = '';
@@ -88,23 +90,39 @@ export class FileUploadComponent {
     private http: HttpClient,
     private cdr: ChangeDetectorRef
   ) {}
-
+  extension = "";
   /* ===================== LIFECYCLE ===================== */
 
-  ngOnChanges() {
-    if (this.mode === 'edit' && this.editFiles?.length) {
-      this.uploads = this.editFiles.map(f => ({
-        ...f,
-        progress: 100,
-        status: 'done',
-        isExisting: true
-      }));
-      this.activeIndex = 0;
-      this.isOpen = true;
-    }
-  }
+ ngOnChanges() {
+  if (this.mode === 'edit' && this.editFiles?.length) {
+    this.uploads = this.editFiles.map(f => {
 
-  get active(): UploadItem | null {
+      const ext = f.name.includes('.')
+        ? f.name.substring(f.name.lastIndexOf('.'))
+        : '';
+
+      let url = '';
+      if (f.preview_url) {
+        url = `${environment.apiBaseUrl}${f.preview_url}`;
+      }
+
+      return {
+        ...f,
+        name: f.name.replace(/\.[^/.]+$/, ''), // base name only
+        originalExt: ext,                      // ✅ preserve extension
+        preview_url: url,
+        isExisting: true
+      };
+    });
+
+    this.activeIndex = 0;
+    this.isOpen = true;
+  }
+}
+
+
+
+  get active(): FileRow | null {
     return this.uploads[this.activeIndex] ?? null;
   }
 
@@ -133,28 +151,44 @@ export class FileUploadComponent {
 
     this.addFiles(files);
   }
+ MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
 
-  addFiles(files: File[]) {
-    files.forEach(file => {
-      const item: UploadItem = {
-        id: crypto.randomUUID(),
-        file,
-        name: file.name.replace(/\.[^/.]+$/, ''),
-        description: '',
-        tags: [],
-        previewUrl: URL.createObjectURL(file),
-        progress: 0,
-        stage: 'initiated'
-      };
+ addFiles(files: File[]) {
+  files.forEach(file => {
 
-      this.uploads.push(item);
+    // ❌ BLOCK files > 20MB
+    if (file.size > this.MAX_FILE_SIZE) {
+      this.toast.error(
+        `File "${file.name}" is larger than 20MB and cannot be processed`
+      );
+      return; // 🚫 discard this file
+    }
 
-      // 🔥 START UPLOAD IMMEDIATELY
-      this.startUpload(item);
-    });
+    const item: FileRow = {
+      id: crypto.randomUUID(),
+      file,
+      name: file.name.replace(/\.[^/.]+$/, ''),
+      description: '',
+      tags: [],
+      favourite:false,
+      size:file.size,
+      type:getFileType(file.name),
+      preview_url: URL.createObjectURL(file),
+      progress: 0,
+      stage: 'initiated'
+    };
 
+    this.uploads.push(item);
+
+    // 🔥 START UPLOAD IMMEDIATELY
+    this.startUpload(item);
+  });
+
+  if (this.uploads.length > 0) {
     this.isOpen = true;
   }
+}
+
 
   removeUpload(index: number) {
     const file = this.uploads[index];
@@ -181,7 +215,7 @@ export class FileUploadComponent {
 
   /* ===================== UPLOAD ===================== */
 
-  startUpload(item: UploadItem) {
+  startUpload(item: FileRow) {
     if (!item.file) return;
  const originalName = item.file.name;
   const ext = originalName.includes('.')
@@ -190,8 +224,8 @@ export class FileUploadComponent {
 
   // 🔥 rebuild full filename
   const fullName = item.name + ext;
+  item.type = getFileType(fullName);
     console.log(fullName);
-
     this.fileService.uploadFile(item.file, {
       name: fullName
     }).subscribe({
@@ -200,8 +234,8 @@ export class FileUploadComponent {
 
         if (update.completed) {
           item.id = update.response.fileId;
-          item.previewUrl = update.response.thumbnailLink
-          console.log("url = ",item.previewUrl);
+          item.preview_url = update.response.thumbnailLink
+          console.log("url = ",item.preview_url);
 
           item.stage = 'queued';
           item.progress = 25;
@@ -226,20 +260,28 @@ export class FileUploadComponent {
   /* ===================== EDIT SAVE ===================== */
 
   saveEdits() {
-    const payload = this.uploads.map(u => ({
+  const payload = this.uploads.map(u => {
+    const finalName =
+      u.originalExt && !u.name.endsWith(u.originalExt)
+        ? u.name + u.originalExt
+        : u.name;
+
+    return {
       id: u.id,
-      name: u.name,
+      name: finalName,
       description: u.description,
       tags: u.tags
-    }));
+    };
+  });
+console.log("calling edit with,",payload)
+  this.http.put(this.editApi, payload).subscribe({
+    next: () => {
+      // this.updated.emit();
+      this.close();
+    }
+  });
+}
 
-    this.http.put(this.editApi, payload).subscribe({
-      next: () => {
-        this.updated.emit();
-        this.close();
-      }
-    });
-  }
 
   /* ===================== TAGS ===================== */
 
@@ -255,7 +297,7 @@ export class FileUploadComponent {
 
   removeTag(tag: string) {
     if (!this.active) return;
-    this.active.tags = this.active.tags.filter(t => t !== tag);
+    this.active.tags = this.active.tags.filter((t:string) => t !== tag);
   }
 
   /* ===================== UTILS ===================== */
@@ -279,6 +321,30 @@ export class FileUploadComponent {
     this.closed.emit();
   }
 
+  retryFile(file: FileRow) {
+
+  // reset UI state
+  file.stage = 'queued';
+  file.progress = 25;
+  file.isRetrying = true;
+  this.fileService.retryFile(file.id).pipe(finalize(()=>{
+    file.isRetrying = false;
+    this.cdr.detectChanges()
+  })).subscribe({
+    next: () => {
+      // restart SSE
+      this.startSse(file);
+      this.toast.success('Retry started');
+    },
+    error: () => {
+      file.stage = 'failed';
+      this.toast.error('Retry failed');
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+
   deletefiles(){
       if (this.mode === 'create') {
       const idsToDelete = this.uploads.map(file => file.id);
@@ -294,24 +360,29 @@ export class FileUploadComponent {
     this.close();
   }
 
- uploadAll() {
+uploadAll() {
   if (this.uploads.length === 0) return;
 
-  // ✅ Build payload with extension preserved
   const files: FileUpdateRequest[] = this.uploads.map(file => {
 
     let finalName = file.name;
 
-    // 🔥 Re-attach extension if file exists
+    // ✅ Case 1: Newly uploaded file (create mode)
     if (file.file) {
       const originalName = file.file.name;
       const ext = originalName.includes('.')
         ? originalName.substring(originalName.lastIndexOf('.'))
         : '';
 
-      // avoid double extension
       if (ext && !file.name.endsWith(ext)) {
         finalName = file.name + ext;
+      }
+    }
+
+    // ✅ Case 2: Existing file (edit mode)
+    else if (file.originalExt) {
+      if (!file.name.endsWith(file.originalExt)) {
+        finalName = file.name + file.originalExt;
       }
     }
 
@@ -324,6 +395,7 @@ export class FileUploadComponent {
   });
 
   const toastId = this.toast.loading('Saving Files...');
+  console.log(files);
 
   this.fileService.updateFiles(files)
     .pipe(
@@ -335,7 +407,7 @@ export class FileUploadComponent {
     .subscribe({
       next: () => {
         this.toast.success('Files updated successfully');
-        this.updated.emit();
+        // this.updated.emit();
       },
       error: err => {
         console.error('[UPDATE FILES] failed', err);
@@ -345,9 +417,10 @@ export class FileUploadComponent {
 }
 
 
+
   /* ===================== SSE ===================== */
 
-  startSse(file: UploadItem) {
+  startSse(file: FileRow) {
     const api = `${environment.apiBaseUrl}`;
     const url = `${api}/api/sse/${file.id}`;
 
@@ -367,6 +440,24 @@ export class FileUploadComponent {
       this.cdr.detectChanges();
       es.close();
     });
+
+    es.addEventListener('file-failed', (event: any) => {
+    const data = JSON.parse(event.data || '{}');
+    file.stage = 'failed';
+    file.progress = 25;
+    this.toast.error(data.error || 'File upload failed');
+    this.cdr.detectChanges();
+    es.close();
+  });
+
+    es.addEventListener('tags-failed', (event: any) => {
+    const data = JSON.parse(event.data || '{}');
+    file.stage = 'failed';
+    file.progress = 50;
+    this.toast.error(data.error || 'Tag generation failed');
+    this.cdr.detectChanges();
+    es.close();
+  });
   }
 
   /* ===================== DRAG ===================== */

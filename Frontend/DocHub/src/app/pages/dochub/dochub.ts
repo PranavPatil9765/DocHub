@@ -14,7 +14,7 @@ import { AddCollectionComponent } from '../../components/add-collection/add-coll
 import { CollectionService } from '../../services/collections.service';
 import { finalize } from 'rxjs';
 import { CollectionRequest } from '../../models/collectionRequest.model';
-import { CollectionModel } from '../../models/collection';
+import { CollectionModel } from '../../models/collection.model';
 import { ToastService } from '../../services/toastService';
 import { BottomBar } from '../../components/bottom-bar/bottom-bar';
 import { FileService } from '../../services/file.service';
@@ -94,6 +94,11 @@ export class Dochub {
     }
 
     this.loading = true;
+console.log(  {
+        ...this.filters,
+        sortBy: this.sortBy,
+        sortDir: this.sortDir,
+      });
 
     this.FileSearchService.searchFiles(
       {
@@ -108,7 +113,7 @@ export class Dochub {
       next: (res) => {
         const beforeCount = this.files.length;
         this.files = [...this.files, ...res.items];
-
+        this.sortFilesManually();
         this.hasMore = res?.has_more;
         this.cursorTime = res?.next_cursor_time;
         this.cursorId = res?.next_cursor_id;
@@ -128,14 +133,48 @@ export class Dochub {
     });
   }
 
+  private sortFilesManually() {
+  const dir = this.sortDir === 'ASC' ? 1 : -1;
+
+  this.files = [...this.files].sort((a, b) => {
+    switch (this.sortBy) {
+
+      case 'NAME':
+        return a.name.localeCompare(b.name) * dir;
+
+      case 'SIZE':
+        return ((a.size ?? 0) - (b.size ?? 0)) * dir;
+
+      case 'UPLOADED_AT':
+      default:
+        return (
+          (new Date(a?.uploadedAt as Date).getTime() -
+           new Date(b?.uploadedAt as Date).getTime()) * dir
+        );
+    }
+  });
+}
+
+
   OnFileDelete(e: string[]) {
-    this.fileService.deleteFiles(e).subscribe({
-      error: (err) => {
-        this.toast.error(err?.message || 'File delete Failed');
-        console.error('Failed to delete file', err);
-      },
-    });
-  }
+    const toastId = this.toast.loading("Deleting file ...");
+  this.fileService.deleteFiles(e).subscribe({
+    next: () => {
+      // ✅ remove deleted files from UI
+      this.files = this.files.filter(
+        file => !e.includes(file.id)
+      );
+
+      this.toast.success('File deleted successfully');
+      this.cdr.detectChanges()
+    },
+    error: (err) => {
+      this.toast.error(err?.message || 'File delete failed');
+      console.error('Failed to delete file', err);
+    }
+  });
+}
+
   onApplyFilters(form: any) {
     this.filters = {
       minSize: form?.minSize ? form?.minSize : undefined,

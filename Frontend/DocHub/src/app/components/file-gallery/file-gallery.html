@@ -1,7 +1,30 @@
 <div
-  class="h-[520px] overflow-y-auto max-w-full scrollbar-none py-4 pb-[96px]"
+  class="h-[620px] overflow-y-auto max-w-full scrollbar-none py-4 pb-[96px]"
   (scroll)="onScroll($event)"
 >
+ @if (!loading && files.length === 0) {
+  <div
+    class="flex flex-col items-center justify-center
+           py-16 text-gray-400 select-none"
+  >
+    <!-- Icon -->
+    <div
+      class="w-14 h-14 mb-3 rounded-full
+             bg-gray-100 flex items-center justify-center"
+    >
+      <i class="fa-regular fa-folder-open text-2xl text-gray-400"></i>
+    </div>
+
+    <!-- Text -->
+    <p class="text-sm font-semibold text-gray-500">
+      No files available
+    </p>
+    <p class="text-xs text-gray-400 mt-1">
+      Upload files to see them here
+    </p>
+  </div>
+}
+
 
   <!-- Grid -->
   <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
@@ -21,27 +44,21 @@
 
   <!-- Loading / Empty -->
   @if (loading) {
-    <div class="text-center py-2 text-gray-500">
-      Loading more files…
-    </div>
+    <div class="text-center py-2 text-gray-500">Loading more files…</div>
   }
 
   @if (!loading && !hasMore && files.length > 0) {
-    <div class="text-center py-2 text-gray-400">
-      No more files
-    </div>
+    <div class="text-center py-2 text-gray-400">No more files</div>
   }
 
   @if (!loading && files.length === 0) {
-    <div class="text-center py-2 text-gray-400">
-      No files found
-    </div>
+    <div class="text-center py-2 text-gray-400">No files found</div>
   }
 </div>
 
 <app-file-upload
-[mode]="'edit'"
-[editFiles]="editFile"
-[isOpen]="editFileOverlayOpen"
-(closeEdit)="closeEdit()"
+  [mode]="'edit'"
+  [editFiles]="editFile"
+  [isOpen]="editFileOverlayOpen"
+  (closeEdit)="closeEdit()"
 ></app-file-upload>

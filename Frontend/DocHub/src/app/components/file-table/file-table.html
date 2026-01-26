@@ -72,9 +72,9 @@
                         flex items-center justify-center">
                 <i
           [class]="
-              FILE_TYPE_ICON[file.file_type] +
+              FILE_TYPE_ICON[file.type] +
               ' ' +
-              FILE_TYPE_COLOR[file.file_type]
+              FILE_TYPE_COLOR[file.type]
               "
           ></i>
             </div>
@@ -84,8 +84,8 @@
                 {{ file.name }}
               </div>
               <div class="text-xs text-gray-500">
-                {{ readableSize(file.file_size) }} •
-                {{ file.uploaded_at | date:'mediumDate' }}
+                {{ readableSize(file.size) }} •
+                {{ file.uploadedAt | date:'mediumDate' }}
               </div>
             </div>
           </div>

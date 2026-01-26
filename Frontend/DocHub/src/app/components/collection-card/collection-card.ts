@@ -1,6 +1,9 @@
+import { Defaultcollection } from './../../constants/constants';
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, SimpleChanges, HostListener, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { CollectionModel } from '../../models/collection.model';
+import { DefaultCollections } from '../../constants/constants';
 
 @Component({
   selector: 'app-collection-card',
@@ -16,7 +19,7 @@ export class CollectionCardComponent {
 
   // 'default' → image + title
   // 'normal'  → icon + title + interactions
-  @Input() collection:any = null;
+  @Input() collection:CollectionModel = Defaultcollection;
   // Used only in DEFAULT state
   @Input() imageUrl?: string;
 
@@ -36,7 +39,7 @@ export class CollectionCardComponent {
 
   @Output() open = new EventEmitter<void>();
   @Output() edit = new EventEmitter<any>();
-  @Output() delete = new EventEmitter<void>();
+  @Output() deleteCollection = new EventEmitter<string[]>();
 
   menuOpen = false;
 
@@ -76,12 +79,10 @@ onCardClick(event: MouseEvent) {
     this.updateSelection(!this.selected);
     return;
   }
-  if(this.collection.state ==='default'){
-         this.router.navigate(['/collections/default', this.collection.name]);
-
+  if(this.collection.state === 'normal'){
+this.router.navigate(['/collections', this.collection.id]);
   }else{
-
-    this.router.navigate(['/collections', this.collection.id]);
+         this.router.navigate(['/collections/default', this.collection.name]);
   }
 
   // normal click behavior
@@ -91,6 +92,11 @@ onCardClick(event: MouseEvent) {
 
   closeMenu() {
     this.menuOpen = false;
+  }
+
+  handleDelete(e:Event){
+    e.stopPropagation();
+    this.deleteCollection.emit([this.collection.id])
   }
 
 private pressTimer: any;

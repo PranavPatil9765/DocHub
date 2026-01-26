@@ -1,23 +1,16 @@
 <div class="main-container h-full w-full max-w-full p-2">
   <div class="bg-white w-full max-w-full h-full md:px-10 px-2">
-
     <!-- ================= DEFAULT COLLECTIONS ================= -->
     <div class="w-full m-auto shadow-lg shadow-blue-200 border border-gray-200 rounded-lg">
       <div class="section-title w-full">
-        <h3 class="text-gray-500 font-medium text-lg px-4 py-2">
-          Default Collections
-        </h3>
+        <h3 class="text-gray-500 font-medium text-lg px-4 py-2">Default Collections</h3>
         <hr />
       </div>
 
       <div class="px-4 py-2 grid grid-cols-3 gap-3">
-   @for (col of DefaultCollections; track col.id) {
-  <app-collection-card
-    [collection]="col"
-    [imageUrl]="col.imageUrl">
-  </app-collection-card>
-}
-
+        @for (col of DefaultCollections; track col.id) {
+          <app-collection-card [collection]="col" [imageUrl]="col.imageUrl"> </app-collection-card>
+        }
       </div>
     </div>
 
@@ -26,15 +19,13 @@
     <!-- ================= SEARCH + ADD ================= -->
     <div class="grid grid-cols-4 gap-6">
       <div class="col-span-3">
-        <app-elatic-search-bar></app-elatic-search-bar>
+        <app-elatic-search-bar [placeholder]="'Search Collections ...'"></app-elatic-search-bar>
       </div>
 
       <div class="col-span-1 flex justify-end">
         <button
           (click)="openCreateCollection()"
-          class="bg-blue-600 h-full w-full md:w-1/2
-                 hover:bg-blue-700 text-white font-medium
-                 py-2 px-4 rounded-md shadow text-sm"
+          class="bg-blue-600 h-full w-full md:w-1/2 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md shadow text-sm"
         >
           + Add
         </button>
@@ -44,28 +35,46 @@
     <br />
 
     <!-- ================= USER COLLECTIONS ================= -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 py-2">
-      @for (col of collections; track $index) {
-        <app-collection-card
-          [multiselect]="true"
-          [collection]="col"
-          [multiselectActive]="!!selectedFileIds.size"
-          [clearSelection]="clearSelectedFields"
-          (edit)="handleCollectionEdit($event)"
-          (selectionChange)="onFileSelectionChange($event)">
-        </app-collection-card>
-      }
-    </div>
+          @if (collections.length == 0) {
+        <div class="flex flex-col items-center justify-center py-16 m-auto w-full text-gray-400 select-none">
+          <!-- Icon -->
+          <div class="w-14 h-14 mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+            <i class="fa-regular fa-folder-open text-2xl text-gray-400"></i>
+          </div>
 
-  </div>
-</div>
+          <!-- Text -->
+          <p class="text-sm font-semibold text-gray-500">No Collections available</p>
+          <p class="text-xs text-gray-400 mt-1">Create Collections to see them here</p>
+        </div>
+           } @else {
+    <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 py-2">
+
+
+        @for (col of collections; track $index) {
+          <app-collection-card
+            [multiselect]="true"
+            [collection]="col"
+            [multiselectActive]="!!selectedCollectionIds.size"
+            [clearSelection]="clearSelectedFields"
+            (edit)="handleCollectionEdit($event)"
+            (deleteCollection)="deleteCollection($event)"
+            (selectionChange)="onCollectionSelectionChange($event)"
+          >
+          </app-collection-card>
+        }
+
+    </div>
+           }
+
 
 <!-- ================= BOTTOM BAR ================= -->
 <app-bottom-bar
-  [selectedCount]="selectedFileIds.size"
+  [selectedCount]="selectedCollectionIds.size"
+  [selectedFileIds]="getSelectedCollections()"
+  [mode]="'collection'"
   (clear)="clearSelection()"
-  (download)="downloadAllSelected()"
-  (delete)="deleteAllSelected()">
+  (delete)="deleteCollection($event)"
+>
 </app-bottom-bar>
 
 <!-- ================= OVERLAY ================= -->
@@ -77,7 +86,8 @@
     (createCollection)="onCreate($event)"
     (selectCollection)="onSelect($event)"
     (updateCollection)="onUpdate($event)"
-    (close)="closeOverlay()">
+    (close)="closeOverlay()"
+  >
   </app-add-collection>
 }
 <app-dochub-loader [show]="loading"></app-dochub-loader>

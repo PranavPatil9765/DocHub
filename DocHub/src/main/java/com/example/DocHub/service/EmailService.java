@@ -1,13 +1,18 @@
 package com.example.DocHub.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
 @Service
 public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     public void sendOtpEmail(String toEmail, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -17,9 +22,10 @@ public class EmailService {
         message.setFrom("dochub162@gmail.com");
         mailSender.send(message);
     }
+
     public void sendVerificationEmail(String email, String token) {
 
-        String link = "https://t4h2k4d0-8080.inc1.devtunnels.ms/auth/verify?token=" + token;
+        String link = baseUrl + "/auth/verify?token=" + token;
         // String link = "http://localhost:8080/auth/verify?token=" + token;
 
         SimpleMailMessage message = new SimpleMailMessage();

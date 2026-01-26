@@ -6,6 +6,8 @@ import com.example.DocHub.security.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -19,7 +21,9 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
-
+    
+    @Value("${app.frontend-url}")
+    private String baseUrl;
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -36,6 +40,7 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                     .email(email)
                     .fullName(name != null ? name : "OAuth User")
                     .password("OAUTH_USER") // OAuth users don't use passwords
+                    .isVerified(true)
                     .build();
             return userRepository.save(user);
         });
@@ -44,6 +49,6 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         String token = jwtService.generateToken(email);
 
         // Redirect to Angular with JWT
-        response.sendRedirect("http://localhost:4200/social-login?token=" + token);
+        response.sendRedirect(baseUrl+"/social-login?token=" + token);
     }
 }

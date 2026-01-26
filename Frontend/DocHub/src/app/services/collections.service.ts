@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
-import { collection } from '../constants/constants';
 import { CollectionRequest } from '../models/collectionRequest.model';
 
 @Injectable({ providedIn: 'root' })
@@ -38,4 +37,15 @@ export class CollectionService {
       return this.http.get<any>(`${this.api}/collections/default/${collectionName}`);
 
   }
+deleteCollections(collectionIds: string[]) {
+  return this.http.delete<any>(
+    `${this.api}/collections`,
+    {
+      body: {
+        CollectionIds: collectionIds
+      }
+    }
+  );
+}
+
 }

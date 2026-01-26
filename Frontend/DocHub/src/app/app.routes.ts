@@ -67,6 +67,7 @@ export const routes: Routes = [
       },
     ], },
       { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.Profile) },
+      { path: 'file-uploads', loadComponent: () => import('./pages/file-uploads/file-uploads').then(m => m.FileUploadsPage) },
 
     ]
   },

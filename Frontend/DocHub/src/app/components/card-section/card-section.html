@@ -1,31 +1,37 @@
-<div class=" w-full m-auto
-            shadow-lg shadow-blue-200 border border-gray-200 rounded-lg">
+<div class="w-full m-auto shadow-lg shadow-blue-200 border border-gray-200 rounded-lg">
   <div class="section-title w-full">
-    <h3 class="text-gray-500 font-medium text-lg px-4 py-2">{{title}}</h3>
+    <h3 class="text-gray-500 font-medium text-lg px-4 py-2">{{ title }}</h3>
     <hr>
   </div>
 
-  <div class="flex space-x-4 p-4  overflow-x-auto">
-
-    @for(file of files;track file.id){
-
-         <app-file-priview-card
-        [multiselect]="multiselect"
-        [file]="file"
-        (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
-        (edit)="onFileEdit($event)"
-        (delete)="OnFileDelete($event)"
-      >
-      </app-file-priview-card>
-
+  @if (files.length > 0) {
+    <div class="flex space-x-4 p-4 overflow-x-auto">
+      @for (file of files; track file.id) {
+        <app-file-priview-card
+          [multiselect]="multiselect"
+          [file]="file"
+          (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
+          (edit)="onFileEdit($event)"
+          (delete)="OnFileDelete($event)">
+        </app-file-priview-card>
+      }
+    </div>
+  } @else {
+    <!-- EMPTY STATE -->
+    <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+      <svg class="w-14 h-14 mb-3" fill="none" stroke="currentColor" stroke-width="1.5"
+           viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 7h18M3 7l2 13h14l2-13M9 11v6M15 11v6M5 7l1-3h12l1 3" />
+      </svg>
+      <p class="text-sm font-medium">No data available</p>
+    </div>
   }
-
-</div>
 </div>
 
 <app-file-upload
-[mode]="'edit'"
-[editFiles]="editFile"
-[isOpen]="editFileOverlayOpen"
-(closeEdit)="closeEdit()"
-></app-file-upload>
+  [mode]="'edit'"
+  [editFiles]="editFile"
+  [isOpen]="editFileOverlayOpen"
+  (closeEdit)="closeEdit()">
+</app-file-upload>

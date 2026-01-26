@@ -64,13 +64,6 @@ export class FileService {
 
       switch (event.type) {
 
-        case HttpEventType.UploadProgress:
-          return {
-            progress: event.total
-              ? Math.round((event.loaded / event.total) * 100)
-              : 0,
-            completed: false
-          };
 
         case HttpEventType.Response:
           return {
@@ -131,4 +124,22 @@ DeleteFavourite(files: string[]): Observable<void> {
 }
 
 
+
+ retryFile(fileId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.api}/files/retry/${fileId}`,
+      {}
+    );
+  }
+
+  /**
+   * 🔁 Retry all failed files
+   * @returns number of files retried
+   */
+  retryAllFailed(): Observable<number> {
+    return this.http.post<number>(
+      `${this.api}/files/retry-failed`,
+      {}
+    );
+  }
 }

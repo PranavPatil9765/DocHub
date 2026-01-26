@@ -6,11 +6,12 @@ import { FilePriviewCard } from '../file-priview-card/file-priview-card';
 import { BottomBar } from '../bottom-bar/bottom-bar';
 import { AddCollectionComponent } from "../add-collection/add-collection";
 import { FileUploadComponent } from "../file-upload/file-upload";
-import { FileRow, UploadItem } from '../../models/file.model';
+import { FileRow } from '../../models/file.model';
 import { CollectionRequest } from '../../models/collectionRequest.model';
 import { CollectionService } from '../../services/collections.service';
 import { ToastService } from '../../services/toastService';
 import { finalize } from 'rxjs';
+import { FloatLabelType } from '@angular/material/form-field';
 @Component({
   selector: 'app-file-gallery',
   templateUrl: './file-gallery.html',
@@ -28,7 +29,7 @@ export class FileGalleryComponent {
   @Input() hasMore = true;
   @Input() clearFileSelection = false;
 
-  editFile:UploadItem[] = []
+  editFile:FileRow[] = []
   @Output() loadMore = new EventEmitter<void>();
   @Output() deleteFiles = new EventEmitter<string[]>();
   @Output() showAddCollectionOverlay = new EventEmitter<string>();
@@ -93,16 +94,7 @@ export class FileGalleryComponent {
   }
 
   onFileEdit(e:FileRow){
-    const file:UploadItem = {
-       id: e.id,
-        name: e.name,
-        description: e.description,
-        tags: e.tags,
-        stage: 'ready',
-        progress:100,
-      previewUrl:e.thumbnail_link,
-    }
-    this.editFile = [file];
+    this.editFile = [e];
     this.editFileOverlayOpen = true;
   }
 

@@ -52,3 +52,99 @@
     transform: scale(0.5) rotate(720deg);
   }
 }
+/* ================= CORE ================= */
+.core {
+  filter: drop-shadow(0 0 18px rgba(59,130,246,0.5));
+}
+
+/* ================= ICONS ================= */
+.icon-wrapper {
+  position: absolute;
+  inset: 18px;
+}
+
+.icon {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  opacity: 0;
+  transform: scale(0.6);
+  animation: icon-cycle 4.5s infinite cubic-bezier(.4,0,.2,1);
+}
+
+/* Stagger */
+.upload { animation-delay: 0s; }
+.tag    { animation-delay: 1.5s; }
+.search { animation-delay: 3s; }
+
+@keyframes icon-cycle {
+  0%   { opacity: 0; transform: scale(0.6); }
+  20%  { opacity: 1; transform: scale(1.05); }
+  40%  { opacity: 1; transform: scale(1); }
+  60%  { opacity: 0; transform: scale(0.6); }
+  100% { opacity: 0; }
+}
+
+/* ================= RINGS ================= */
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  animation: spin 6s linear infinite;
+}
+
+.ring-1 {
+  border-top-color: rgba(96,165,250,0.7);
+  border-right-color: rgba(59,130,246,0.4);
+}
+
+.ring-2 {
+  inset: 6px;
+  animation-direction: reverse;
+  animation-duration: 9s;
+  border-bottom-color: rgba(147,197,253,0.6);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ================= PARTICLES ================= */
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: rgba(147,197,253,0.8);
+  border-radius: 999px;
+  animation: float 3.5s ease-in-out infinite;
+}
+
+.p1 { top: -4px; left: 50%; animation-delay: 0s; }
+.p2 { right: -4px; top: 50%; animation-delay: 1s; }
+.p3 { bottom: -4px; left: 30%; animation-delay: 2s; }
+
+@keyframes float {
+  0%,100% { transform: translateY(0) scale(0.8); opacity: .4; }
+  50%     { transform: translateY(-10px) scale(1.2); opacity: 1; }
+}
+
+/* ================= CARD SHIMMER ================= */
+.loader-card::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255,255,255,0.15),
+    transparent 70%
+  );
+  animation: shimmer 3.5s infinite;
+}
+
+@keyframes shimmer {
+  to { transform: translateX(100%); }
+}

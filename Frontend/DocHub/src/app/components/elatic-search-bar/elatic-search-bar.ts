@@ -26,6 +26,7 @@ export class ElaticSearchBar {
   FILE_TYPE_COLOR = FILE_TYPE_COLOR;
 
   /** ✅ NEW INPUT */
+  @Input() placeholder = 'Search files...'
   @Input() showSuggestionsEnabled = true;
 
   @Output() searchSuggestion = new EventEmitter<string>();

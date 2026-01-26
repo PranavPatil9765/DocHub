@@ -7,9 +7,10 @@ import { ElaticSearchBar } from '../../components/elatic-search-bar/elatic-searc
 import { AddCollectionComponent } from '../../components/add-collection/add-collection';
 import { DefaultCollections } from '../../constants/constants';
 import { finalize } from 'rxjs';
-import { DocHubLoaderComponent } from "../../components/dochub-loader/dochub-loader";
+import { DocHubLoaderComponent } from '../../components/dochub-loader/dochub-loader';
 import { CollectionRequest } from '../../models/collectionRequest.model';
 import { ToastService } from '../../services/toastService';
+import { CollectionModel } from '../../models/collection.model';
 
 @Component({
   selector: 'app-collections',
@@ -20,19 +21,18 @@ import { ToastService } from '../../services/toastService';
     BottomBar,
     ElaticSearchBar,
     AddCollectionComponent,
-    DocHubLoaderComponent
-],
+    DocHubLoaderComponent,
+  ],
   templateUrl: './collections.html',
-  styleUrl: './collections.scss'
+  styleUrl: './collections.scss',
 })
 export class Collections implements OnInit {
-
   /* ---------------- Data ---------------- */
   collections: any[] = [];
-  DefaultCollections: any[] = [...DefaultCollections];
+  DefaultCollections: CollectionModel[] = DefaultCollections;
   loading = false;
   /* ---------------- Selection ---------------- */
-  selectedFileIds = new Set<string>();
+  selectedCollectionIds: Set<string> = new Set();
   clearSelectedFields = false;
   editingCollection: any = null;
 
@@ -40,57 +40,90 @@ export class Collections implements OnInit {
   showOverlay = false;
   mode: 'select' | 'edit' | 'create' | 'both' = 'create';
 
-  constructor(private collectionService: CollectionService,private cdr:ChangeDetectorRef,private toast:ToastService) {}
+  constructor(
+    private collectionService: CollectionService,
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService,
+  ) {}
 
   /* ---------------- API CALL ---------------- */
   ngOnInit() {
     this.loadCollections();
   }
 
-private loadCollections() {
-  this.loading = true;
+  private loadCollections() {
+    this.loading = true;
 
-  this.collectionService.getCollections()
-    .pipe(
-      finalize(() => {
-        this.loading = false;
-        this.cdr.detectChanges()
-      })
-    )
-    .subscribe({
-      next: (res) => {
-        this.collections = Array.isArray(res?.data)
-          ? res.data
-          : [];
-      },
-      error: (err) => {
-        console.error('Failed to load collections', err);
-        this.collections = [];
-      }
-    });
-}
+    this.collectionService
+      .getCollections()
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.collections = Array.isArray(res?.data)
+            ? res.data.map((c: any) => ({
+                ...c,
+                state: 'normal',
+              }))
+            : [];
+        },
+        error: (err) => {
+          console.error('Failed to load collections', err);
+          this.collections = [];
+        },
+      });
+  }
 
   /* ---------------- Selection Logic ---------------- */
-  onFileSelectionChange(event: { id: string; selected: boolean }) {
+  onCollectionSelectionChange(event: { id: string; selected: boolean }) {
     if (event.selected) {
-      this.selectedFileIds.add(event.id);
+      this.selectedCollectionIds.add(event.id);
     } else {
-      this.selectedFileIds.delete(event.id);
+      this.selectedCollectionIds.delete(event.id);
     }
+  }
+
+  getSelectedCollections(){
+    return  Array.from(this.selectedCollectionIds);
   }
 
   clearSelection() {
     this.clearSelectedFields = true;
-    this.selectedFileIds.clear();
+    this.selectedCollectionIds.clear();
     setTimeout(() => (this.clearSelectedFields = false));
   }
 
-  deleteAllSelected() {
-    this.clearSelection();
+  deleteCollection(e: string[]) {
+    console.log("CollectionsToDelete",e);
+
+    const fileId = e;
+    this.loading = true;
+    this.collectionService
+      .deleteCollections(e)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.loadCollections();
+          this.clearSelection();
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.toast.success(res.message);
+        },
+        error: (err) => {
+          this.toast.error(err.error.message);
+        },
+      });
   }
 
-  downloadAllSelected() {
-  }
+
+  downloadAllSelected() {}
 
   /* ---------------- Overlay Actions ---------------- */
 
@@ -111,57 +144,56 @@ private loadCollections() {
 
   /* ---------------- Overlay Callbacks ---------------- */
 
-  onCreate(event:CollectionRequest) {
-    this.showOverlay = false
-    const newCollection:CollectionRequest = {
+  onCreate(event: CollectionRequest) {
+    this.showOverlay = false;
+    const newCollection: CollectionRequest = {
       name: event.name,
       icon: event.icon || '📁',
       description: event.description,
-      fileIds:[]
+      fileIds: [],
     };
-const toastId = this.toast.loading('Creating collection...');
-  this.collectionService.createCollection(newCollection)
-    .pipe(
-      finalize(() => {
-
-        this.cdr.detectChanges()
-      })
-    )
-    .subscribe({
-      next: (res) => {
-        this.toast.success(res.message ||"Collection Created");
-        this.loadCollections();
-      },
-      error: (err) => {
-        this.toast.error(err.error.message || "Failed to create Collection")
-      }
-    });
-}
-
+    const toastId = this.toast.loading('Creating collection...');
+    this.collectionService
+      .createCollection(newCollection)
+      .pipe(
+        finalize(() => {
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.toast.success(res.message || 'Collection Created');
+          this.loadCollections();
+        },
+        error: (err) => {
+          this.toast.error(err.error.message || 'Failed to create Collection');
+        },
+      });
+  }
 
   onSelect(collection: any) {
     this.closeOverlay();
   }
-  onUpdate(e:any){
-  this.showOverlay = false
-  const toastId = this.toast.loading('Editing collection...');
-  this.collectionService.updateCollection(e.id,e)
-    .pipe(
-      finalize(() => {
-        this.loading = false;
-        this.cdr.detectChanges()
-      })
-    )
-    .subscribe({
-      next: (res) => {
-        this.showOverlay = false
-        this.toast.success("Collection Updated");
-        this.loadCollections();
-      },
-      error: (err) => {
-        this.toast.error(err.error.message || "Failed to create Collection")
-      }
-    });
-
+  onUpdate(e: any) {
+    this.showOverlay = false;
+    const toastId = this.toast.loading('Editing collection...');
+    this.collectionService
+      .updateCollection(e.id, e)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.showOverlay = false;
+          this.toast.success('Collection Updated');
+          this.loadCollections();
+        },
+        error: (err) => {
+          this.toast.error(err.error.message || 'Failed to create Collection');
+        },
+      });
   }
 }

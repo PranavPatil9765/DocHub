@@ -1,9 +1,10 @@
 import { Component, EventEmitter, Input, input, Output } from '@angular/core';
 import { FilePriviewCard } from '../file-priview-card/file-priview-card';
 import { RouterModule } from "@angular/router";
-import { FileRow, UploadItem } from '../../models/file.model';
+import { FileRow } from '../../models/file.model';
 import { dummyFiles } from '../../constants/constants';
 import { FileUploadComponent } from "../file-upload/file-upload";
+import { mapStatusToStage } from '../../../utilities/file-functions';
 
 @Component({
   selector: 'app-card-section',
@@ -12,7 +13,7 @@ import { FileUploadComponent } from "../file-upload/file-upload";
   styleUrl: './card-section.scss',
 })
 export class CardSection {
-    editFile:UploadItem[] = []
+    editFile:FileRow[] = []
     editFileOverlayOpen = false;
 selectedFileId:string = ""
   @Input() title = "";
@@ -33,16 +34,7 @@ selectedFileId:string = ""
   }
 
   onFileEdit(e:FileRow){
-    const file:UploadItem = {
-       id: e.id,
-        name: e.name,
-        description: e.description,
-        tags: e.tags,
-        stage: 'ready',
-        progress:100,
-      previewUrl:e.thumbnail_link,
-    }
-    this.editFile = [file];
+    this.editFile = [e];
     this.editFileOverlayOpen = true;
   }
 

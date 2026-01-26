@@ -277,14 +277,14 @@ clearSelection() {
     /* -------- SORT -------- */
     switch (this.sortBy) {
       case 1: // Size
-        result.sort((a, b) => a.file_size - b.file_size);
+        result.sort((a, b) => a.size as number - (b.size as number));
         break;
 
       case 2: // Upload Date
         result.sort(
           (a, b) =>
-            new Date(b.uploaded_at).getTime() -
-            new Date(a.uploaded_at).getTime()
+            new Date(b.uploadedAt as Date).getTime() -
+            new Date(a.uploadedAt as Date).getTime()
         );
         break;
 

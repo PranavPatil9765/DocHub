@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ElaticSearchBar } from '../elatic-search-bar/elatic-search-bar';
 import { SpinnerComponent } from "../spinner/spinner";
 import { SearchSuggestion } from '../../models/file.model';
-import { CollectionModel } from '../../models/collection';
+import { CollectionModel } from '../../models/collection.model';
 
 @Component({
   selector: 'app-add-collection',

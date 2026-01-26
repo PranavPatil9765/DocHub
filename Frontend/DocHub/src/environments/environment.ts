@@ -1,4 +1,5 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8080'
+  apiBaseUrl: 'https://dochub-app-latest.onrender.com'
+  // apiBaseUrl: 'http://localhost:8080'
 };

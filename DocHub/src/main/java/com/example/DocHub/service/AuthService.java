@@ -79,6 +79,7 @@ public void register(RegisterRequest req) {
                     .password("OATH_PASS")
                     .fullName(name)
                     .storageUsedBytes(0L)
+                    .isVerified(true)
                     .build();
 
             repo.save(user);

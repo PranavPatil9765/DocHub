@@ -24,9 +24,10 @@ export class StorageUsageComponent {
     { type: 'Videos', sizeGB: 8, color: 'bg-blue-500' }
   ];
 
-  get usedGB(): number {
-    return this.usedStorage.reduce((a, b) => a + b.sizeGB, 0);
-  }
+ get usedGB(): number {
+  const total = this.usedStorage.reduce((a, b) => a + b.sizeGB, 0);
+  return Math.ceil(total * 100) / 100;
+}
 
   get remainingGB(): number {
     return this.totalStorageGB - this.usedGB;
@@ -52,6 +53,8 @@ onMouseLeave() {
 
 
   getPercentage(size: number): number {
-    return (size / this.totalStorageGB) * 100;
-  }
+  const percentage = (size / this.totalStorageGB) * 100;
+  return Math.ceil(percentage * 100) / 100;
+}
+
 }

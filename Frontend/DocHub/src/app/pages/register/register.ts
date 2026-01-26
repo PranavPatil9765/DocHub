@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { ToastService } from '../../services/toastService';
 import { registerReq } from '../../models/request';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +17,7 @@ import { registerReq } from '../../models/request';
   styleUrls: ['./register.css']
 })
 export class RegisterComponent {
-
+  api = environment.apiBaseUrl;
   fb = inject(FormBuilder);
   authService = inject(AuthService);
   router = inject(Router);
@@ -40,8 +41,8 @@ export class RegisterComponent {
       })
     )
     .subscribe({
-      next: (res) => {
-        this.toast.show('User Registered successfully', 'success');
+      next: (res:any) => {
+        this.toast.success(res?.message);
         this.router.navigate(['/login']);
       },
       error: (err) => {
@@ -49,4 +50,13 @@ export class RegisterComponent {
       }
     });
 }
+
+
+  loginWithGoogle() {
+    window.location.href = `${this.api}/oauth2/authorization/google`;
+  }
+
+  loginWithGithub() {
+    window.location.href = `${this.api}/oauth2/authorization/github`;
+  }
   }

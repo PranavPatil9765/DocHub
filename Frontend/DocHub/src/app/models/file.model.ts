@@ -1,13 +1,19 @@
 export interface FileRow {
   id: string;
+  file?: File;
   name: string;
-  description:string,
-  file_type:FileType,
-  file_size: number;
-  thumbnail_link:string,
-  uploaded_at: Date;
-  favourite:boolean,
-  tags:string[]
+  description: string;
+  tags: string[];
+  type:FileType;
+  favourite:boolean;
+  stage?: UploadStage;
+  progress?: number;
+  preview_url:string;
+  isRetrying?:boolean;
+  size:number;
+  isExisting?: boolean;
+  uploadedAt?:Date;
+  originalExt?: string;
 }
 export enum FileType {
   IMAGE = 'IMAGE',
@@ -55,22 +61,9 @@ export type UploadStage =
   | 'initiated'
   | 'queued'
   | 'uploaded'
+  | 'failed'
   | 'tagging'
   | 'ready';
-
-export interface UploadItem {
-  id: string;
-  file?: File;
-
-  name: string;
-  description: string;
-  tags: string[];
-
-  stage?: UploadStage;
-  progress?: number;
-previewUrl:string;
-  isExisting?: boolean;
-}
 
 export interface FileUpdateRequest{
   id: string;

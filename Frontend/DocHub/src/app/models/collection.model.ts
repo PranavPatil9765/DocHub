@@ -4,5 +4,7 @@ export interface CollectionModel {
   icon:string;
   description?: string;
   file_ids:string[];
-  created_at:string
+  created_at:string;
+  imageUrl?:string;
+  state:'default'|'normal';
 }

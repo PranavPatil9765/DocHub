@@ -25,7 +25,7 @@
         class="w-full bg-blue-600 hover:bg-blue-700 text-white flex justify-center items-center py-3 flex rounded-lg transition"
         [disabled]="loading"
       >
-         <app-spinner *ngIf="loading" size="sm"></app-spinner>
+         <app-spinner *ngIf="loading" [size]="'sm'"></app-spinner>
   <span *ngIf="!loading">Login</span>
       </button>
 

@@ -40,7 +40,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // Redis Support (optional, but added for token store)
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Validation (for validating request bodies)
     implementation 'org.springframework.boot:spring-boot-starter-validation'
