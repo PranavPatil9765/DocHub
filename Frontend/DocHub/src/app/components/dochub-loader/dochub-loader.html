@@ -1,12 +1,11 @@
 <div
   *ngIf="show"
   class="fixed top-0 bottom-0 right-0
-         z-[25]
+         z-[25] left-0
          flex items-center justify-center
          bg-black/40 backdrop-blur-sm
          transition-all duration-300"
-  [class.left-0]="isMobile"
-  [class.left-[256px]]="!isMobile"
+         [class.left-[256px]]="!isMobile"
 >
 
   <!-- Loader Card -->

@@ -1,4 +1,4 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -8,10 +8,15 @@ import { CommonModule } from '@angular/common';
   templateUrl: './dochub-loader.html',
   styleUrls: ['./dochub-loader.scss']
 })
-export class DocHubLoaderComponent {
+export class DocHubLoaderComponent implements OnInit {
   @Input() show = false;
   isMobile = false;
-   @HostListener('window:resize')
+
+  ngOnInit() {
+    this.checkScreen(); // ✅ Initial screen size detection
+  }
+
+  @HostListener('window:resize')
   checkScreen() {
     this.isMobile = window.innerWidth < 768;
   }

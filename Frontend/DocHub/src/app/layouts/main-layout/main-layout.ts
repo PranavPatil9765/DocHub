@@ -25,8 +25,5 @@ export class MainLayout {
   @HostListener('window:resize')
   checkScreen() {
     this.isMobile = window.innerWidth < 768;
-    if (!this.isMobile) {
-      this.isSidebarOpen = true;
-    }
   }
 }

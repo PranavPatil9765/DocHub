@@ -26,7 +26,7 @@
 
 <!-- Overlay -->
 @if (isOpen) {
-  <div class="fixed inset-0 z-50 bg-blue-900/30 backdrop-blur-sm flex justify-center items-center">
+  <div class="fixed inset-0 z-50 bg-blue-900/30 backdrop-blur-sm flex justify-center items-center sm:px-3">
     <!-- MODAL -->
     <div
       class="relative bg-white w-full h-full sm:w-[820px] sm:h-[540px] rounded-none sm:rounded-2xl shadow-2xl flex flex-col sm:flex-row overflow-hidden"
@@ -41,15 +41,15 @@
 
       <!-- LEFT TABS -->
       <div
-        class="sm:w-56 w-full bg-blue-50 border-b sm:border-b-0 sm:border-r p-3 space-y-2 overflow-x-auto sm:overflow-y-auto flex sm:flex-col gap-2"
+        class="sm:w-56 w-full bg-blue-50 border-b sm:border-b-0 sm:border-r  overflow-x-auto sm:overflow-y-auto flex sm:flex-col gap-2 pr-14 py-3 sm:pr-0 "
       >
-        <label class="text-sm font-semibold text-blue-700"> Upload Files </label>
+        <label class="text-sm font-semibold text-blue-700 p-4 "> Upload Files </label>
 
         @if (mode !== 'edit') {
           <label
             class="border-2 border-dashed border-blue-300 rounded-xl px-4 py-2 text-center cursor-pointer hover:bg-blue-100 transition"
           >
-            <span class="text-blue-600 text-sm">➕ Add Files</span>
+            <span class="text-blue-600 text-sm sm:px-3">➕ Add Files</span>
             <input type="file" multiple hidden (change)="onFilesSelected($event)" />
           </label>
         }

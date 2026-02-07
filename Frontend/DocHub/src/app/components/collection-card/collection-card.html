@@ -33,20 +33,20 @@
         (change)="onSelectChange($event)"
       />
     </label>
+    <!-- 🔹 MENU (ONLY FOR NORMAL STATE) -->
+      <button
+        class="absolute top-2 right-2 z-20
+               w-8 h-8 rounded-full
+               bg-white/80 backdrop-blur
+               flex items-center justify-center
+               md:opacity-0 group-hover:opacity-100
+               transition hover:bg-white shadow"
+        (click)="toggleMenu($event)"
+      >
+        ⋮
+      </button>
   }
 
-  <!-- 🔹 MENU (ONLY FOR NORMAL STATE) -->
-    <button
-      class="absolute top-2 right-2 z-20
-             w-8 h-8 rounded-full
-             bg-white/80 backdrop-blur
-             flex items-center justify-center
-             md:opacity-0 group-hover:opacity-100
-             transition hover:bg-white shadow"
-      (click)="toggleMenu($event)"
-    >
-      ⋮
-    </button>
 
 
   <!-- 🔹 MENU DROPDOWN -->

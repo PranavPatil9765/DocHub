@@ -197,7 +197,7 @@ console.log(  {
     });
   }
   downloadSelectedFiles(fileIds: string[]) {
-    const toastId = this.toast.loading('downlading ...');
+    const toastId = this.toast.loading('downloading ...');
     this.fileService.DownloadFiles(fileIds).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
