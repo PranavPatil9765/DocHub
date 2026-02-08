@@ -83,7 +83,7 @@ export class FileUploadsPage implements OnDestroy {
       .subscribe({
         next: (res) => {
           const mapped: FileRow[] = res.items.map((f) => {
-            const previewUrl = f.preview_url ? `${environment.apiBaseUrl}${f.preview_url}` : "";
+            const previewUrl = f.preview_url ? `${f.preview_url}` : "";
 
             return {
               id: f.id,
