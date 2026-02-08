@@ -32,7 +32,7 @@ public class TagGenerationService {
     /* ================== PUBLIC API ================== */
 
     public List<String> generateTags(Path filePath,String fileName) {
-
+        System.out.println("GROQ KEY = " + groqApiKey);
         try {
             String extractedText = extractText(filePath);
 
@@ -53,7 +53,7 @@ public class TagGenerationService {
             return tags;
 
         } catch (Exception e) {
-            throw new AppException.BadRequestException("Tag generation failed");
+            throw new AppException.BadRequestException("Tag generation failed"+e.getMessage());
         }
     }
 

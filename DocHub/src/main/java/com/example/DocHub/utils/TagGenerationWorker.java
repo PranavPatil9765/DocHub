@@ -79,7 +79,7 @@ public class TagGenerationWorker {
         } catch (Exception e) {
 
             file.setStatus(FileStatus.FAILED);
-            file.setErrorMessage("Tag generation failed ");
+            file.setErrorMessage("Tag generation failed "+e.getMessage());
             fileRepository.save(file);
 
             // ❌ FAILURE SSE (NEW)

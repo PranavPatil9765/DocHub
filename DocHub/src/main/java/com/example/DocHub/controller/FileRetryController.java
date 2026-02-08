@@ -79,7 +79,7 @@ public class FileRetryController {
     private void resetForUploadRetry(FileEntity file) {
         file.setStatus(FileStatus.QUEUED);
         file.setErrorMessage(null);
-        file.setUploadProgress(0);
+        file.setUploadProgress(25);
         fileRepository.save(file);
     }
 }

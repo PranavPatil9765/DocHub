@@ -1,29 +1,39 @@
 package com.example.DocHub.service;
 
+import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.rendering.ImageType;
 import org.springframework.stereotype.Service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+
+import lombok.RequiredArgsConstructor;
+
 import javax.imageio.*;
 import javax.imageio.stream.ImageOutputStream;
+
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.Map;
 
+@RequiredArgsConstructor
 @Service
 public class PdfThumbnailService {
 
-    private static final int DPI = 130;
+    private static final int DPI = 50; // Safe for Render low RAM
+    private final Cloudinary cloudinary;
 
-    private static final String THUMBNAIL_DIR =
-            System.getProperty("user.dir") + "/thumbnails";
+    public String generateThumbnail(String tempPath, String originalName) throws Exception {
 
-    public String generateThumbnail(Path tempPath, String originalName) throws Exception {
-        File file = tempPath.toFile();
+        File file = new File(tempPath);
+        if (!file.exists()) {
+            throw new IllegalArgumentException("File not found at path: " + tempPath);
+        }
+
         String lower = originalName.toLowerCase();
 
         if (lower.endsWith(".pdf")) {
@@ -37,55 +47,42 @@ public class PdfThumbnailService {
             return generateImageThumbnail(file);
         }
 
-        return null; // other file types
+        return null;
     }
 
     /* ---------------- PDF ---------------- */
 
     private String generatePdfThumbnail(File pdfFile) throws Exception {
 
-        File output = prepareOutput();
-
-        try (PDDocument document = PDDocument.load(pdfFile)) {
+        try (PDDocument document = PDDocument.load(
+                pdfFile,
+                MemoryUsageSetting.setupTempFileOnly())) {
 
             PDFRenderer renderer = new PDFRenderer(document);
 
-            BufferedImage image = renderer.renderImageWithDPI(
-                    0, DPI, ImageType.RGB
-            );
+            BufferedImage image =
+                    renderer.renderImageWithDPI(0, DPI, ImageType.RGB);
 
             BufferedImage cropped = cropMargins(image);
             BufferedImage topCropped = cropTopOnly(cropped);
 
-            writeCompressedJpeg(topCropped, output, 0.65f);
+            return uploadToCloudinary(topCropped);
         }
-
-        return "/thumbnails/" + output.getName();
     }
 
     /* ---------------- IMAGE ---------------- */
 
     private String generateImageThumbnail(File imageFile) throws Exception {
 
-        File output = prepareOutput();
-
         BufferedImage image = ImageIO.read(imageFile);
         if (image == null) return null;
 
         BufferedImage resized = resize(image, 400);
 
-        writeCompressedJpeg(resized, output, 0.7f);
-
-        return "/thumbnails/" + output.getName();
+        return uploadToCloudinary(resized);
     }
 
     /* ---------------- HELPERS ---------------- */
-
-    private File prepareOutput() {
-        File dir = new File(THUMBNAIL_DIR);
-        if (!dir.exists()) dir.mkdirs();
-        return new File(dir, UUID.randomUUID() + ".jpg");
-    }
 
     private BufferedImage resize(BufferedImage src, int targetWidth) {
 
@@ -97,15 +94,18 @@ public class PdfThumbnailService {
         BufferedImage resized =
                 new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
 
-        resized.getGraphics().drawImage(
-                src.getScaledInstance(targetWidth, targetHeight, java.awt.Image.SCALE_SMOOTH),
+        Graphics2D g = resized.createGraphics();
+        g.drawImage(
+                src.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH),
                 0, 0, null
         );
+        g.dispose();
 
         return resized;
     }
 
     private BufferedImage cropMargins(BufferedImage src) {
+
         int width = src.getWidth();
         int height = src.getHeight();
 
@@ -122,11 +122,33 @@ public class PdfThumbnailService {
     }
 
     private BufferedImage cropTopOnly(BufferedImage src) {
+
         int width = src.getWidth();
         int height = src.getHeight();
+
         int topHeight = (int) (height * 0.45);
 
         return src.getSubimage(0, 0, width, topHeight);
+    }
+
+    private String uploadToCloudinary(BufferedImage image) throws Exception {
+
+        File temp = File.createTempFile("thumb", ".jpg");
+
+        try {
+
+            writeCompressedJpeg(image, temp, 0.65f);
+
+            Map uploadResult = cloudinary.uploader().upload(
+                    temp,
+                    ObjectUtils.asMap("folder", "dochub_thumbnails")
+            );
+
+            return uploadResult.get("secure_url").toString();
+
+        } finally {
+            temp.delete();
+        }
     }
 
     private void writeCompressedJpeg(
@@ -135,9 +157,8 @@ public class PdfThumbnailService {
             float quality
     ) throws Exception {
 
-        ImageWriter writer = ImageIO
-                .getImageWritersByFormatName("jpg")
-                .next();
+        ImageWriter writer =
+                ImageIO.getImageWritersByFormatName("jpg").next();
 
         ImageWriteParam param = writer.getDefaultWriteParam();
         param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);

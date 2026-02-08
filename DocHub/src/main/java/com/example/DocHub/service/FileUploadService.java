@@ -41,7 +41,6 @@ public class FileUploadService {
     private final UserRepository userRepository;
     private final FileQueuePublisher queuePublisher;
     private final PdfThumbnailService thumbnailService;
-    private final SseEmitterRegistry sseEmitterRegistry;
     @Value("${dochub.storage.root}")
     private String storageRoot;
 
@@ -68,7 +67,7 @@ public class FileUploadService {
                 Files.copy(in, tempFilePath, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            String thumbnailString = thumbnailService.generateThumbnail(tempFilePath, file.getOriginalFilename());
+            // String thumbnailString = thumbnailService.generateThumbnail(tempFilePath, file.getOriginalFilename());
 
             FileEntity entity = FileEntity.builder()
                     .id(fileId)
@@ -76,7 +75,6 @@ public class FileUploadService {
                     .name(file.getOriginalFilename())
                     .fileType(FileTypeUtil.getFileType(file.getOriginalFilename()))
                     .fileSize(file.getSize())
-                    .thumbnailLink(thumbnailString)
                     .tempFilePath(tempFilePath.toString())
                     .status(FileStatus.QUEUED)
                     .uploadProgress(100)
@@ -97,8 +95,9 @@ public class FileUploadService {
                     });
 
             Map<String, Object> data = Map.of(
-                    "fileId", fileId,
-                    "thumbnailId", thumbnailString != null ? thumbnailString : "");
+                    "fileId", fileId
+                    // "thumbnailId", thumbnailString != null ? thumbnailString : ""
+                );
             return new ApiResponse<>(
                     true,
                     "File " + file.getOriginalFilename() + " queued for processing",
