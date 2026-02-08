@@ -119,7 +119,7 @@
           </div>
 
           <!-- PREVIEW -->
-          @if (active.preview_url !=null) {
+          @if (active.preview_url !=null && active.preview_url !="" ) {
             <img
               *ngIf="active.preview_url"
               [src]="active.preview_url"

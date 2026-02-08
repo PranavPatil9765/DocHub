@@ -7,13 +7,16 @@
   @if (files.length > 0) {
     <div class="flex space-x-4 p-4 overflow-x-auto">
       @for (file of files; track file.id) {
-        <app-file-priview-card
+        <div class="w-[300px]">
+
+          <app-file-priview-card
           [multiselect]="multiselect"
           [file]="file"
           (showAddCollectionOverlay)="onShowAddCollectionOverlay($event)"
           (edit)="onFileEdit($event)"
           (delete)="OnFileDelete($event)">
         </app-file-priview-card>
+      </div>
       }
     </div>
   } @else {

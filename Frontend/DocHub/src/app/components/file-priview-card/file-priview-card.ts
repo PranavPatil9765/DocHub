@@ -36,7 +36,7 @@ export class FilePriviewCard {
 
   ngOnInit(): void {
     if(this.file.preview_url){
-      this.previewUrl = `${this.api}${this.file.preview_url}`;
+      this.previewUrl = `${this.file.preview_url}`;
       console.log(this.previewUrl);
     }
 

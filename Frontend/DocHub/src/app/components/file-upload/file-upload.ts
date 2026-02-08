@@ -101,16 +101,10 @@ export class FileUploadComponent {
         ? f.name.substring(f.name.lastIndexOf('.'))
         : '';
 
-      let url = '';
-      if (f.preview_url) {
-        url = `${environment.apiBaseUrl}${f.preview_url}`;
-      }
-
       return {
         ...f,
         name: f.name.replace(/\.[^/.]+$/, ''), // base name only
         originalExt: ext,                      // ✅ preserve extension
-        preview_url: url,
         isExisting: true
       };
     });
@@ -173,7 +167,7 @@ export class FileUploadComponent {
       favourite:false,
       size:file.size,
       type:getFileType(file.name),
-      preview_url: URL.createObjectURL(file),
+      preview_url: "",
       progress: 0,
       stage: 'initiated'
     };
@@ -234,9 +228,6 @@ export class FileUploadComponent {
 
         if (update.completed) {
           item.id = update.response.fileId;
-          item.preview_url = update.response.thumbnailLink
-          console.log("url = ",item.preview_url);
-
           item.stage = 'queued';
           item.progress = 25;
           this.cdr.detectChanges();
@@ -426,8 +417,14 @@ uploadAll() {
 
     const es = new EventSource(url, { withCredentials: true });
 
-    es.addEventListener('file-uploaded', () => {
+    es.addEventListener('file-uploaded', (event: any) => {
+      console.log("event.data",event.data);
+
+      const thumbnailLink = event.data;
+      console.log(thumbnailLink);
+
       file.stage = 'uploaded';
+      file.preview_url = thumbnailLink;
       file.progress = 50;
       this.cdr.detectChanges();
     });
