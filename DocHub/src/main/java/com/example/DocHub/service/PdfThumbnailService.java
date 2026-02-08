@@ -1,11 +1,26 @@
 package com.example.DocHub.service;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.rendering.ImageType;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.apache.http.entity.ContentType;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
@@ -17,7 +32,10 @@ import javax.imageio.stream.ImageOutputStream;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -51,36 +69,54 @@ public class PdfThumbnailService {
     }
 
     /* ---------------- PDF ---------------- */
+private String generatePdfThumbnail(File pdfFile) throws Exception {
 
-    private String generatePdfThumbnail(File pdfFile) throws Exception {
+    String url = "https://lor-service-pdfthumbnail.vercel.app/pdf?optimize=true";
 
-        try (PDDocument document = PDDocument.load(
-                pdfFile,
-                MemoryUsageSetting.setupTempFileOnly())) {
+    try (CloseableHttpClient client = HttpClients.createDefault()) {
 
-            PDFRenderer renderer = new PDFRenderer(document);
+        HttpPost post = new HttpPost(url);
 
-            BufferedImage image =
-                    renderer.renderImageWithDPI(0, DPI, ImageType.RGB);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 
-            BufferedImage cropped = cropMargins(image);
-            BufferedImage topCropped = cropTopOnly(cropped);
+        builder.addBinaryBody(
+                "file",                    // form field name
+                pdfFile,                   // actual file
+                ContentType.create("application/pdf"),
+                pdfFile.getName()          // filename
+        );
 
-            return uploadToCloudinary(topCropped);
+        post.setEntity(builder.build());
+
+        try (CloseableHttpResponse response = client.execute(post)) {
+
+            int status = response.getStatusLine().getStatusCode();
+
+            if (status != 200) {
+                throw new RuntimeException("Thumbnail API failed: " + status);
+            }
+
+            byte[] imageBytes = EntityUtils.toByteArray(response.getEntity());
+
+            return uploadToCloudinary(imageBytes);
         }
     }
+}
+private String generateImageThumbnail(File imageFile) throws Exception {
 
-    /* ---------------- IMAGE ---------------- */
+    BufferedImage image = ImageIO.read(imageFile);
+    if (image == null) return null;
 
-    private String generateImageThumbnail(File imageFile) throws Exception {
+    BufferedImage resized = resize(image, 400);
 
-        BufferedImage image = ImageIO.read(imageFile);
-        if (image == null) return null;
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        BufferedImage resized = resize(image, 400);
+    writeCompressedJpeg(resized, baos, 0.65f);
 
-        return uploadToCloudinary(resized);
-    }
+    byte[] imageBytes = baos.toByteArray();
+
+    return uploadToCloudinary(imageBytes);
+}
 
     /* ---------------- HELPERS ---------------- */
 
@@ -91,14 +127,12 @@ public class PdfThumbnailService {
 
         int targetHeight = (targetWidth * height) / width;
 
-        BufferedImage resized =
-                new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
+        BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
 
         Graphics2D g = resized.createGraphics();
         g.drawImage(
                 src.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH),
-                0, 0, null
-        );
+                0, 0, null);
         g.dispose();
 
         return resized;
@@ -117,8 +151,7 @@ public class PdfThumbnailService {
                 cropSides,
                 cropTop,
                 width - (cropSides * 2),
-                height - (cropTop + cropBottom)
-        );
+                height - (cropTop + cropBottom));
     }
 
     private BufferedImage cropTopOnly(BufferedImage src) {
@@ -131,46 +164,35 @@ public class PdfThumbnailService {
         return src.getSubimage(0, 0, width, topHeight);
     }
 
-    private String uploadToCloudinary(BufferedImage image) throws Exception {
+    private String uploadToCloudinary(byte[] imageBytes) throws Exception {
 
-        File temp = File.createTempFile("thumb", ".jpg");
+    Map uploadResult = cloudinary.uploader().upload(
+            imageBytes,
+            ObjectUtils.asMap(
+                    "folder", "dochub_thumbnails",
+                    "resource_type", "image"
+            )
+    );
 
-        try {
+    return uploadResult.get("secure_url").toString();
+}
 
-            writeCompressedJpeg(image, temp, 0.65f);
+     private void writeCompressedJpeg(
+        BufferedImage image,
+        OutputStream outputStream,
+        float quality) throws Exception {
 
-            Map uploadResult = cloudinary.uploader().upload(
-                    temp,
-                    ObjectUtils.asMap("folder", "dochub_thumbnails")
-            );
+    ImageWriter writer = ImageIO.getImageWritersByFormatName("jpg").next();
 
-            return uploadResult.get("secure_url").toString();
+    ImageWriteParam param = writer.getDefaultWriteParam();
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+    param.setCompressionQuality(quality);
 
-        } finally {
-            temp.delete();
-        }
+    try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputStream)) {
+        writer.setOutput(ios);
+        writer.write(null, new IIOImage(image, null, null), param);
     }
 
-    private void writeCompressedJpeg(
-            BufferedImage image,
-            File output,
-            float quality
-    ) throws Exception {
-
-        ImageWriter writer =
-                ImageIO.getImageWritersByFormatName("jpg").next();
-
-        ImageWriteParam param = writer.getDefaultWriteParam();
-        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-        param.setCompressionQuality(quality);
-
-        try (ImageOutputStream ios =
-                     ImageIO.createImageOutputStream(output)) {
-
-            writer.setOutput(ios);
-            writer.write(null, new IIOImage(image, null, null), param);
-        }
-
-        writer.dispose();
-    }
+    writer.dispose();
+}
 }

@@ -32,7 +32,7 @@ public class TelegramUploadWorker {
     private final PdfThumbnailService thumbnailService;
 
     // 🔥 GLOBAL LIMITER (Only 1 file processing at a time)
-    private static final Semaphore PROCESS_LIMIT = new Semaphore(1);
+    private static final Semaphore PROCESS_LIMIT = new Semaphore(3);
 
     @Transactional
     @RabbitListener(queues = "file-processing-queue")
